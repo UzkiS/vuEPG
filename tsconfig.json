@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "declaration": true,
+    "allowJs": true,
+    "outDir": "./dist",
+    "strict": true,
+    "moduleResolution":"Node"
+  }
+}

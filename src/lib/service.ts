@@ -1,0 +1,557 @@
+import {
+  addCodeToAction,
+  getCurrentKeyActions,
+  keyActions,
+  removeCodeFromAction,
+  setAction,
+  setActionCallback,
+} from "./keyActions";
+import type EPGItem from "./epgItem";
+import type EPGGroup from "./epgGroup";
+import type { DataContainer, EPGConfig, EPGDocument, MoveType } from "./types";
+import { getDescendant, selfLog } from "./utils";
+import { onActivated, onDeactivated, onMounted, onUnmounted } from "vue-demi";
+import { getRecentTarget } from "./moveRule";
+import { getItemByDirectionOld } from "./compatible/move";
+
+export const dataContainer: DataContainer = {
+  currentItem: null,
+  itemArray: [],
+  currentGroup: null,
+  groupArray: [],
+};
+
+export const currentConfig: EPGConfig = {
+  focusClass: "vuepg-focus",
+  defBackHandler: null,
+  tempBackHandler: null,
+  useOldMoveRule: false,
+  debug: true,
+};
+
+/**
+ * 设置配置
+ * @param config EPGConfig
+ */
+const setConfig = (config: EPGConfig) => {
+  Object.assign(currentConfig, config);
+};
+
+/**
+ * 设置临时返回处理函数
+ * @param func 回调函数
+ */
+const setTempBack = (func: Function) => {
+  Object.assign(currentConfig, {
+    tempBackHandler: func,
+  });
+};
+
+/**
+ * 设置临时返回处理函数
+ */
+const unsetTempBack = () => {
+  Object.assign(currentConfig, {
+    tempBackHandler: null,
+  });
+};
+/**
+ * 设置临时的返回的回调函数
+ * @param func 回调函数
+ */
+export const onBack = (func: Function) => {
+  onMounted(() => {
+    setTempBack(func);
+  });
+  onActivated(() => {
+    setTempBack(func);
+  });
+  onDeactivated(() => {
+    unsetTempBack();
+  });
+  onUnmounted(() => {
+    unsetTempBack();
+  });
+};
+
+/** 获取当前 Item */
+const getCurrentItem = () => dataContainer.currentItem;
+/** 获取所有 Item */
+const getItems = () => dataContainer.itemArray;
+/** 获取当前 Group */
+const getCurrentGroup = () => dataContainer.currentGroup;
+/** 获取所有 Group */
+const getGroups = () => dataContainer.groupArray;
+/** 获取当前选中元素的 Class */
+const getFoucsClass = () =>
+  dataContainer.currentItem?.focusClass || currentConfig.focusClass;
+
+/** 返回处理 */
+const backHandler = () => {
+  if (currentConfig.defBackHandler) {
+    currentConfig.defBackHandler();
+  } else {
+    currentConfig.tempBackHandler && currentConfig.tempBackHandler();
+  }
+};
+/** 注册 EPGItem */
+const registerItem = (item: EPGItem) => {
+  dataContainer.itemArray.push(item);
+  if (item.isDefault) {
+    moveToItem(item);
+  }
+};
+/** 更新 EPGItem 状态 */
+const updateItem = (newItem: EPGItem) => {
+  dataContainer.itemArray.forEach((item) => {
+    if (item.id === newItem.id) {
+      Object.assign(item, newItem);
+    }
+  });
+};
+/** 注册EPGGroup */
+const registerGroup = (group: EPGGroup) => {
+  dataContainer.groupArray.push(group);
+};
+/** 更新 EPGGroup 状态 */
+const updateGroup = (newGroup: EPGGroup) => {
+  dataContainer.groupArray.forEach((group) => {
+    if (group.id === newGroup.id) {
+      Object.assign(group, newGroup);
+    }
+  });
+};
+
+const move = (target: MoveType | HTMLElement | EPGItem) => {
+  if (dataContainer.itemArray.length == 0) return;
+  selfLog("------------------------- 移动逻辑开始 -------------------------");
+  /** 目标 EPGItem */
+  let targetItem: EPGItem | EPGGroup | null = null;
+  if (typeof target === "object") {
+    /* target 为 HTMLElement 或 EPGItem 时 */
+    if ((target as EPGItem).el) {
+      /* target为 EPGItem 时，获取其本身 */
+      targetItem = target as EPGItem;
+    } else {
+      /* target为 HTMLElement 时，获取其 EPGItem */
+      targetItem = getItemByHTMLElement(target as HTMLElement);
+    }
+  } else if (["up", "down", "right", "left"].includes(target)) {
+    targetItem = getTargetByDirection(target);
+    /* target 为上下左右事件时 */
+    let nextGroup;
+    const currentGroup = getGroupByItem(dataContainer.currentItem!);
+    if (targetItem != null) {
+      if (isEPGGroup(targetItem.el!)) {
+        nextGroup = targetItem;
+      } else {
+        nextGroup = getGroupByItem(targetItem as EPGItem);
+      }
+      if (!(currentGroup === nextGroup) && currentGroup) {
+        if (currentGroup.events[target] != null) {
+          return (currentGroup.events[target] as Function)();
+        }
+      }
+    } else {
+      selfLog("无法获取目标元素");
+    }
+  }
+  if (targetItem) {
+    if (isEPGItem(targetItem.el!)) {
+      moveToItem(targetItem as EPGItem);
+    } else if (isEPGGroup(targetItem.el!)) {
+      moveToGroup(targetItem as EPGGroup);
+    }
+    selfLog("移动至：", targetItem);
+  } else {
+    selfLog("无可用元素");
+  }
+  selfLog("------------------------- 移动逻辑结束 -------------------------");
+};
+
+/**
+ * 移动到指定 EPGItem
+ * @param target 指定的 EPGItem
+ * @returns
+ */
+const moveToItem = (target: EPGItem) => {
+  if (dataContainer.currentItem) {
+    dataContainer.currentItem.isFocus = false;
+    dataContainer.currentItem.el?.classList.remove(getFoucsClass() as string);
+    if (dataContainer.currentItem.events.blur) {
+      (dataContainer.currentItem.events.blur as Function)();
+    }
+  } else {
+    dataContainer.currentItem = dataContainer.itemArray[0] ?? null;
+  }
+
+  dataContainer.currentItem = target;
+  dataContainer.currentGroup = getGroupByItem(dataContainer.currentItem);
+  dataContainer.currentItem.isFocus = true;
+  dataContainer.currentItem.el?.classList.add(getFoucsClass() as string);
+  if (dataContainer.currentItem.events.focus) {
+    (dataContainer.currentItem.events.focus as Function)();
+  }
+  if (target.events.enter) (target.events.enter as Function)();
+};
+
+/**
+ * 移动到指定 EPGGroup 的第一个 EPGItem
+ * @param target 指定的 EPGGroup
+ * @returns
+ */
+const moveToGroup = (target: EPGGroup) => {
+  if (isEPGGroup(target.children[0].el!)) {
+    if (target.events.enter) (target.events.enter as Function)();
+    moveToGroup(target.children[0] as EPGGroup);
+  } else {
+    moveToItem(target.children[0] as EPGItem);
+  }
+};
+
+/** 设置按下按键事件的监听 */
+const setKeyBoardEventListener = () => {
+  document.onkeydown =
+    (document as EPGDocument).onsystemevent =
+    (document as EPGDocument).onirkeypress =
+    (document as EPGDocument).onkeypress =
+      (event) => {
+        const keyCode = event.code
+          ? event.code
+          : event.which
+          ? event.which
+          : event.keyCode;
+
+        eventHandler(event, keyCode);
+      };
+};
+/** 按键事件处理器 */
+const eventHandler = (event: KeyboardEvent, keyCode: string | number) => {
+  if (!dataContainer.itemArray.length) {
+    !dataContainer.currentItem &&
+      (dataContainer.currentItem = dataContainer.itemArray[0]);
+  }
+  let keyAction: string | null = null;
+  for (let action in keyActions) {
+    if (keyActions[action].code.includes(keyCode)) {
+      keyAction = action;
+      break;
+    }
+  }
+  selfLog("按键KeyCode:", keyCode, "触发事件:", keyAction);
+  // 注入白名单
+
+  if (keyAction) {
+    if (keyActions[keyAction].preventDefault) {
+      /** 阻止默认事件 */
+      event.preventDefault();
+      selfLog(`事件 ${keyAction} 将阻止默认事件发生`);
+    }
+    if (
+      dataContainer.currentItem &&
+      ["ENTER", "DOWN", "UP", "LEFT", "RIGHT", "BACK"].includes(keyAction)
+    ) {
+      switch (keyAction) {
+        case "ENTER":
+          dataContainer.currentItem.el!.click();
+          break;
+        case "DOWN":
+          if (dataContainer.currentItem.events.down) {
+            (dataContainer.currentItem.events.down as Function)(
+              dataContainer.currentItem,
+              down
+            );
+          } else {
+            move("down");
+          }
+          break;
+        case "UP":
+          if (dataContainer.currentItem.events.up) {
+            (dataContainer.currentItem.events.up as Function)(
+              dataContainer.currentItem,
+              up
+            );
+          } else {
+            move("up");
+          }
+          break;
+        case "LEFT":
+          if (dataContainer.currentItem.events.left) {
+            (dataContainer.currentItem.events.left as Function)(
+              dataContainer.currentItem,
+              left
+            );
+          } else {
+            move("left");
+          }
+          break;
+        case "RIGHT":
+          if (dataContainer.currentItem.events.right) {
+            (dataContainer.currentItem.events.right as Function)(
+              dataContainer.currentItem,
+              right
+            );
+          } else {
+            move("right");
+          }
+          break;
+        case "BACK":
+          backHandler();
+          break;
+      }
+    }
+    if (keyActions[keyAction].callback != null) {
+      keyActions[keyAction].callback!(keyCode);
+    }
+  }
+};
+
+/**
+ * 根据方向获取下一个 Item
+ * @param direction "up" | "down" | "right" | "left"
+ * @returns EPGItem
+ */
+export const getTargetByDirection = (
+  direction: "up" | "down" | "right" | "left"
+): EPGItem | EPGGroup | null => {
+  if (!currentConfig.useOldMoveRule) {
+    return getRecentTarget(direction);
+  } else {
+    return getItemByDirectionOld(direction);
+  }
+};
+
+/**
+ * 获取指定 HTMLElement 的 EPGItem
+ * @param element HTMLElement
+ * @returns EPGGroup | null
+ */
+export const getItemByHTMLElement = (element: HTMLElement) => {
+  return (
+    dataContainer.itemArray.find(
+      (item) => item.id === element.dataset.epgItemId
+    ) ?? null
+  );
+};
+
+/**
+ * 获取指定 EPGGroup 下的所有 EPGItem
+ * @param group HTMLElement
+ * @returns EPGGroup | null
+ */
+export const getItemsByGroup = (group: EPGGroup) => {
+  return getDescendant(group.el as HTMLElement).filter(
+    (item) => item.dataset.epgItemId != undefined
+  );
+};
+
+/**
+ * 获取指定 HTMLElement 的 EPGGroup
+ * @param element HTMLElement
+ * @returns EPGGroup | null
+ */
+export const getGroupByHTMLElement = (element: HTMLElement) => {
+  return (
+    dataContainer.groupArray.find(
+      (group) => group.id === element.dataset.epgGroupId
+    ) ?? null
+  );
+};
+
+/**
+ * 获取指定 EPGItem 的 EPGGroup
+ * @param item EPGItem
+ * @returns EPGGroup | null
+ */
+export const getGroupByItem = (item: EPGItem) => {
+  if (getParentsByHTMLElement(item.el!).length > 0) {
+    return (
+      dataContainer.groupArray.find(
+        (group) =>
+          group.id ===
+          getParentGroupByHTMLElement(dataContainer.currentItem!.el!)?.el!
+            .dataset.epgGroupId
+      ) ?? null
+    );
+  } else {
+    return null;
+  }
+};
+
+/**
+ * 获取 Group 的第一层子元素
+ * @param element HTMLElement
+ * @returns (EPGGroup | EPGItem)[]
+ */
+export const getGroupChildrenByHTMLElement = (element: HTMLElement | Node) => {
+  const children = element.childNodes;
+  let buffer: (EPGItem | EPGGroup)[] = [];
+  for (let i = 0; i < children.length; i++) {
+    const childNode = children[i];
+    if (childNode.nodeType == 1) {
+      const buf = getChild(childNode as HTMLElement);
+      if (buf) {
+        buffer.push(buf);
+      } else {
+        buffer = [...buffer, ...getGroupChildrenByHTMLElement(childNode)];
+      }
+    }
+  }
+  return buffer;
+};
+
+/**
+ * 获取全局 GroupChildren
+ * @returns (EPGItem | EPGGroup)[]
+ */
+export const getGlobalGroupChildren = (): (EPGItem | EPGGroup)[] => {
+  return getGroupChildrenByHTMLElement(
+    document.getElementsByTagName("html")[0]
+  );
+};
+
+/**
+ * 通过 HTMLElement 获取 EPGGroup 或 EPGItem
+ * @param element HTMLElement
+ * @returns EPGGroup 或 EPGItem, 找不到则返回 null
+ */
+export const getChild = (element: HTMLElement): (EPGItem | EPGGroup) | null => {
+  let child: EPGItem | EPGGroup | null;
+  if (isEPGGroup(element)) {
+    child = getGroupByHTMLElement(element);
+  } else if (isEPGItem(element)) {
+    child = getItemByHTMLElement(element);
+  } else {
+    child = null;
+  }
+  return child;
+};
+
+/**
+ * 通过 HTMLElement 获取父 Group
+ * @param element HTMLElement
+ * @returns 父元素到 html 节点排序的 HTMLElement[]
+ */
+export const getParentsByHTMLElement = (element: HTMLElement) => {
+  const elements = [];
+  let buffer: HTMLElement | null = element;
+  while (buffer) {
+    buffer = buffer.parentElement as HTMLElement;
+    buffer && elements.push(buffer);
+  }
+  return elements;
+};
+
+/**
+ * 通过 HTMLElement 获取父 EPGGroup
+ * @param element HTMLElement
+ * @returns 第一个父层 EPGGroup
+ */
+export const getParentGroupByHTMLElement = (
+  element: HTMLElement
+): EPGGroup | null => {
+  const parent = getParentsByHTMLElement(element).find(
+    (el) => el.dataset.epgGroupId != undefined
+  );
+  if (parent) {
+    return getGroupByHTMLElement(parent);
+  } else {
+    return null;
+  }
+};
+
+/**
+ * 判断 HTMLElement 是否为 EPGGroup
+ * @param element HTMLElement
+ * @returns boolean
+ */
+export const isEPGGroup = (element: HTMLElement): boolean => {
+  try {
+    if (element.dataset.epgGroupId != undefined) {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+};
+
+/**
+ * 判断 HTMLElement 是否为 EPGItem
+ * @param element HTMLElement
+ * @returns boolean
+ */
+export const isEPGItem = (element: HTMLElement): boolean => {
+  try {
+    if (element.dataset.epgItemId != undefined) {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+};
+
+/** 左移  */
+const left = () => move("left");
+/** 右移  */
+const right = () => move("right");
+/** 上移  */
+const up = () => move("up");
+/** 下移  */
+const down = () => move("down");
+
+setKeyBoardEventListener();
+
+export const epgService = {
+  // 常规移动类
+  move,
+  left,
+  right,
+  up,
+  down,
+  moveToItem,
+  moveToGroup,
+
+  // 配置获取设置
+  setConfig,
+  getFoucsClass,
+
+  // EPG数据获取类
+  getCurrentItem,
+  getCurrentGroup,
+
+  getItems,
+  getItemByHTMLElement,
+  getItemsByGroup,
+
+  getGroups,
+  getGroupByHTMLElement,
+  getGroupByItem,
+
+  getGroupChildrenByHTMLElement,
+  getGlobalGroupChildren,
+
+  getParentsByHTMLElement,
+  getParentGroupByHTMLElement,
+  getChild,
+
+  isEPGItem,
+  isEPGGroup,
+
+  // 对象注册
+  registerGroup,
+  registerItem,
+  updateItem,
+  updateGroup,
+
+  // onBack 生命周期劫持
+  onBack,
+
+  // KeyAction 操作类
+  getCurrentKeyActions,
+  setAction,
+  setActionCallback,
+  addCodeToAction,
+  removeCodeFromAction,
+};

@@ -1,0 +1,45 @@
+{
+  "name": "vuepg",
+  "version": "0.0.0",
+  "description": "Vue2/3 通用式焦点管理工具",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rimraf dist/* & tsc",
+    "test:2": "vue-demi-switch 2 && jest",
+    "test:3": "vue-demi-switch 3 vue3 && jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LemoFire/vuEPG.git"
+  },
+  "keywords": [
+    "toolkit"
+  ],
+  "author": "LemoFire",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "bugs": {
+    "url": "https://github.com/LemoFire/vuEPG/issues"
+  },
+  "homepage": "https://github.com/LemoFire/vuEPG#readme",
+  "dependencies": {
+    "vue-demi": "latest"
+  },
+  "peerDependencies": {
+    "@vue/composition-api": "^1.0.0-rc.1",
+    "vue": "^2.0.0 || >=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@vue/composition-api": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "vue": "latest",
+    "rimraf": "^3.0.2",
+    "typescript": "latest"
+  }
+}
