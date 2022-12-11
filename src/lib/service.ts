@@ -2,9 +2,11 @@ import {
   addCodeToAction,
   getCurrentKeyActions,
   keyActions,
+  removeAction,
   removeCodeFromAction,
   setAction,
   setActionCallback,
+  setActionPreventDefault,
 } from "./keyActions";
 import type EPGItem from "./epgItem";
 import type EPGGroup from "./epgGroup";
@@ -551,7 +553,9 @@ export const epgService = {
   // KeyAction 操作类
   getCurrentKeyActions,
   setAction,
+  removeAction,
   setActionCallback,
+  setActionPreventDefault,
   addCodeToAction,
   removeCodeFromAction,
 };

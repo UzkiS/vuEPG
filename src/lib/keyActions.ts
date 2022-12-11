@@ -111,6 +111,18 @@ export const setAction = (
 };
 
 /**
+ * 移除一个按键事件，其中基础事件 ["UP", "DOWN", "LEFT", "RIGHT", "ENTER", "BACK"] 无法被移除
+ * @param actionName 事件名称
+ * @returns boolean
+ */
+export const removeAction = (actionName: string) => {
+  if (["UP", "DOWN", "LEFT", "RIGHT", "ENTER", "BACK"].includes(actionName)) {
+    return false;
+  }
+  return delete keyActions[actionName];
+};
+
+/**
  * 设置事件的回调函数
  * @param actionName 事件名称
  * @param callback 回调函数, 不设置时为清除回调
@@ -121,6 +133,22 @@ export const setActionCallback = (
 ) => {
   if (keyActions[actionName]) {
     keyActions[actionName].callback = callback;
+  } else {
+    console.error(`action: ${actionName} 不存在`);
+  }
+};
+
+/**
+ * 设置事件的回调函数
+ * @param actionName 事件名称
+ * @param preventDefault 是否 preventDefault
+ */
+export const setActionPreventDefault = (
+  actionName: string,
+  preventDefault: boolean
+) => {
+  if (keyActions[actionName]) {
+    keyActions[actionName].preventDefault = preventDefault;
   } else {
     console.error(`action: ${actionName} 不存在`);
   }
