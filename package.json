@@ -5,16 +5,27 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rimraf dist/* & tsc",
+    "build": "rimraf dist/* && tsc",
     "test:2": "vue-demi-switch 2 && jest",
-    "test:3": "vue-demi-switch 3 vue3 && jest"
+    "test:3": "vue-demi-switch 3 vue3 && jest",
+    "publish:major": "npm run build && npm version major",
+    "publish:minor": "npm run build && npm version minor",
+    "publish:patch": "npm run build && npm version patch",
+    "publish:premajor": "npm run build && npm version premajor",
+    "publish:preminor": "npm run build && npm version preminor",
+    "publish:prepatch": "npm run build && npm version prepatch",
+    "publish:prerelease": "npm run build && npm version prerelease"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LemoFire/vuEPG.git"
   },
   "keywords": [
-    "toolkit"
+    "epg",
+    "vuepg",
+    "vue-epg",
+    "focusable",
+    "iptv"
   ],
   "author": "LemoFire",
   "license": "MIT",
