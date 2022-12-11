@@ -132,9 +132,6 @@ export default {
   },
 };
 
-export const getEpgService = () => {
-  return epgService;
-};
-export const useVueEpg = () => {
+export const useVuEPG = () => {
   return epgService;
 };
