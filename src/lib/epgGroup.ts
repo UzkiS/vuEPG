@@ -18,6 +18,10 @@ export default class EPGGroup {
    */
   children: (EPGItem | EPGGroup)[] = [];
   /**
+   * 当前元素是否未默认选择的元素
+   */
+  isDefault: boolean = false;
+  /**
    * 更新当前元素的首层子 EPGItem / EPGGroup
    */
   updateChildren() {
@@ -52,6 +56,7 @@ export default class EPGGroup {
       this.el.dataset.epgGroupId = this.id;
     }
     this.updateChildren();
+    this.isDefault = !!(binding.value && binding.value.default);
     if (isVue2) {
       if ((vnode as CVNode).data?.on) {
         ["left", "right", "up", "down", "enter"].forEach((type) => {

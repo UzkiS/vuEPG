@@ -203,11 +203,17 @@ const moveToItem = (target: EPGItem) => {
  * @returns
  */
 const moveToGroup = (target: EPGGroup) => {
-  if (isEPGGroup(target.children[0].el!)) {
+  let buffer: EPGItem | EPGGroup | undefined = target.children.find(
+    (item) => item.isDefault == true
+  );
+  if (buffer == undefined) {
+    buffer = target.children[0];
+  }
+  if (isEPGGroup(buffer.el!)) {
     if (target.events.enter) (target.events.enter as Function)();
-    moveToGroup(target.children[0] as EPGGroup);
+    moveToGroup(buffer as EPGGroup);
   } else {
-    moveToItem(target.children[0] as EPGItem);
+    moveToItem(buffer as EPGItem);
   }
 };
 
