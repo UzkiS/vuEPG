@@ -28,7 +28,7 @@ export const currentConfig: EPGConfig = {
   defBackHandler: null,
   tempBackHandler: null,
   useOldMoveRule: false,
-  debug: true,
+  debug: false,
 };
 
 /**
