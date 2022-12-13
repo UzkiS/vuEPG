@@ -129,6 +129,11 @@ export default {
     if (!isVue2) {
       app.provide("epg", epgService);
     }
+    console.log(
+      "\n %c vuEPG loaded v0.0.1 %c https://github.com/LemoFire/vuEPG \n",
+      "color: white; background: pink; padding:5px 0;",
+      "background: skyblue; padding:5px 0;"
+    );
   },
 };
 
