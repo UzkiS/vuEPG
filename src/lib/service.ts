@@ -99,9 +99,6 @@ const backHandler = () => {
 /** 注册 EPGItem */
 const registerItem = (item: EPGItem) => {
   dataContainer.itemArray.push(item);
-  if (item.isDefault) {
-    moveToItem(item);
-  }
 };
 /** 更新 EPGItem 状态 */
 const updateItem = (newItem: EPGItem) => {
@@ -218,20 +215,16 @@ const moveToGroup = (target: EPGGroup) => {
 };
 
 /** 设置按下按键事件的监听 */
-const setKeyBoardEventListener = () => {
-  document.onkeydown =
-    (document as EPGDocument).onsystemevent =
-    (document as EPGDocument).onirkeypress =
-    (document as EPGDocument).onkeypress =
-      (event) => {
-        const keyCode = event.code
-          ? event.code
-          : event.which
-          ? event.which
-          : event.keyCode;
+const setKeyboardEventListener = () => {
+  document.onkeydown = (event) => {
+    const keyCode = event.code
+      ? event.code
+      : event.which
+      ? event.which
+      : event.keyCode;
 
-        eventHandler(event, keyCode);
-      };
+    eventHandler(event, keyCode);
+  };
 };
 /** 按键事件处理器 */
 const eventHandler = (event: KeyboardEvent, keyCode: string | number) => {
@@ -247,7 +240,6 @@ const eventHandler = (event: KeyboardEvent, keyCode: string | number) => {
     }
   }
   selfLog("按键KeyCode:", keyCode, "触发事件:", keyAction);
-  // 注入白名单
 
   if (keyAction) {
     if (keyActions[keyAction].preventDefault) {
@@ -509,7 +501,7 @@ const up = () => move("up");
 /** 下移  */
 const down = () => move("down");
 
-setKeyBoardEventListener();
+setKeyboardEventListener();
 
 export const epgService = {
   // 常规移动类

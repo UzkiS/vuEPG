@@ -83,9 +83,13 @@ const epg = inject("epg");
 
 <script setup>
 import { useVuEPG } from "vuepg";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 const epg = useVuEPG();
 
 const top = ref();
+
+onMounted(() => {
+  epg.move(top.value);
+});
 </script>
 ```
