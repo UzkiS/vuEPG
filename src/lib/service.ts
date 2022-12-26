@@ -250,14 +250,15 @@ const eventHandler = (event: KeyboardEvent, keyCode: string | number) => {
       event.preventDefault();
       selfLog(`事件 ${keyAction} 将阻止默认事件发生`);
     }
-    if (
-      dataContainer.currentItem &&
-      ["ENTER", "DOWN", "UP", "LEFT", "RIGHT", "BACK"].includes(keyAction)
-    ) {
+    if (["DOWN", "UP", "LEFT", "RIGHT"].includes(keyAction)) {
+      if (dataContainer.currentItem == null) {
+        if (dataContainer.itemArray.length != 0) {
+          dataContainer.currentItem = dataContainer.itemArray[0];
+        } else {
+          return;
+        }
+      }
       switch (keyAction) {
-        case "ENTER":
-          dataContainer.currentItem.el!.click();
-          break;
         case "DOWN":
           if (dataContainer.currentItem.events.down) {
             (dataContainer.currentItem.events.down as Function)(
@@ -297,6 +298,15 @@ const eventHandler = (event: KeyboardEvent, keyCode: string | number) => {
           } else {
             move("right");
           }
+          break;
+      }
+    } else if (["ENTER", "BACK"].includes(keyAction)) {
+      switch (keyAction) {
+        case "ENTER":
+          if (dataContainer.currentItem == null) {
+            return;
+          }
+          dataContainer.currentItem.el!.click();
           break;
         case "BACK":
           backHandler();
