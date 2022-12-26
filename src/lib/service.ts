@@ -62,6 +62,7 @@ const unsetTempBack = () => {
  * @param func 回调函数
  */
 export const onBack = (func: Function) => {
+  selfLog("注册 onBack 生命周期");
   onMounted(() => {
     setTempBack(func);
   });
@@ -90,10 +91,12 @@ const getFoucsClass = () =>
 
 /** 返回处理 */
 const backHandler = () => {
-  if (currentConfig.defBackHandler) {
-    currentConfig.defBackHandler();
+  if (currentConfig.tempBackHandler) {
+    selfLog("调用页面临时 BackHandler");
+    currentConfig.tempBackHandler();
   } else {
-    currentConfig.tempBackHandler && currentConfig.tempBackHandler();
+    selfLog("调用全局默认 BackHandler");
+    currentConfig.defBackHandler && currentConfig.defBackHandler();
   }
 };
 /** 注册 EPGItem */
