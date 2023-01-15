@@ -133,7 +133,7 @@ export default {
     console.log(
       "\n %c vuEPG loaded " +
         PACKAGE_VERSION +
-        " %c https://github.com/LemoFire/vuEPG \n",
+        " %c https://docs.ito.fun/vuepg \n",
       "color: white; background: pink; padding:5px 0;",
       "background: skyblue; padding:5px 0;"
     );
