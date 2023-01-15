@@ -3,6 +3,7 @@ import { dataContainer, epgService } from "./lib/service";
 import EPGItem from "./lib/epgItem";
 import EPGGroup from "./lib/epgGroup";
 import { isVue2, type DirectiveHook, type FunctionDirective } from "vue-demi";
+import { PACKAGE_VERSION } from "./config/version";
 
 const _directive = (
   beforeMount: FunctionDirective,
@@ -130,7 +131,9 @@ export default {
       app.provide("epg", epgService);
     }
     console.log(
-      "\n %c vuEPG loaded v0.0.1 %c https://github.com/LemoFire/vuEPG \n",
+      "\n %c vuEPG loaded " +
+        PACKAGE_VERSION +
+        " %c https://github.com/LemoFire/vuEPG \n",
       "color: white; background: pink; padding:5px 0;",
       "background: skyblue; padding:5px 0;"
     );

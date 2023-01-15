@@ -5,16 +5,19 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "git:fixup": "git add . && git commit --amend --no-edit",
+    "update:version": "node ./scripts/updateVersion.mjs",
+    "autobuild": "npm run update:version && npm run git:fixup && npm run build",
     "build": "rimraf dist/* && tsc",
     "test:2": "vue-demi-switch 2 && jest",
     "test:3": "vue-demi-switch 3 vue3 && jest",
-    "publish:major": "npm run build && npm version major && npm publish",
-    "publish:minor": "npm run build && npm version minor && npm publish",
-    "publish:patch": "npm run build && npm version patch && npm publish",
-    "publish:premajor": "npm run build && npm version premajor && npm publish",
-    "publish:preminor": "npm run build && npm version preminor && npm publish",
-    "publish:prepatch": "npm run build && npm version prepatch && npm publish",
-    "publish:prerelease": "npm run build && npm version prerelease && npm publish"
+    "publish:major": "npm version major && npm run autobuild && npm publish && git push",
+    "publish:minor": "npm version minor && npm run autobuild && npm publish && git push",
+    "publish:patch": "npm version patch && npm run autobuild && npm publish && git push",
+    "publish:premajor": "npm version premajor && npm run autobuild && npm publish && git push",
+    "publish:preminor": "npm version preminor && npm run autobuild && npm publish && git push",
+    "publish:prepatch": "npm version prepatch && npm run autobuild && npm publish && git push",
+    "publish:prerelease": "npm version prerelease && npm run autobuild && npm publish && git push"
   },
   "repository": {
     "type": "git",

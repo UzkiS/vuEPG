@@ -5,6 +5,7 @@
     "allowJs": true,
     "outDir": "./dist",
     "strict": true,
-    "moduleResolution":"Node"
-  }
+    "moduleResolution": "Node"
+  },
+  "exclude": ["./scripts"]
 }
