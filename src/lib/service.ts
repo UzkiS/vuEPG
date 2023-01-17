@@ -35,7 +35,7 @@ export const currentConfig: EPGConfig = {
  * 设置配置
  * @param config EPGConfig
  */
-const setConfig = (config: EPGConfig) => {
+export const setConfig = (config: EPGConfig) => {
   Object.assign(currentConfig, config);
 };
 
@@ -78,15 +78,15 @@ export const onBack = (func: Function) => {
 };
 
 /** 获取当前 Item */
-const getCurrentItem = () => dataContainer.currentItem;
+export const getCurrentItem = () => dataContainer.currentItem;
 /** 获取所有 Item */
-const getItems = () => dataContainer.itemArray;
+export const getItems = () => dataContainer.itemArray;
 /** 获取当前 Group */
-const getCurrentGroup = () => dataContainer.currentGroup;
+export const getCurrentGroup = () => dataContainer.currentGroup;
 /** 获取所有 Group */
-const getGroups = () => dataContainer.groupArray;
+export const getGroups = () => dataContainer.groupArray;
 /** 获取当前选中元素的 Class */
-const getFoucsClass = () =>
+export const getFoucsClass = () =>
   dataContainer.currentItem?.focusClass || currentConfig.focusClass;
 
 /** 返回处理 */
@@ -100,11 +100,11 @@ const backHandler = () => {
   }
 };
 /** 注册 EPGItem */
-const registerItem = (item: EPGItem) => {
+export const registerItem = (item: EPGItem) => {
   dataContainer.itemArray.push(item);
 };
 /** 更新 EPGItem 状态 */
-const updateItem = (newItem: EPGItem) => {
+export const updateItem = (newItem: EPGItem) => {
   dataContainer.itemArray.forEach((item) => {
     if (item.id === newItem.id) {
       Object.assign(item, newItem);
@@ -112,11 +112,11 @@ const updateItem = (newItem: EPGItem) => {
   });
 };
 /** 注册EPGGroup */
-const registerGroup = (group: EPGGroup) => {
+export const registerGroup = (group: EPGGroup) => {
   dataContainer.groupArray.push(group);
 };
 /** 更新 EPGGroup 状态 */
-const updateGroup = (newGroup: EPGGroup) => {
+export const updateGroup = (newGroup: EPGGroup) => {
   dataContainer.groupArray.forEach((group) => {
     if (group.id === newGroup.id) {
       Object.assign(group, newGroup);
@@ -124,7 +124,7 @@ const updateGroup = (newGroup: EPGGroup) => {
   });
 };
 
-const move = (target: MoveType | HTMLElement | EPGItem) => {
+export const move = (target: MoveType | HTMLElement | EPGItem) => {
   if (dataContainer.itemArray.length == 0) return;
   selfLog("------------------------- 移动逻辑开始 -------------------------");
   /** 目标 EPGItem */
@@ -176,7 +176,7 @@ const move = (target: MoveType | HTMLElement | EPGItem) => {
  * @param target 指定的 EPGItem
  * @returns
  */
-const moveToItem = (target: EPGItem) => {
+export const moveToItem = (target: EPGItem) => {
   if (dataContainer.currentItem) {
     dataContainer.currentItem.isFocus = false;
     dataContainer.currentItem.el?.classList.remove(getFoucsClass() as string);
@@ -202,7 +202,7 @@ const moveToItem = (target: EPGItem) => {
  * @param target 指定的 EPGGroup
  * @returns
  */
-const moveToGroup = (target: EPGGroup) => {
+export const moveToGroup = (target: EPGGroup) => {
   let buffer: EPGItem | EPGGroup | undefined = target.children.find(
     (item) => item.isDefault == true
   );
@@ -506,67 +506,12 @@ export const isEPGItem = (element: HTMLElement): boolean => {
 };
 
 /** 左移  */
-const left = () => move("left");
+export const left = () => move("left");
 /** 右移  */
-const right = () => move("right");
+export const right = () => move("right");
 /** 上移  */
-const up = () => move("up");
+export const up = () => move("up");
 /** 下移  */
-const down = () => move("down");
+export const down = () => move("down");
 
 setKeyboardEventListener();
-
-export const epgService = {
-  // 常规移动类
-  move,
-  left,
-  right,
-  up,
-  down,
-  moveToItem,
-  moveToGroup,
-
-  // 配置获取设置
-  setConfig,
-  getFoucsClass,
-
-  // EPG数据获取类
-  getCurrentItem,
-  getCurrentGroup,
-
-  getItems,
-  getItemByHTMLElement,
-  getItemsByGroup,
-
-  getGroups,
-  getGroupByHTMLElement,
-  getGroupByItem,
-
-  getGroupChildrenByHTMLElement,
-  getGlobalGroupChildren,
-
-  getParentsByHTMLElement,
-  getParentGroupByHTMLElement,
-  getChild,
-
-  isEPGItem,
-  isEPGGroup,
-
-  // 对象注册
-  registerGroup,
-  registerItem,
-  updateItem,
-  updateGroup,
-
-  // onBack 生命周期劫持
-  onBack,
-
-  // KeyAction 操作类
-  getCurrentKeyActions,
-  setAction,
-  removeAction,
-  setActionCallback,
-  setActionPreventDefault,
-  addCodeToAction,
-  removeCodeFromAction,
-};

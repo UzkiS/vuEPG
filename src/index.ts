@@ -1,9 +1,11 @@
 /* eslint-disable */
-import { dataContainer, epgService } from "./lib/service";
+import { dataContainer } from "./lib/service";
 import EPGItem from "./lib/epgItem";
 import EPGGroup from "./lib/epgGroup";
 import { isVue2, type DirectiveHook, type FunctionDirective } from "vue-demi";
 import { PACKAGE_VERSION } from "./config/version";
+import * as epgService from "./lib/service";
+import * as keyActions from "./lib/keyActions";
 
 const _directive = (
   beforeMount: FunctionDirective,
@@ -141,5 +143,5 @@ export default {
 };
 
 export const useVuEPG = () => {
-  return epgService;
+  return Object.assign(epgService, keyActions);
 };
