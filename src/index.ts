@@ -143,5 +143,5 @@ export default {
 };
 
 export const useVuEPG = () => {
-  return Object.assign(epgService, keyActions);
+  return { ...epgService, ...keyActions };
 };

@@ -32,5 +32,10 @@ export const generateID = (pre: string = ""): string =>
  * consle.log
  */
 export const selfLog = (...data: any[]): void => {
-  currentConfig.debug && console.log("vuEPG: ", ...data);
+  currentConfig.debug &&
+    console.log(
+      "%cvuEPG",
+      "color:white; background: linear-gradient(270deg, skyblue, pink); padding: 5px 8px; border-radius: 15px 15px 0 15px",
+      ...data
+    );
 };
