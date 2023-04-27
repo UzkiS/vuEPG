@@ -134,6 +134,11 @@ export const move = (target: MoveType | HTMLElement | EPGItem) => {
     if ((target as EPGItem).el) {
       /* target为 EPGItem 时，获取其本身 */
       targetItem = target as EPGItem;
+    } else if ((target as unknown as { $el: HTMLElement }).$el) {
+      /* target为 VueComponent 时，获取其 EPGItem */
+      targetItem = getItemByHTMLElement(
+        (target as unknown as { $el: HTMLElement }).$el
+      );
     } else {
       /* target为 HTMLElement 时，获取其 EPGItem */
       targetItem = getItemByHTMLElement(target as HTMLElement);
