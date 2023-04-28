@@ -124,24 +124,26 @@ export const updateGroup = (newGroup: EPGGroup) => {
   });
 };
 
-export const move = (target: MoveType | HTMLElement | EPGItem) => {
+export const move = (target: MoveType | HTMLElement | EPGItem | EPGGroup) => {
   if (dataContainer.itemArray.length == 0) return;
-  selfLog("移动逻辑开始");
+  selfLog("-移动逻辑开始-");
   /** 目标 EPGItem */
   let targetItem: EPGItem | EPGGroup | null = null;
   if (typeof target === "object") {
-    /* target 为 HTMLElement 或 EPGItem 时 */
+    /* target 为 HTMLElement 或 EPGItem 或 EPGGroup 或 VueComponent 时 */
     if ((target as EPGItem).el) {
-      /* target为 EPGItem 时，获取其本身 */
+      /* target为 EPGItem/EPGGroup 时，获取其本身 */
       targetItem = target as EPGItem;
     } else if ((target as unknown as { $el: HTMLElement }).$el) {
-      /* target为 VueComponent 时，获取其 EPGItem */
-      targetItem = getItemByHTMLElement(
-        (target as unknown as { $el: HTMLElement }).$el
-      );
+      /* target为 VueComponent 时，获取其 EPGItem 或 EPGGroup*/
+      targetItem =
+        getItemByHTMLElement((target as unknown as { $el: HTMLElement }).$el) ??
+        getGroupByHTMLElement((target as unknown as { $el: HTMLElement }).$el);
     } else {
-      /* target为 HTMLElement 时，获取其 EPGItem */
-      targetItem = getItemByHTMLElement(target as HTMLElement);
+      /* target为 HTMLElement 时，获取其 EPGItem 或 EPGGroup */
+      targetItem =
+        getItemByHTMLElement(target as HTMLElement) ??
+        getGroupByHTMLElement(target as HTMLElement);
     }
   } else if (["up", "down", "right", "left"].includes(target)) {
     targetItem = getTargetByDirection(target);
@@ -173,7 +175,7 @@ export const move = (target: MoveType | HTMLElement | EPGItem) => {
   } else {
     selfLog("无可用元素");
   }
-  selfLog("移动逻辑结束");
+  selfLog("-移动逻辑结束-");
 };
 
 /**
