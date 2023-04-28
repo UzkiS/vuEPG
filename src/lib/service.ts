@@ -126,7 +126,7 @@ export const updateGroup = (newGroup: EPGGroup) => {
 
 export const move = (target: MoveType | HTMLElement | EPGItem) => {
   if (dataContainer.itemArray.length == 0) return;
-  selfLog("------------------------- 移动逻辑开始 -------------------------");
+  selfLog("移动逻辑开始");
   /** 目标 EPGItem */
   let targetItem: EPGItem | EPGGroup | null = null;
   if (typeof target === "object") {
@@ -173,7 +173,7 @@ export const move = (target: MoveType | HTMLElement | EPGItem) => {
   } else {
     selfLog("无可用元素");
   }
-  selfLog("------------------------- 移动逻辑结束 -------------------------");
+  selfLog("移动逻辑结束");
 };
 
 /**
@@ -213,6 +213,9 @@ export const moveToGroup = (target: EPGGroup) => {
   );
   if (buffer == undefined) {
     buffer = target.children[0];
+    if (buffer == undefined) {
+      throw new Error("当前 EPGGroup 不存在 EPGItem");
+    }
   }
   if (isEPGGroup(buffer.el!)) {
     if (target.events.enter) (target.events.enter as Function)();
