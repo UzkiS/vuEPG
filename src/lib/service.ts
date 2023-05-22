@@ -392,8 +392,7 @@ export const getGroupByItem = (item: EPGItem) => {
       dataContainer.groupArray.find(
         (group) =>
           group.id ===
-          getParentGroupByHTMLElement(dataContainer.currentItem!.el!)?.el!
-            .dataset.epgGroupId
+          getParentGroupByHTMLElement(item.el!)?.el!.dataset.epgGroupId
       ) ?? null
     );
   } else {
