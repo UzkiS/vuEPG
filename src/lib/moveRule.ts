@@ -6,7 +6,7 @@ import {
   getParentGroupByHTMLElement,
 } from "./service";
 import type { MoveType } from "./types";
-import { selfLog } from "./utils";
+import { isHidden, selfLog } from "./utils";
 
 const RATE = 0.05;
 
@@ -102,6 +102,9 @@ const getAllAvailableChildren = (
   const currentRect = target?.getRect()!;
   const targetArray = children.filter((child) => child != target);
   targetArray.forEach((child) => {
+    if (isHidden(child.el!)) {
+      return;
+    }
     const targetRect = child.getRect()!;
     if (direction == "down") {
       if (currentRect.top < targetRect.top) {

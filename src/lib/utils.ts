@@ -29,6 +29,15 @@ export const generateID = (pre: string = ""): string =>
     .substring(0, 10);
 
 /**
+ * 判断元素是否隐藏
+ * @param el
+ * @returns
+ */
+export const isHidden = (el: HTMLElement) => {
+  return el.offsetParent == null;
+};
+
+/**
  * consle.log
  */
 export const selfLog = (...data: any[]): void => {
