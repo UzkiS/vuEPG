@@ -11,7 +11,7 @@ import {
 import type EPGItem from "./epgItem";
 import type EPGGroup from "./epgGroup";
 import type { DataContainer, EPGConfig, EPGDocument, MoveType } from "./types";
-import { getDescendant, selfLog } from "./utils";
+import { getDescendant, isHidden, selfLog } from "./utils";
 import { onActivated, onDeactivated, onMounted, onUnmounted } from "vue-demi";
 import { getRecentTarget } from "./moveRule";
 import { getItemByDirectionOld } from "./compatible/move";
@@ -146,6 +146,13 @@ export const move = (target: MoveType | HTMLElement | EPGItem | EPGGroup) => {
         getGroupByHTMLElement(target as HTMLElement);
     }
   } else if (["up", "down", "right", "left"].includes(target)) {
+    if (!dataContainer.currentItem) {
+      return;
+    }
+    if (dataContainer.currentItem && isHidden(dataContainer.currentItem.el!)) {
+      dataContainer.currentItem = null;
+      return;
+    }
     targetItem = getTargetByDirection(target);
     /* target 为上下左右事件时 */
     let nextGroup;

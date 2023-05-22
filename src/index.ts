@@ -96,9 +96,14 @@ export default {
       epgService.updateItem(item);
     };
     const itemUnmounted: DirectiveHook<HTMLElement> = (el, binding, vnode) => {
-      const index = dataContainer.itemArray.findIndex(
-        (item: EPGItem) => item.id === el.dataset.id
-      );
+      const index = dataContainer.itemArray.findIndex((item: EPGItem) => {
+        if (dataContainer.currentItem) {
+          if (item.id === el.dataset.id) {
+            dataContainer.currentItem = null;
+          }
+        }
+        return item.id === el.dataset.id;
+      });
       dataContainer.itemArray.splice(index, 1);
     };
     const compatibleItemBeforeMount: DirectiveHook<HTMLElement> = (
