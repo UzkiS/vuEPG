@@ -99,7 +99,7 @@ export default {
     const itemUnmounted: DirectiveHook<HTMLElement> = (el, binding, vnode) => {
       const index = dataContainer.itemArray.findIndex((item: EPGItem) => {
         if (dataContainer.currentItem) {
-          if (item.id === el.dataset.id) {
+          if (dataContainer.currentItem.id === el.dataset.id) {
             selfLog("当前元素已经卸载，移除 CurrentItem");
             dataContainer.currentItem = null;
           }
