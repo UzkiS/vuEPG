@@ -147,10 +147,11 @@ export const move = (target: MoveType | HTMLElement | EPGItem | EPGGroup) => {
     }
   } else if (["up", "down", "right", "left"].includes(target)) {
     if (!dataContainer.currentItem) {
+      selfLog("当前元素不存在，不进行操作");
       return;
     }
     if (dataContainer.currentItem && isHidden(dataContainer.currentItem.el!)) {
-      dataContainer.currentItem = null;
+      selfLog("当前元素已经隐藏或不存在，不进行操作");
       return;
     }
     targetItem = getTargetByDirection(target);
@@ -274,6 +275,10 @@ const eventHandler = (event: KeyboardEvent, keyCode: string | number) => {
         } else {
           return;
         }
+      }
+      if (isHidden(dataContainer.currentItem.el!)) {
+        selfLog("当前元素已隐藏或不存在，不执行操作");
+        return;
       }
       switch (keyAction) {
         case "DOWN":

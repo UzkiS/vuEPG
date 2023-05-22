@@ -6,6 +6,7 @@ import { isVue2, type DirectiveHook, type FunctionDirective } from "vue-demi";
 import { PACKAGE_VERSION } from "./config/version";
 import * as epgService from "./lib/service";
 import * as keyActions from "./lib/keyActions";
+import { selfLog } from "./lib/utils";
 
 const _directive = (
   beforeMount: FunctionDirective,
@@ -99,6 +100,7 @@ export default {
       const index = dataContainer.itemArray.findIndex((item: EPGItem) => {
         if (dataContainer.currentItem) {
           if (item.id === el.dataset.id) {
+            selfLog("当前元素已经卸载，移除 CurrentItem");
             dataContainer.currentItem = null;
           }
         }
