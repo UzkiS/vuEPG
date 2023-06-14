@@ -51,7 +51,7 @@ export default {
     };
     const groupUnmount: DirectiveHook<HTMLElement> = (el, binding, vnode) => {
       const index = dataContainer.groupArray.findIndex(
-        (item: EPGGroup) => item.id === el.dataset["groupId"]
+        (item: EPGGroup) => item.id === el.dataset.epgGroupId
       );
       dataContainer.groupArray.splice(index, 1);
     };
@@ -99,14 +99,16 @@ export default {
     const itemUnmounted: DirectiveHook<HTMLElement> = (el, binding, vnode) => {
       const index = dataContainer.itemArray.findIndex((item: EPGItem) => {
         if (dataContainer.currentItem) {
-          if (dataContainer.currentItem.id === el.dataset.id) {
+          if (dataContainer.currentItem.id === el.dataset.epgItemId) {
             selfLog("当前元素已经卸载，移除 CurrentItem");
             dataContainer.currentItem = null;
           }
         }
-        return item.id === el.dataset.id;
+        return item.id === el.dataset.epgItemId;
       });
-      dataContainer.itemArray.splice(index, 1);
+      if (index != -1) {
+        dataContainer.itemArray.splice(index, 1);
+      }
     };
     const compatibleItemBeforeMount: DirectiveHook<HTMLElement> = (
       el,
