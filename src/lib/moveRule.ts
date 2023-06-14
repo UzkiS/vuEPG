@@ -53,7 +53,7 @@ export const getRecentTarget = (
   if (availableChild.length == 0) {
     //当前可用孩子元素组为0
     if (isTopGroup) {
-      selfLog("当前已是最顶层，不停止向上寻找");
+      selfLog("当前已是最顶层，停止向上寻找");
       return null;
     }
     selfLog(
@@ -70,7 +70,7 @@ export const getRecentTarget = (
   selfLog("当前获取的最佳目标", bestChild);
   if (bestChild == null) {
     if (isTopGroup) {
-      selfLog("当前已是最顶层，不停止向上寻找");
+      selfLog("当前已是最顶层，停止向上寻找");
       return null;
     }
     selfLog(
