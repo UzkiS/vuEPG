@@ -325,10 +325,15 @@ const eventHandler = (event: KeyboardEvent, keyCode: string | number) => {
     } else if (["ENTER", "BACK"].includes(keyAction)) {
       switch (keyAction) {
         case "ENTER":
-          if (dataContainer.currentItem == null) {
+          if (!dataContainer.currentItem) {
             return;
+          } else {
+            if (!isHidden(dataContainer.currentItem.el!)) {
+              dataContainer.currentItem.el!.click();
+            } else {
+              selfLog("当前元素已隐藏，不处理点击事件");
+            }
           }
-          dataContainer.currentItem.el!.click();
           break;
         case "BACK":
           backHandler();
