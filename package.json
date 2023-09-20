@@ -1,6 +1,6 @@
 {
   "name": "vuepg",
-  "version": "0.0.1-19",
+  "version": "1.0.0",
   "description": "Vue2/3 通用式焦点管理工具",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
