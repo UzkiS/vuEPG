@@ -1,20 +1,10 @@
-import {
-  addCodeToAction,
-  getCurrentKeyActions,
-  keyActions,
-  removeAction,
-  removeCodeFromAction,
-  setAction,
-  setActionCallback,
-  setActionPreventDefault,
-} from "./keyActions";
+import { keyActions } from "./keyActions";
 import type EPGItem from "./epgItem";
 import type EPGGroup from "./epgGroup";
-import type { DataContainer, EPGConfig, EPGDocument, MoveType } from "./types";
+import type { DataContainer, EPGConfig, MoveType } from "./types";
 import { getDescendant, isHidden, selfLog } from "./utils";
 import { onActivated, onDeactivated, onMounted, onUnmounted } from "vue-demi";
 import { getRecentTarget } from "./moveRule";
-import { getItemByDirectionOld } from "./compatible/move";
 
 export const dataContainer: DataContainer = {
   currentItem: null,
@@ -27,7 +17,6 @@ export const currentConfig: EPGConfig = {
   focusClass: "vuepg-focus",
   defBackHandler: null,
   tempBackHandler: null,
-  useOldMoveRule: false,
   debug: false,
 };
 
@@ -354,11 +343,7 @@ const eventHandler = (event: KeyboardEvent, keyCode: string | number) => {
 export const getTargetByDirection = (
   direction: "up" | "down" | "right" | "left"
 ): EPGItem | EPGGroup | null => {
-  if (!currentConfig.useOldMoveRule) {
-    return getRecentTarget(direction);
-  } else {
-    return getItemByDirectionOld(direction);
-  }
+  return getRecentTarget(direction);
 };
 
 /**

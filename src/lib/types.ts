@@ -23,8 +23,6 @@ export interface EPGConfig {
   defBackHandler?: Function | null;
   /** 临时返回处理函数 */
   tempBackHandler?: Function | null;
-  /** 使用 vue-epg 的原版移动逻辑，如果新逻辑有bug，则可以先用原版逻辑进行替代 */
-  useOldMoveRule?: boolean;
   /** 开启控制台输出 */
   debug?: boolean;
 }

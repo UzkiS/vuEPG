@@ -35,7 +35,6 @@ const _directive = (
 
 export default {
   install(app: any) {
-    let compatibleFlag = false;
     const groupBeforeMount: DirectiveHook<HTMLElement> = (
       el,
       binding,
@@ -55,30 +54,6 @@ export default {
       );
       dataContainer.groupArray.splice(index, 1);
     };
-    const compatibleGroupBeforeMounted: DirectiveHook<HTMLElement> = (
-      el,
-      binding,
-      vnode,
-      prevVNode
-    ) => {
-      if (!compatibleFlag) {
-        console.warn(
-          "v-items/v-groups are reserved for vue-epg compatibility only, please use v-epg-item/v-epg-group instead."
-        );
-        compatibleFlag = true;
-      }
-      groupBeforeMount(el, binding, vnode, prevVNode);
-    };
-    /** 对 vue-epg 的兼容，不建议使用 */
-    app.directive(
-      "groups",
-      _directive(
-        compatibleGroupBeforeMounted,
-        groupMounted,
-        groupUpdated,
-        groupUnmount
-      )
-    );
     app.directive(
       "epg-group",
       _directive(groupBeforeMount, groupMounted, groupUpdated, groupUnmount)
@@ -110,30 +85,6 @@ export default {
         dataContainer.itemArray.splice(index, 1);
       }
     };
-    const compatibleItemBeforeMount: DirectiveHook<HTMLElement> = (
-      el,
-      binding,
-      vnode,
-      prevVNode
-    ) => {
-      if (!compatibleFlag) {
-        console.warn(
-          "v-items/v-groups are reserved for vue-epg compatibility only, please use v-epg-item/v-epg-group instead."
-        );
-        compatibleFlag = true;
-      }
-      itemBeforeMount(el, binding, vnode, prevVNode);
-    };
-    /** 对 vue-epg 的兼容，不建议使用 */
-    app.directive(
-      "items",
-      _directive(
-        compatibleItemBeforeMount,
-        itemMounted,
-        itemsUpdated,
-        itemUnmounted
-      )
-    );
     app.directive(
       "epg-item",
       _directive(itemBeforeMount, itemMounted, itemsUpdated, itemUnmounted)
