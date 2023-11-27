@@ -46,6 +46,7 @@ export interface DataContainer {
   itemArray: EPGItem[];
   currentGroup: EPGGroup | null;
   groupArray: EPGGroup[];
+  isPause: boolean;
 }
 
 /**

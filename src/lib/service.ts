@@ -11,6 +11,7 @@ export const dataContainer: DataContainer = {
   itemArray: [],
   currentGroup: null,
   groupArray: [],
+  isPause: false,
 };
 
 export const currentConfig: EPGConfig = {
@@ -39,7 +40,7 @@ const setTempBack = (func: Function) => {
 };
 
 /**
- * 设置临时返回处理函数
+ * 注销临时返回处理函数
  */
 const unsetTempBack = () => {
   Object.assign(currentConfig, {
@@ -224,6 +225,20 @@ export const moveToGroup = (target: EPGGroup) => {
   }
 };
 
+/**
+ * 暂停移动
+ */
+export const pause = () => {
+  dataContainer.isPause = true;
+};
+
+/**
+ * 恢复移动
+ */
+export const resume = () => {
+  dataContainer.isPause = false;
+};
+
 /** 设置按下按键事件的监听 */
 const setKeyboardEventListener = () => {
   document.onkeydown = (event) => {
@@ -232,7 +247,9 @@ const setKeyboardEventListener = () => {
       : event.which
       ? event.which
       : event.keyCode;
-
+    if (dataContainer.isPause) {
+      return;
+    }
     eventHandler(event, keyCode);
   };
 };
