@@ -541,5 +541,7 @@ export const right = () => move("right");
 export const up = () => move("up");
 /** 下移  */
 export const down = () => move("down");
+/** 返回 */
+export const back = () => backHandler();
 
 setKeyboardEventListener();
