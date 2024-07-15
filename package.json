@@ -8,7 +8,7 @@
     "git:fixup": "git add . && git commit --amend --no-edit",
     "update:version": "node ./scripts/updateVersion.mjs",
     "autobuild": "npm run update:version && npm run git:fixup && npm run build",
-    "build": "rimraf dist/* && tsc",
+    "build": "rimraf dist/ && tsc",
     "test:2": "vue-demi-switch 2 && jest",
     "test:3": "vue-demi-switch 3 vue3 && jest",
     "publish:major": "npm version major && npm run autobuild && npm publish && git push",
@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "vue": "latest",
-    "rimraf": "^3.0.2",
+    "rimraf": "latest",
     "typescript": "latest"
   }
 }
