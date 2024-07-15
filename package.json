@@ -1,7 +1,7 @@
 {
   "name": "vuepg",
   "version": "1.2.0",
-  "description": "Vue2/3 通用式焦点管理工具",
+  "description": "Vue2/3 通用大屏端焦点管理工具",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LemoFire/vuEPG.git"
+    "url": "git+https://github.com/UzkiS/vuEPG.git"
   },
   "keywords": [
     "epg",
@@ -30,15 +30,15 @@
     "focusable",
     "iptv"
   ],
-  "author": "LemoFire",
+  "author": "UzkiS",
   "license": "MIT",
   "files": [
     "dist"
   ],
   "bugs": {
-    "url": "https://github.com/LemoFire/vuEPG/issues"
+    "url": "https://github.com/UzkiS/vuEPG/issues"
   },
-  "homepage": "https://github.com/LemoFire/vuEPG#readme",
+  "homepage": "https://github.com/UzkiS/vuEPG#readme",
   "dependencies": {
     "vue-demi": "latest"
   },
