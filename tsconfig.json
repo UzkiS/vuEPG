@@ -1,11 +1,9 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "declaration": true,
-    "allowJs": true,
-    "outDir": "./dist",
-    "strict": true,
-    "moduleResolution": "Node"
-  },
-  "exclude": ["./scripts"]
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.lib.json" },
+    { "path": "./tsconfig.test.json" },
+    { "path": "./tsconfig.vue2.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
 }

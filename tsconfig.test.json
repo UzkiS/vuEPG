@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    // 与 vitest.config.ts 中的别名对应；Vue 2 版本由 tsconfig.vue2.json 检查
+    "paths": { "#mount": ["./test/helpers/mount-vue3.ts"] },
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo"
+  },
+  "include": ["src", "test", "package.json"],
+  // 以 Vue 2 类型检查的文件，见 tsconfig.vue2.json
+  "exclude": ["test/types/vue2.ts", "test/helpers/mount-vue2.ts"]
+}

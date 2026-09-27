@@ -1,0 +1,52 @@
+name: 🐛 Bug 报告
+description: 报告一个问题
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: 感谢反馈！提交前请确认已搜索过现有 Issue，并使用最新版本复现。
+  - type: input
+    id: version
+    attributes:
+      label: vuepg 版本
+      placeholder: 例如 2.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: vue
+    attributes:
+      label: Vue 版本
+      options:
+        - Vue 3
+        - Vue 2.7
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 运行环境
+      description: 浏览器 / WebView 及版本、设备型号（如机顶盒型号）
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤
+      description: "最好附上最小复现（在线示例链接或仓库）。开启 `debug: true` 后的控制台日志很有帮助。"
+      placeholder: |
+        1. ...
+        2. 按下 ↓
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+    validations:
+      required: true

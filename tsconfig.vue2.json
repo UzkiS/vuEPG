@@ -1,0 +1,19 @@
+{
+  // 以 Vue 2.7 的类型检查源码与 Vue 2 专属测试文件，保证类型层面同样兼容 Vue 2
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": {
+      "vue": ["./node_modules/vue2/types/index.d.ts"],
+      "#mount": ["./test/helpers/mount-vue2.ts"]
+    },
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.vue2.tsbuildinfo"
+  },
+  "include": [
+    "src",
+    "test/types/vue2.ts",
+    "test/helpers/mount-vue2.ts",
+    "test/helpers/types.ts",
+    "package.json"
+  ]
+}
