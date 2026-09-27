@@ -1,59 +1,109 @@
 {
   "name": "vuepg",
   "version": "1.2.1",
-  "description": "Vue2/3 通用大屏端焦点管理工具",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "git:fixup": "git add . && git commit --amend --no-edit",
-    "update:version": "node ./scripts/updateVersion.mjs",
-    "autobuild": "npm run update:version && npm run git:fixup && npm run build",
-    "build": "rimraf dist/ && tsc",
-    "test:2": "vue-demi-switch 2 && jest",
-    "test:3": "vue-demi-switch 3 vue3 && jest",
-    "publish:major": "npm version major && npm run autobuild && npm publish && git push",
-    "publish:minor": "npm version minor && npm run autobuild && npm publish && git push",
-    "publish:patch": "npm version patch && npm run autobuild && npm publish && git push",
-    "publish:premajor": "npm version premajor && npm run autobuild && npm publish && git push",
-    "publish:preminor": "npm version preminor && npm run autobuild && npm publish && git push",
-    "publish:prepatch": "npm version prepatch && npm run autobuild && npm publish && git push",
-    "publish:prerelease": "npm version prerelease && npm run autobuild && npm publish && git push"
+  "description": "Vue 2.7 / Vue 3 通用的大屏（TV / IPTV / 机顶盒）遥控器焦点管理与空间导航插件",
+  "keywords": [
+    "vue",
+    "vue2",
+    "vue3",
+    "epg",
+    "iptv",
+    "tv",
+    "smart-tv",
+    "set-top-box",
+    "remote-control",
+    "focus",
+    "focus-management",
+    "spatial-navigation",
+    "keyboard-navigation"
+  ],
+  "homepage": "https://uzkis.github.io/vuEPG/",
+  "bugs": {
+    "url": "https://github.com/UzkiS/vuEPG/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/UzkiS/vuEPG.git"
   },
-  "keywords": [
-    "epg",
-    "vuepg",
-    "vue-epg",
-    "focusable",
-    "iptv"
-  ],
-  "author": "UzkiS",
   "license": "MIT",
+  "author": "UzkiS",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
   "files": [
     "dist"
   ],
-  "bugs": {
-    "url": "https://github.com/UzkiS/vuEPG/issues"
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc -b && vue-tsc -p docs/tsconfig.json",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm coverage && pnpm build && pnpm docs:build",
+    "changeset": "changeset",
+    "release": "pnpm build && changeset publish",
+    "prepare": "simple-git-hooks"
   },
-  "homepage": "https://github.com/UzkiS/vuEPG#readme",
-  "dependencies": {
-    "vue-demi": "latest"
+  "simple-git-hooks": {
+    "pre-commit": "pnpm exec lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,ts,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css}": "prettier --write"
   },
   "peerDependencies": {
-    "@vue/composition-api": "^1.0.0-rc.1",
-    "vue": "^2.0.0 || >=3.0.0"
+    "vue": "^2.7.0 || ^3.0.0"
   },
-  "peerDependenciesMeta": {
-    "@vue/composition-api": {
-      "optional": true
-    }
+  "packageManager": "pnpm@12.6.0",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "devDependencies": {
-    "vue": "latest",
-    "rimraf": "latest",
-    "typescript": "latest"
+    "@arethetypeswrong/core": "0.18.5",
+    "@changesets/changelog-github": "1.0.1",
+    "@changesets/cli": "3.0.3",
+    "@eslint/js": "10.0.1",
+    "@types/node": "26.6.3",
+    "@vitest/coverage-v8": "5.0.2",
+    "eslint": "10.11.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-vue": "10.11.1",
+    "globals": "17.12.0",
+    "jiti": "2.7.0",
+    "jsdom": "30.1.1",
+    "lint-staged": "17.6.0",
+    "prettier": "3.9.9",
+    "publint": "0.3.24",
+    "simple-git-hooks": "2.14.0",
+    "tsdown": "0.23.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.1",
+    "vite": "8.3.1",
+    "vitepress": "1.6.4",
+    "vitest": "5.0.2",
+    "vue": "3.5.43",
+    "vue-eslint-parser": "10.4.1",
+    "vue-tsc": "3.3.11",
+    "vue2": "npm:vue@2.7.16"
   }
 }

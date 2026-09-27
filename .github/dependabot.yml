@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dependencies:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    ignore:
+      # typescript-eslint 目前只支持 TypeScript < 6.1
+      - dependency-name: typescript
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      # 用于测试 Vue 2.7 的别名依赖，固定在 2.x
+      - dependency-name: vue2
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directories: [/, /.github/actions/setup]
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]

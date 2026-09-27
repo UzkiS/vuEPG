@@ -1,0 +1,10 @@
+{
+  // 文档主题与演示组件的类型检查（vue-tsc）
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "types": ["node"],
+    "paths": { "vuepg": ["../src/index.ts"] }
+  },
+  "include": [".vitepress/**/*.ts", ".vitepress/**/*.vue", "../package.json"]
+}

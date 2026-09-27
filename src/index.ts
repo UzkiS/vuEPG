@@ -1,107 +1,52 @@
-/* eslint-disable */
-import { dataContainer } from "./lib/service";
-import EPGItem from "./lib/epgItem";
-import EPGGroup from "./lib/epgGroup";
-import { isVue2, type DirectiveHook, type FunctionDirective } from "vue-demi";
-import { PACKAGE_VERSION } from "./config/version";
-import * as epgService from "./lib/service";
-import * as keyActions from "./lib/keyActions";
-import { selfLog } from "./lib/utils";
+/**
+ * vuEPG：Vue 2.7 / Vue 3 通用的大屏焦点管理插件。
+ *
+ * 分层（自上而下，只允许上层依赖下层）：
+ * - `index.ts`  公开入口：插件、`useVuEPG` 与类型
+ * - `vue/`      Vue 适配层：插件安装、指令、`onBack`、公开 API 清单
+ * - `core/`     框架无关的核心：注册表、焦点状态、导航算法、按键映射
+ */
+import type { ObjectDirective } from "vue";
+import type { EPGGroupOptions, EPGItemOptions } from "./core";
+import { plugin } from "./vue/plugin";
+import type { VuEPG } from "./vue/use-vuepg";
 
-const _directive = (
-  beforeMount: FunctionDirective,
-  mounted: FunctionDirective,
-  updated: FunctionDirective,
-  unmounted: FunctionDirective
-) => {
-  let obj = {};
-  if (isVue2) {
-    obj = {
-      bind: beforeMount,
-      inserted: mounted,
-      componentUpdated: updated,
-      unbind: unmounted,
-    };
-  } else {
-    obj = {
-      beforeMount: beforeMount,
-      mounted: mounted,
-      updated: updated,
-      unmounted: unmounted,
-    };
+export default plugin;
+export { useVuEPG } from "./vue/use-vuepg";
+
+export type { VuEPG } from "./vue/use-vuepg";
+export type { PluginOptions, PluginTarget, VuEPGPlugin } from "./vue/plugin";
+export type {
+  BackHandler,
+  BuiltinKeyActionName,
+  Direction,
+  DirectionEventDetail,
+  EPGConfig,
+  EPGEvent,
+  EPGEventDetailMap,
+  EPGEventName,
+  EPGGroup,
+  EPGGroupOptions,
+  EPGItem,
+  EPGItemOptions,
+  EPGNode,
+  FocusTarget,
+  KeyAction,
+  KeyActionCallback,
+  KeyActionOptions,
+  KeyCode,
+} from "./core";
+
+declare module "vue" {
+  interface ComponentCustomProperties {
+    /** vuEPG 实例，与 `useVuEPG()` 返回值相同 */
+    $epg: VuEPG;
   }
-  return obj;
-};
 
-export default {
-  install(app: any) {
-    const groupBeforeMount: DirectiveHook<HTMLElement> = (
-      el,
-      binding,
-      vnode
-    ) => {};
-    const groupMounted: DirectiveHook<HTMLElement> = (el, binding, vnode) => {
-      let group = new EPGGroup(vnode, binding);
-      epgService.registerGroup(group);
-    };
-    const groupUpdated: DirectiveHook<HTMLElement> = (el, binding, vnode) => {
-      let item = new EPGGroup(vnode, binding);
-      epgService.updateGroup(item);
-    };
-    const groupUnmount: DirectiveHook<HTMLElement> = (el, binding, vnode) => {
-      const index = dataContainer.groupArray.findIndex(
-        (item: EPGGroup) => item.id === el.dataset.epgGroupId
-      );
-      dataContainer.groupArray.splice(index, 1);
-    };
-    app.directive(
-      "epg-group",
-      _directive(groupBeforeMount, groupMounted, groupUpdated, groupUnmount)
-    );
-    const itemBeforeMount: DirectiveHook<HTMLElement> = (
-      el,
-      binding,
-      vnode
-    ) => {};
-    const itemMounted: DirectiveHook<HTMLElement> = (el, binding, vnode) => {
-      let item = new EPGItem(vnode, binding);
-      epgService.registerItem(item);
-    };
-    const itemsUpdated: DirectiveHook<HTMLElement> = (el, binding, vnode) => {
-      let item = new EPGItem(vnode, binding);
-      epgService.updateItem(item);
-    };
-    const itemUnmounted: DirectiveHook<HTMLElement> = (el, binding, vnode) => {
-      const index = dataContainer.itemArray.findIndex((item: EPGItem) => {
-        if (dataContainer.currentItem) {
-          if (dataContainer.currentItem.id === el.dataset.epgItemId) {
-            selfLog("当前元素已经卸载，移除 CurrentItem");
-            dataContainer.currentItem = null;
-          }
-        }
-        return item.id === el.dataset.epgItemId;
-      });
-      if (index != -1) {
-        dataContainer.itemArray.splice(index, 1);
-      }
-    };
-    app.directive(
-      "epg-item",
-      _directive(itemBeforeMount, itemMounted, itemsUpdated, itemUnmounted)
-    );
-    if (!isVue2) {
-      app.provide("epg", epgService);
-    }
-    console.log(
-      "\n %c vuEPG loaded " +
-        PACKAGE_VERSION +
-        " %c https://docs.ito.fun/vuepg \n",
-      "color: white; background: pink; padding:5px 0;",
-      "background: skyblue; padding:5px 0;"
-    );
-  },
-};
-
-export const useVuEPG = () => {
-  return { ...epgService, ...keyActions };
-};
+  interface GlobalDirectives {
+    /** 将元素注册为 EPGItem */
+    vEpgItem: ObjectDirective<HTMLElement, EPGItemOptions | undefined>;
+    /** 将元素注册为 EPGGroup */
+    vEpgGroup: ObjectDirective<HTMLElement, EPGGroupOptions | undefined>;
+  }
+}

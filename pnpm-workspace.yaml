@@ -1,0 +1,6 @@
+# pnpm 配置（单包仓库同样通过此文件配置 pnpm）
+
+# 允许执行安装脚本的依赖（pnpm 默认拦截所有依赖的安装脚本）
+allowBuilds:
+  esbuild: true
+  simple-git-hooks: true
