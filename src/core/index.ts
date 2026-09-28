@@ -4,9 +4,10 @@
  */
 import { mergeConfig, resetConfig, type EPGConfig } from "./config";
 import { resetBack } from "./back";
-import { moveInDirection, moveToNode, releaseFocus, resetFocus, syncFocusClass } from "./focus";
+import { moveToNode, releaseFocus, resetFocus, syncFocusClass } from "./focus";
 import { resetKeyboard } from "./keyboard";
 import { debug, warn } from "./logger";
+import { moveInDirection, navigate as navigateInDirection } from "./navigate";
 import { isDirection, type Direction } from "./navigation";
 import {
   EPGGroup,
@@ -21,14 +22,7 @@ export { back, registerBackHandler, type BackEntry } from "./back";
 export { getConfig, type BackHandler, type EPGConfig } from "./config";
 export { isValidClassName } from "./dom";
 export type { DirectionEventDetail, EPGEvent, EPGEventDetailMap, EPGEventName } from "./events";
-export {
-  findTarget,
-  getCurrentGroup,
-  getCurrentItem,
-  getFocusClass,
-  moveToGroup,
-  moveToItem,
-} from "./focus";
+export { getCurrentGroup, getCurrentItem, getFocusClass, moveToGroup, moveToItem } from "./focus";
 export {
   addKeyCodes,
   getKeyActions,
@@ -47,8 +41,16 @@ export {
   updateKeyAction,
 } from "./keyboard";
 export { banner, warn } from "./logger";
+export { findTarget } from "./navigate";
 export type { Direction } from "./navigation";
-export type { EPGGroup, EPGGroupOptions, EPGItem, EPGItemOptions, EPGNode } from "./nodes";
+export type {
+  EPGGroup,
+  EPGGroupOptions,
+  EPGItem,
+  EPGItemOptions,
+  EPGNode,
+  ScrollMode,
+} from "./nodes";
 export {
   getChildren,
   getGroups,
@@ -102,6 +104,19 @@ export const move = (target: Direction | FocusTarget | null | undefined): boolea
     return false;
   }
   return moveToNode(node);
+};
+
+/**
+ * 按方向导航，与用户按下方向键完全相同：派发方向事件（可被 `.prevent` 拦截），
+ * 当前焦点失效时先恢复焦点。供虚拟遥控器、手柄等其他输入方式使用。
+ * @returns 焦点是否发生变化
+ * @throws 方向无效时
+ */
+export const navigate = (direction: Direction): boolean => {
+  if (!isDirection(direction)) {
+    throw new TypeError(`[vuEPG] 方向必须是 up / down / left / right，收到 "${String(direction)}"`);
+  }
+  return navigateInDirection(direction);
 };
 
 /** 向上移动，等同于 `move("up")` */

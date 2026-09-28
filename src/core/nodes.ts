@@ -3,7 +3,7 @@
 export interface EPGItemOptions {
   /** 所在层级被进入时，优先获得焦点 */
   default?: boolean;
-  /** 禁用：保持注册与可见，但不会获得焦点 */
+  /** 禁用：保持注册与可见，但不会获得焦点（已获得焦点时仍可作为移动的起点） */
   disabled?: boolean;
   /** 获得焦点时使用的 class，覆盖全局 `focusClass` */
   focusClass?: string;
@@ -11,12 +11,22 @@ export interface EPGItemOptions {
 // #endregion item-options
 
 // #region group-options
+/** 分组内元素获得焦点时的滚动方式 */
+export type ScrollMode = "nearest" | "start" | "center";
+
 /** `v-epg-group` 的绑定值 */
 export interface EPGGroupOptions {
   /** 所在层级被进入时，优先进入该组 */
   default?: boolean;
   /** 禁用：导航时整组被跳过 */
   disabled?: boolean;
+  /**
+   * 该分组元素是滚动容器：组内元素获得焦点时，滚动分组让它可见。
+   * - `"nearest"`（即 `true`）：只在元素超出可视区域时滚动最小距离
+   * - `"start"`：元素对齐到可视区域的起始边
+   * - `"center"`：元素居中
+   */
+  scroll?: boolean | ScrollMode;
 }
 // #endregion group-options
 
@@ -80,6 +90,15 @@ export class EPGGroup extends BaseNode<EPGGroupOptions> {
   /** @internal 由注册表创建 */
   constructor(el: HTMLElement, options: Readonly<EPGGroupOptions>) {
     super(el, options, "epg-group");
+  }
+
+  /** 滚动方式；未开启滚动时为 `null` */
+  get scrollMode(): ScrollMode | null {
+    const { scroll } = this.options;
+    if (scroll === true) {
+      return "nearest";
+    }
+    return scroll === undefined || scroll === false ? null : scroll;
   }
 }
 

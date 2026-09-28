@@ -179,3 +179,118 @@ describe("direction events", () => {
     expect(focusedId()).toBe("a");
   });
 });
+
+describe("direction events bubble until the move is resolved", () => {
+  const ROW = `<div>
+    <div id="row" v-epg-group @epg-right="onRowRight">
+      <div id="r1" v-epg-item style="${box(0, 0, 50, 50)}"></div>
+      <div id="r2" v-epg-item style="${box(60, 0, 50, 50)}"></div>
+    </div>
+  </div>`;
+
+  it("fires on the group at the edge of the page, where no target exists at all", () => {
+    const { log, entries } = setupLog();
+    mount({
+      template: ROW,
+      setup: () => ({
+        onRowRight: () => {
+          log("row right");
+        },
+      }),
+    });
+    epg.move(byId("r2"));
+    press("ArrowRight");
+    expect(entries).toEqual(["row right"]);
+  });
+
+  it("lets a group wrap around by moving the focus itself", () => {
+    mount({
+      template: ROW,
+      setup: () => ({
+        onRowRight: () => {
+          epg.move(byId("r1"));
+        },
+      }),
+    });
+    epg.move(byId("r2"));
+    press("ArrowRight");
+    expect(focusedId()).toBe("r1");
+  });
+
+  it("stops bubbling once the group handler cancels the move", () => {
+    const { log, entries } = setupLog();
+    mount({
+      template: `<div v-epg-group @epg-right="log('outer')">
+        <div v-epg-group @epg-right.prevent="log('inner')">
+          <div id="a" v-epg-item style="${box(0, 0, 50, 50)}"></div>
+        </div>
+        <div id="b" v-epg-item style="${box(100, 0, 50, 50)}"></div>
+      </div>`,
+      setup: () => ({ log }),
+    });
+    epg.move(byId("a"));
+    press("ArrowRight");
+    expect(entries).toEqual(["inner"]);
+    expect(focusedId()).toBe("a");
+  });
+
+  it("fires on every ancestor group at the edge, from the inside out", () => {
+    const { log, entries } = setupLog();
+    mount({
+      template: `<div v-epg-group @epg-up="log('outer')">
+        <div v-epg-group @epg-up="log('inner')">
+          <div id="a" v-epg-item style="${box(0, 0, 50, 50)}"></div>
+        </div>
+      </div>`,
+      setup: () => ({ log }),
+    });
+    epg.move(byId("a"));
+    press("ArrowUp");
+    expect(entries).toEqual(["inner", "outer"]);
+  });
+});
+
+describe("navigate", () => {
+  it("behaves exactly like a key press, including direction events and .prevent", () => {
+    const { log, entries } = setupLog();
+    mount({ template: TWO_GROUPS, setup: () => ({ log }) });
+    epg.move(byId("a"));
+    entries.length = 0;
+    expect(epg.navigate("down")).toBe(true);
+    expect(entries).toEqual(["down a", "down g1", "blur a", "leave g1", "enter g2", "focus b"]);
+  });
+
+  it("returns false when the move is cancelled", () => {
+    mount({
+      template: `<div>
+        <div id="a" v-epg-item style="${box(0, 0, 50, 50)}" @epg-down.prevent></div>
+        <div id="b" v-epg-item style="${box(0, 60, 50, 50)}"></div>
+      </div>`,
+    });
+    epg.move(byId("a"));
+    expect(epg.navigate("down")).toBe(false);
+    expect(epg.navigate("up")).toBe(false);
+  });
+
+  it("returns true when a direction handler moves the focus itself", () => {
+    mount({
+      template: `<div>
+        <div id="top" v-epg-item style="${box(0, 0, 50, 50)}"></div>
+        <div id="a" v-epg-item style="${box(0, 60, 50, 50)}" @epg-down="$epg.move('up')"></div>
+      </div>`,
+    });
+    epg.move(byId("a"));
+    expect(epg.navigate("down")).toBe(true);
+    expect(focusedId()).toBe("top");
+  });
+
+  it("focuses the page entry when nothing is focused yet", () => {
+    mount({ template: TWO_GROUPS, setup: () => ({ log: () => undefined }) });
+    expect(epg.navigate("right")).toBe(true);
+    expect(focusedId()).toBe("a");
+  });
+
+  it("rejects invalid directions", () => {
+    expect(() => epg.navigate("forward" as "up")).toThrow(TypeError);
+  });
+});

@@ -1,19 +1,21 @@
 import { getConfig } from "./config";
 import { emit } from "./events";
 import { debug } from "./logger";
-import { pickNearest, type Direction } from "./navigation";
 import { EPGItem, type EPGGroup, type EPGNode } from "./nodes";
-import {
-  entryOf,
-  getAncestorGroups,
-  getChildren,
-  getParentGroup,
-  isFocusable,
-  resolveEntry,
-} from "./tree";
+import { scrollIntoView } from "./scroll";
+import { entryOf, getAncestorGroups, getParentGroup, isFocusable } from "./tree";
 
 /** 当前焦点：全局唯一事实源 */
 let currentItem: EPGItem | null = null;
+
+/** 已派发 `epg-focus`、尚未派发 `epg-blur` 的元素 */
+let focusedItem: EPGItem | null = null;
+
+/**
+ * 焦点路径：已派发 `epg-enter`、尚未派发 `epg-leave` 的分组，由内向外。
+ * 焦点元素被卸载后仍然保留，用于保证进入 / 离开成对派发，并在原来的分组内恢复焦点。
+ */
+let focusPath: EPGGroup[] = [];
 
 interface AppliedClass {
   readonly el: HTMLElement;
@@ -32,6 +34,9 @@ export const getCurrentItem = (): EPGItem | null => currentItem;
 /** 获取当前焦点所在的 EPGGroup */
 export const getCurrentGroup = (): EPGGroup | null =>
   currentItem === null ? null : getParentGroup(currentItem);
+
+/** 焦点路径（由内向外），焦点元素被卸载后仍保留 */
+export const getFocusPath = (): readonly EPGGroup[] => focusPath;
 
 /** 当前焦点应使用的 class */
 export const getFocusClass = (): string => currentItem?.focusClass ?? getConfig().focusClass;
@@ -54,6 +59,7 @@ export const syncFocusClass = (): void => {
 /**
  * 让指定 EPGItem 获得焦点，依次派发：旧元素 `epg-blur` → 离开的组 `epg-leave`（由内向外）
  * → 进入的组 `epg-enter`（由外向内）→ 新元素 `epg-focus`。
+ * `epg-focus` / `epg-blur`、`epg-enter` / `epg-leave` 总是成对派发（元素已被卸载时除外）。
  * 任一事件处理函数中再次移动了焦点，则停止派发剩余事件。
  * @returns 焦点是否落在该元素上
  */
@@ -62,39 +68,42 @@ export const moveToItem = (item: EPGItem): boolean => {
     debug("目标不可获得焦点（已禁用或未渲染）", item);
     return false;
   }
-  const previous = currentItem;
-  if (previous === item) {
+  if (currentItem === item) {
     syncFocusClass();
+    scrollIntoView(item);
     return true;
   }
+  debug("焦点移动", currentItem, "→", item);
   currentItem = item;
   syncFocusClass();
-  debug("焦点移动", previous, "→", item);
 
   const stillCurrent = (): boolean => currentItem === item;
-  const previousGroups = previous === null ? [] : getAncestorGroups(previous);
-  const nextGroups = getAncestorGroups(item);
+  const targetGroups = getAncestorGroups(item);
 
-  if (previous !== null) {
-    emit(previous.el, "epg-blur", { item: previous });
+  const blurred = focusedItem;
+  if (blurred !== null) {
+    focusedItem = null;
+    emit(blurred.el, "epg-blur", { item: blurred });
   }
-  const leaving = previousGroups.filter((group) => nextGroups.indexOf(group) === -1);
-  const entering = nextGroups.filter((group) => previousGroups.indexOf(group) === -1).reverse();
-  for (const group of leaving) {
+  for (const group of focusPath.filter((g) => targetGroups.indexOf(g) === -1)) {
     if (!stillCurrent()) {
       return false;
     }
+    focusPath = focusPath.filter((g) => g !== group);
     emit(group.el, "epg-leave", { group });
   }
-  for (const group of entering) {
+  for (const group of targetGroups.filter((g) => focusPath.indexOf(g) === -1).reverse()) {
     if (!stillCurrent()) {
       return false;
     }
+    focusPath = [group].concat(focusPath);
     emit(group.el, "epg-enter", { group });
   }
   if (!stillCurrent()) {
     return false;
   }
+  scrollIntoView(item);
+  focusedItem = item;
   emit(item.el, "epg-focus", { item });
   return true;
 };
@@ -116,83 +125,6 @@ export const moveToGroup = (group: EPGGroup): boolean => {
 export const moveToNode = (node: EPGNode): boolean =>
   node instanceof EPGItem ? moveToItem(node) : moveToGroup(node);
 
-/**
- * 计算从当前焦点出发、指定方向上的下一个目标（不移动焦点）。
- * 在当前层级找不到时，以父级 EPGGroup 为起点逐层向外查找。
- */
-export const findTarget = (direction: Direction): EPGNode | null => {
-  if (currentItem === null) {
-    return null;
-  }
-  let origin: EPGNode = currentItem;
-  for (;;) {
-    const parent = getParentGroup(origin);
-    const from: EPGNode = origin;
-    const candidates = getChildren(parent)
-      .filter((node) => node !== from && entryOf(node) !== null)
-      .map((node) => ({ value: node, box: node.getRect() }));
-    const target = pickNearest(direction, from.getRect(), candidates);
-    if (target !== null) {
-      return target;
-    }
-    if (parent === null) {
-      return null;
-    }
-    origin = parent;
-  }
-};
-
-/**
- * 编程式按方向移动：不派发方向事件。
- * @returns 焦点是否发生移动
- */
-export const moveInDirection = (direction: Direction): boolean => {
-  if (currentItem === null || !isFocusable(currentItem)) {
-    debug("当前没有可用焦点，无法按方向移动");
-    return false;
-  }
-  const target = findTarget(direction);
-  return target !== null && moveToNode(target);
-};
-
-/**
- * 响应方向键：
- * 1. 当前没有焦点或焦点已失效（被卸载、隐藏、禁用）时，焦点回到顶层入口；
- * 2. 在当前 EPGItem 上派发方向事件；
- * 3. 对即将离开的每个 EPGGroup（由内向外）派发方向事件；
- * 4. 以上任一事件被 `preventDefault()` 或处理函数自行移动了焦点，则不再执行默认移动。
- */
-export const navigate = (direction: Direction): void => {
-  const current = currentItem;
-  if (current === null || !isFocusable(current)) {
-    const entry = resolveEntry();
-    debug("当前焦点不可用，回到入口", entry);
-    if (entry !== null) {
-      moveToItem(entry);
-    }
-    return;
-  }
-  const proceed = (el: Element, node: EPGNode): boolean =>
-    emit(el, `epg-${direction}` as const, { node, direction }) && currentItem === current;
-
-  if (!proceed(current.el, current)) {
-    return;
-  }
-  const target = findTarget(direction);
-  const entry = target === null ? null : entryOf(target);
-  if (entry === null) {
-    debug(`方向 ${direction} 上没有可移动的目标`);
-    return;
-  }
-  const targetGroups = getAncestorGroups(entry);
-  for (const group of getAncestorGroups(current)) {
-    if (targetGroups.indexOf(group) === -1 && !proceed(group.el, group)) {
-      return;
-    }
-  }
-  moveToItem(entry);
-};
-
 /** 模拟点击当前焦点 */
 export const activate = (): void => {
   if (currentItem !== null && isFocusable(currentItem)) {
@@ -200,16 +132,25 @@ export const activate = (): void => {
   }
 };
 
-/** 节点被注销时调用：若为当前焦点则清除（不派发 `epg-blur`，元素已被移除） */
+/**
+ * 节点被注销时调用（元素已被移除，不派发 `epg-blur` / `epg-leave`）：
+ * 若为当前焦点则清除，但保留焦点路径中仍然存在的分组。
+ */
 export const releaseFocus = (node: EPGNode): void => {
+  if (node === focusedItem) {
+    focusedItem = null;
+  }
   if (node === currentItem) {
     currentItem = null;
     syncFocusClass();
   }
+  focusPath = focusPath.filter((group) => group !== node);
 };
 
 /** @internal 仅供测试：清除焦点状态 */
 export const resetFocus = (): void => {
   currentItem = null;
+  focusedItem = null;
+  focusPath = [];
   syncFocusClass();
 };

@@ -5,9 +5,10 @@ export const press = (code: string, init: KeyboardEventInit = {}): KeyboardEvent
   return event;
 };
 
-/** 模拟只提供数字键值的老旧机顶盒浏览器 */
+/** 模拟只提供数字键值的老旧机顶盒浏览器：没有 `event.code` 属性（值为 undefined，而不是空字符串） */
 export const pressLegacy = (keyCode: number): KeyboardEvent => {
   const event = new KeyboardEvent("keydown", { bubbles: true, cancelable: true });
+  Object.defineProperty(event, "code", { value: undefined });
   Object.defineProperty(event, "keyCode", { value: keyCode });
   Object.defineProperty(event, "which", { value: keyCode });
   document.dispatchEvent(event);

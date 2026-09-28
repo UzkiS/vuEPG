@@ -35,6 +35,7 @@ export type {
   KeyActionCallback,
   KeyActionOptions,
   KeyCode,
+  ScrollMode,
 } from "./core";
 
 declare module "vue" {
