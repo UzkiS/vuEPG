@@ -39,10 +39,35 @@ export default defineConfig({
           { text: "更新日志", link: "/changelog" },
           { text: "从 1.x 升级", link: "/migration/v1" },
           { text: "从 vue-epg 迁移", link: "/migration/vue-epg" },
+          { text: "v1.x 文档（旧版）", link: "/v1/introduction" },
         ],
       },
     ],
     sidebar: {
+      // 1.x 旧版文档：内容冻结，仅做事实修正
+      "/v1/": [
+        {
+          text: "指引（1.x）",
+          items: [
+            { text: "什么是 vuEPG", link: "/v1/introduction" },
+            { text: "快速开始", link: "/v1/getting-started" },
+            { text: "vue-epg 差异", link: "/v1/difference" },
+          ],
+        },
+        {
+          text: "使用（1.x）",
+          items: [
+            { text: "配置 EPG", link: "/v1/configuration" },
+            { text: "按键事件", link: "/v1/key-action" },
+            { text: "返回回调", link: "/v1/back-callback" },
+            { text: "EPGItem", link: "/v1/epg-item" },
+            { text: "EPGGroup", link: "/v1/epg-group" },
+            { text: "移动规则", link: "/v1/move-rule" },
+            { text: "API", link: "/v1/api" },
+          ],
+        },
+        { text: "升级到 2.x", items: [{ text: "从 1.x 升级", link: "/migration/v1" }] },
+      ],
       "/": [
         {
           text: "开始",
@@ -93,6 +118,8 @@ export default defineConfig({
     search: {
       provider: "local",
       options: {
+        // 站内搜索只收录当前版本，避免搜到 1.x 的旧用法
+        _render: (src, env, md) => (env.relativePath.startsWith("v1/") ? "" : md.render(src, env)),
         translations: {
           button: { buttonText: "搜索文档", buttonAriaLabel: "搜索文档" },
           modal: {

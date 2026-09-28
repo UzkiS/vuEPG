@@ -129,6 +129,7 @@ scripts/publish.ts    发布脚本（CI 调用）
 - 新增、修改、删除公开方法时，同步修改 `docs/api/index.md`（标题格式 `### epg.方法名`），否则 `test/docs.test.ts` 失败。
 - 行为变化同步修改对应的指南页面；破坏性变更同步修改 `docs/migration/`。
 - 类型、默认值等可以从源码引用的内容，一律用 `<<< ../../src/…#region` 引用，不要手抄。
+- `docs/v1/` 是 1.x 旧版文档的归档：内容冻结，只做与 1.2.1 实际行为一致的事实修正；它描述的是已不在仓库中的旧代码，因此不引用源码 region，也不参与站内搜索。所有 v1 页面顶部的提示由 `LegacyNotice.vue` 统一渲染，不要在页面内重复添加。
 - 文档内的交互组件位于 `docs/.vitepress/theme/components/`，直接使用仓库源码（别名 `vuepg`）；文档站平时处于 `pause()` 状态，演示激活时才 `resume()`，见 `composables/use-demo.ts`。
 
 ## 提交与发布
