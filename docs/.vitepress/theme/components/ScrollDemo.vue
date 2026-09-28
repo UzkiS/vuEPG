@@ -19,6 +19,7 @@ interface Mark {
   height: number;
 }
 const marks = ref<Mark[]>([]);
+const rows = ref<Mark[]>([]);
 const entries = Array.from({ length: 7 }, (_, index) => index);
 const clipId = `scroll-demo-${props.kind}`;
 const areaHeight = props.kind === "nested" ? 172 : props.kind === "vertical" ? 150 : 84;
@@ -35,6 +36,17 @@ const measure = (): void => {
     return {
       id: el.dataset["demoId"] ?? "",
       label: el.textContent.trim(),
+      x: 24 + (box.left - view.left) * scale,
+      y: 36 + (box.top - view.top) * scale,
+      width: box.width * scale,
+      height: box.height * scale,
+    };
+  });
+  rows.value = Array.from(root.querySelectorAll<HTMLElement>("[data-row]"), (el) => {
+    const box = el.getBoundingClientRect();
+    return {
+      id: el.dataset["row"] ?? "",
+      label: el.dataset["row"] === "first" ? "上排" : "下排",
       x: 24 + (box.left - view.left) * scale,
       y: 36 + (box.top - view.top) * scale,
       width: box.width * scale,
@@ -62,6 +74,20 @@ const step = (difference: number): void => {
   focus(`${props.kind === "vertical" ? "v" : "h"}${String(next)}`);
 };
 
+const navigateNested = (direction: "up" | "down" | "left" | "right"): void => {
+  if (current.value === "") {
+    focus("a0");
+    return;
+  }
+  if (epg.navigate(direction)) {
+    const focused = epg.getCurrentItem()?.el.dataset["demoId"];
+    if (focused !== undefined) {
+      current.value = focused;
+    }
+    measure();
+  }
+};
+
 onMounted(() => {
   void nextTick(measure);
 });
@@ -86,6 +112,10 @@ onMounted(() => {
       </text>
       <rect x="24" y="36" width="300" :height="areaHeight" rx="8" class="viewport" />
       <g :clip-path="`url(#${clipId})`">
+        <g v-for="row in rows" :key="row.id" class="row-mark">
+          <rect :x="row.x" :y="row.y" :width="row.width" :height="row.height" rx="5" />
+          <text :x="row.x + 8" :y="row.y + 14">{{ row.label }}</text>
+        </g>
         <g
           v-for="mark in marks"
           :key="mark.id"
@@ -115,6 +145,7 @@ onMounted(() => {
       ref="stage"
       v-epg-scroll
       class="real horizontal"
+      aria-hidden="true"
       @scroll="measure"
     >
       <button
@@ -122,6 +153,7 @@ onMounted(() => {
         :key="index"
         v-epg-item
         type="button"
+        tabindex="-1"
         :data-demo-id="`h${String(index)}`"
         :class="{ selected: current === `h${String(index)}` }"
         @click="focus(`h${String(index)}`)"
@@ -134,6 +166,7 @@ onMounted(() => {
       ref="stage"
       v-epg-scroll
       class="real vertical"
+      aria-hidden="true"
       @scroll="measure"
     >
       <button
@@ -141,6 +174,7 @@ onMounted(() => {
         :key="index"
         v-epg-item
         type="button"
+        tabindex="-1"
         :data-demo-id="`v${String(index)}`"
         :class="{ selected: current === `v${String(index)}` }"
         @click="focus(`v${String(index)}`)"
@@ -148,13 +182,26 @@ onMounted(() => {
         频道 {{ index + 1 }}
       </button>
     </div>
-    <div v-else ref="stage" v-epg-scroll class="real outer" @scroll="measure">
+    <div
+      v-else
+      ref="stage"
+      v-epg-group
+      v-epg-scroll
+      class="real outer"
+      aria-hidden="true"
+      @scroll="measure"
+      @epg-up.prevent
+      @epg-down.prevent
+      @epg-left.prevent
+      @epg-right.prevent
+    >
       <div v-epg-group v-epg-scroll data-row="first" class="row" @scroll="measure">
         <button
           v-for="index in entries"
           :key="index"
           v-epg-item
           type="button"
+          tabindex="-1"
           :data-demo-id="`a${String(index)}`"
           :class="{ selected: current === `a${String(index)}` }"
           @click="focus(`a${String(index)}`)"
@@ -168,6 +215,7 @@ onMounted(() => {
           :key="index"
           v-epg-item
           type="button"
+          tabindex="-1"
           :data-demo-id="`b${String(index)}`"
           :class="{ selected: current === `b${String(index)}` }"
           @click="focus(`b${String(index)}`)"
@@ -179,10 +227,11 @@ onMounted(() => {
 
     <figcaption>
       <div v-if="kind === 'nested'" class="controls">
-        <button type="button" @click="focus('a6')">上排末项</button>
-        <button type="button" @click="focus('b0')">进入下排</button>
-        <button type="button" @click="focus('b6')">下排末项</button>
-        <button type="button" @click="focus('a0')">回到上排</button>
+        <button type="button" @click="focus('a0')">从上排开始</button>
+        <button type="button" @click="navigateNested('left')">←</button>
+        <button type="button" @click="navigateNested('up')">↑</button>
+        <button type="button" @click="navigateNested('down')">↓</button>
+        <button type="button" @click="navigateNested('right')">→</button>
       </div>
       <div v-else class="controls">
         <button type="button" @click="step(-1)">
@@ -195,7 +244,13 @@ onMounted(() => {
           跳到末项
         </button>
       </div>
-      <p>点击按钮或图中的卡片，观察真实容器与上方 SVG 同步移动。</p>
+      <p>
+        {{
+          kind === "nested"
+            ? "先点「从上排开始」，再用方向键观察行内和跨组滚动。"
+            : "点击图中的卡片或方向按钮，观察焦点与可视区域。"
+        }}
+      </p>
     </figcaption>
   </figure>
 </template>
@@ -240,6 +295,17 @@ svg {
   stroke: var(--vp-c-brand-1);
   stroke-width: 3;
 }
+.row-mark rect {
+  fill: var(--vp-c-brand-soft);
+  stroke: var(--vp-c-brand-1);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+.row-mark text {
+  fill: var(--vp-c-brand-1);
+  font: 11px sans-serif;
+  pointer-events: none;
+}
 .mark text {
   fill: var(--vp-c-text-1);
   text-anchor: middle;
@@ -248,6 +314,11 @@ svg {
   pointer-events: none;
 }
 .real {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  opacity: 0;
+  pointer-events: none;
   max-width: 300px;
   margin: 0 auto;
   border: 1px dashed var(--vp-c-text-3);
