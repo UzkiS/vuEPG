@@ -1,5 +1,11 @@
 # vuepg
 
+## 2.1.0
+
+### Minor Changes
+
+- [#7](https://github.com/UzkiS/vuEPG/pull/7) [`33f8d76`](https://github.com/UzkiS/vuEPG/commit/33f8d76cb9db970feac0eac341ea68d961274803) Thanks [@UzkiS](https://github.com/UzkiS)! - 新增分组自动滚动和 `navigate(direction)`；修复旧设备按键识别、焦点失效恢复与方向事件边界行为，并改进移动端演示布局。
+
 ## 2.0.0
 
 ### Major Changes
