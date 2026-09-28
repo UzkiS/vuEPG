@@ -3,7 +3,7 @@
  * 其中 `vue` 被映射到 Vue 2.7 的类型声明。
  */
 import Vue, { defineComponent } from "vue";
-import VuEPG, { useVuEPG } from "../../src";
+import VuEPG, { useVuEPG, type EPGGroupOptions, type ScrollMode } from "../../src";
 
 Vue.use(VuEPG);
 Vue.use(VuEPG, { focusClass: "focused" });
@@ -17,3 +17,12 @@ defineComponent({
 });
 
 useVuEPG().onBack(() => undefined);
+export const navigated: boolean = useVuEPG().navigate("down");
+const releasePause: () => void = useVuEPG().pause();
+releasePause();
+const mode: ScrollMode = "center";
+export const groupOptions: EPGGroupOptions = { scroll: mode };
+// @ts-expect-error 滚动方式不接受 smooth
+export const invalidGroupOptions: EPGGroupOptions = { scroll: "smooth" };
+// @ts-expect-error 导航方向只能是 up / down / left / right
+useVuEPG().navigate("forward");

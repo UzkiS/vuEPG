@@ -47,7 +47,7 @@
 
 在剩下的元素中，选**距离最近**的：按 ↓ 时比较上边缘，按 ↑ 时比较下边缘，按 ← → 时同理比较左右边缘。
 
-距离相同时，选与 O **更对齐**的：上下移动时比较左边缘，左右移动时比较上边缘。仍然相同时，选文档中靠前的。
+距离相同时，选与 O **更对齐**的：上下移动时比较左边缘，左右移动时比较上边缘。逐层向外查找时，如果距离并列，先比较候选与当前焦点元素在交叉轴上的间距，再比较与整组的对齐程度。仍然相同时，选文档中靠前的。
 
 <NavigationDiagram scenario="tie" />
 
@@ -63,7 +63,7 @@
 
 ## 跨层级：逐层向外
 
-在分组内挑不到目标时，vuEPG 会把**整个分组当作一个元素**，在外一层继续按上面的三步挑选。挑中的如果是一个分组，就**进入**这个分组。
+在分组内挑不到目标时，vuEPG 会先在这个分组上派发可取消的方向事件，再把**整个分组当作一个元素**，在外一层继续按上面的三步挑选。挑中的如果是一个分组，就**进入**这个分组。
 
 <HierarchyDemo />
 
@@ -97,17 +97,16 @@
 
 ## 没有焦点或焦点失效时
 
-以下情况按下方向键，焦点会落在**页面入口**，也就是对整个页面套用“进入分组”的规则：
+页面还没有焦点时，第一次方向操作会落在**页面入口**，也就是对整个页面套用“进入分组”的规则。
 
-- 页面上还没有任何焦点；
-- 当前焦点已被卸载、隐藏或禁用（例如切换了 KeepAlive 页面）。
+焦点元素被卸载或隐藏（例如切换了 KeepAlive 页面）后，下一次方向操作优先进入原焦点路径中最内层仍可进入的分组；这些分组都不可进入时才回到页面入口。已获得焦点的元素后来被禁用，只影响它能否成为下一次移动的目标；它仍可作为移动的起点。
 
 ## 源码
 
 规则与源码逐条对应，并由单元测试覆盖：
 
 - 同一层级的挑选：[`src/core/navigation.ts`](https://github.com/UzkiS/vuEPG/blob/main/src/core/navigation.ts)
-- 逐层向外与进入分组：[`src/core/focus.ts`](https://github.com/UzkiS/vuEPG/blob/main/src/core/focus.ts)、[`src/core/tree.ts`](https://github.com/UzkiS/vuEPG/blob/main/src/core/tree.ts)
+- 逐层向外与进入分组：[`src/core/navigate.ts`](https://github.com/UzkiS/vuEPG/blob/main/src/core/navigate.ts)、[`src/core/tree.ts`](https://github.com/UzkiS/vuEPG/blob/main/src/core/tree.ts)
 
 <style>
 .legend {

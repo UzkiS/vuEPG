@@ -9,6 +9,7 @@ import {
   warn,
   type EPGGroupOptions,
   type EPGItemOptions,
+  type ScrollMode,
 } from "../core";
 
 /** 指令钩子实际用到的绑定信息（Vue 2 / 3 通用的最小子集） */
@@ -50,12 +51,24 @@ const toObject = (value: unknown, directive: string): object => {
   return value;
 };
 
+const SCROLL_MODES: readonly ScrollMode[] = ["nearest", "start", "center"];
+
+const isScrollMode = (value: unknown): value is ScrollMode =>
+  SCROLL_MODES.some((mode) => mode === value);
+
 const parseGroupOptions = (value: unknown): EPGGroupOptions => {
   const source = toObject(value, "v-epg-group");
-  return {
+  const scroll = "scroll" in source ? source.scroll : undefined;
+  const options: EPGGroupOptions = {
     default: "default" in source && source.default === true,
     disabled: "disabled" in source && source.disabled === true,
   };
+  if (typeof scroll === "boolean" || isScrollMode(scroll)) {
+    options.scroll = scroll;
+  } else if (scroll !== undefined) {
+    warn('v-epg-group 的 scroll 必须是布尔值或 "nearest" / "start" / "center"，已忽略', scroll);
+  }
+  return options;
 };
 
 const parseItemOptions = (value: unknown): EPGItemOptions => {

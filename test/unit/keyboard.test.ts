@@ -31,6 +31,9 @@ describe("resolveKeyCode", () => {
   it("falls back to which / keyCode when code is missing or unidentified", () => {
     expect(resolveKeyCode(keydown({ legacy: 19 }))).toBe(19);
     expect(resolveKeyCode(keydown({ code: "Unidentified", legacy: 19 }))).toBe(19);
+    const withoutCode = keydown({ legacy: 19 });
+    Object.defineProperty(withoutCode, "code", { value: undefined });
+    expect(resolveKeyCode(withoutCode)).toBe(19);
   });
 
   it("returns null when no key information is available", () => {
@@ -136,5 +139,17 @@ describe("handleKeydown", () => {
     expect(isPaused()).toBe(false);
     handleKeydown(keydown({ code: "KeyM" }));
     expect(callback).toHaveBeenCalledOnce();
+  });
+
+  it("keeps independent pauses until each holder releases its own pause", () => {
+    const releaseA = pause();
+    const releaseB = pause();
+    expect(isPaused()).toBe(true);
+    releaseA();
+    expect(isPaused()).toBe(true);
+    releaseB();
+    expect(isPaused()).toBe(false);
+    releaseA();
+    expect(isPaused()).toBe(false);
   });
 });

@@ -1,6 +1,8 @@
 # 事件
 
-vuEPG 通过**原生 DOM 事件**通知焦点变化。它们都是标准的 [`CustomEvent`](https://developer.mozilla.org/zh-CN/docs/Web/API/CustomEvent)：不冒泡，数据放在 `event.detail` 中。在 Vue 模板里用 `@事件名` 监听即可，Vue 2 与 Vue 3 写法完全相同。
+vuEPG 通过**原生 DOM 事件**通知焦点变化。它们都是标准的 [`CustomEvent`](https://developer.mozilla.org/zh-CN/docs/Web/API/CustomEvent)：不冒泡，数据放在 `event.detail` 中。在 Vue 模板里用 `@事件名` 监听。事件写在原生元素上时，Vue 2.7 与 Vue 3 的写法相同。
+
+如果监听写在**组件标签**上，Vue 2.7 需要 `.native` 修饰符，让监听器绑定到组件根元素；Vue 3 直接写 `@epg-*`。在 Vue 2.7 中，方向事件的 `.prevent` 也要与 `.native` 一起使用：`@epg-right.native.prevent`。
 
 事件名统一带 `epg-` 前缀，不会与浏览器原生事件冲突：例如 `<button>` 被鼠标点击时浏览器会派发原生 `focus`，但不会派发 `epg-focus`。
 
@@ -32,7 +34,7 @@ vuEPG 通过**原生 DOM 事件**通知焦点变化。它们都是标准的 [`Cu
 按下方向键时，在真正移动之前依次派发：
 
 1. 当前焦点元素上的方向事件；
-2. 焦点**即将离开**的每个组上的方向事件（由内向外）。
+2. 当前组内找不到目标时，在该组上派发方向事件，再到外层继续查找；即使整页都没有目标，沿途的组也会收到事件。
 
 任一处理函数满足以下条件之一，就不再执行默认移动：
 
@@ -53,8 +55,8 @@ vuEPG 通过**原生 DOM 事件**通知焦点变化。它们都是标准的 [`Cu
 <div v-epg-group @epg-right.prevent>...</div>
 ```
 
-::: tip 编程式移动不派发方向事件
-方向事件表示“用户按了方向键”，只在按键时派发。调用 `epg.move("up")`、`epg.up()` 等方法**不会**派发方向事件，但仍会派发 `epg-focus`、`epg-blur`、`epg-enter`、`epg-leave`。
+::: tip 其他输入方式
+虚拟遥控器、手柄等应调用 `epg.navigate("up")`，与方向键走相同的事件和 `.prevent` 流程。`epg.move("up")`、`epg.up()` 等只移动焦点，不派发方向事件。
 :::
 
 ## 类型

@@ -17,7 +17,9 @@ vuEPG 把按键映射为**按键事件**（key action）。每个按键事件包
 
 ## 按键是如何识别的
 
-读取顺序为 `event.code` → `event.which` → `event.keyCode`，取第一个有效值（`event.code` 为空或 `"Unidentified"` 时视为无效）。现代浏览器通常只会匹配到 `event.code`，只提供数字键值的老旧机顶盒浏览器会匹配到数字。因此添加一个按键时，建议**同时写上 `event.code` 和数字键值**。
+读取顺序为 `event.code` → `event.which` → `event.keyCode`，取第一个有效值（`event.code` 缺失、为空或为 `"Unidentified"` 时回退）。现代浏览器通常只会匹配到 `event.code`，只提供数字键值的老旧机顶盒浏览器会匹配到数字。因此添加一个按键时，建议**同时写上 `event.code` 和数字键值**。
+
+在输入框、文本域、下拉框或可编辑内容中，vuEPG 将文字、Backspace 和左右方向键交给浏览器处理；上下方向键和 Esc / 遥控器返回键仍由 vuEPG 处理。输入时需要处理其他按键，可直接监听输入元素的原生 `keydown` 事件。
 
 在目标设备上查看键值：
 
@@ -63,9 +65,10 @@ console.log(epg.getKeyActions());
 弹出原生输入框、播放全屏视频等场景下，可以暂停 vuEPG 对按键的响应：
 
 ```ts
-epg.pause();
-epg.resume();
+const releasePause = epg.pause();
+releasePause(); // 只释放本次暂停
+epg.resume(); // 强制清除所有暂停
 epg.isPaused(); // boolean
 ```
 
-暂停期间不会调用 `preventDefault()`，按键完全交还给浏览器。
+多处同时暂停时，应保存并调用各自的释放函数；全部释放后才恢复响应。暂停期间不会调用 `preventDefault()`，按键完全交还给浏览器。

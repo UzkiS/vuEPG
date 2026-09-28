@@ -49,7 +49,15 @@ interface DirectionRule {
   distance(from: Box, to: Box): number;
   /** 交叉轴偏移：主轴距离相同时，越小越优先 */
   offset(from: Box, to: Box): number;
+  /** 交叉轴间距：两者在交叉轴上重叠时为 0 */
+  gap(from: Box, to: Box): number;
 }
+
+const horizontalGap = (from: Box, to: Box): number =>
+  Math.max(0, to.left - from.right, from.left - to.right);
+
+const verticalGap = (from: Box, to: Box): number =>
+  Math.max(0, to.top - from.bottom, from.top - to.bottom);
 
 const RULES: Readonly<Record<Direction, DirectionRule>> = {
   down: {
@@ -58,6 +66,7 @@ const RULES: Readonly<Record<Direction, DirectionRule>> = {
     overlaps: overlapsHorizontally,
     distance: (from, to) => to.top - from.top,
     offset: (from, to) => Math.abs(to.left - from.left),
+    gap: horizontalGap,
   },
   up: {
     isAhead: (from, to) => to.bottom < from.bottom,
@@ -65,6 +74,7 @@ const RULES: Readonly<Record<Direction, DirectionRule>> = {
     overlaps: overlapsHorizontally,
     distance: (from, to) => from.bottom - to.bottom,
     offset: (from, to) => Math.abs(to.left - from.left),
+    gap: horizontalGap,
   },
   right: {
     isAhead: (from, to) => to.left > from.left,
@@ -72,6 +82,7 @@ const RULES: Readonly<Record<Direction, DirectionRule>> = {
     overlaps: overlapsVertically,
     distance: (from, to) => to.left - from.left,
     offset: (from, to) => Math.abs(to.top - from.top),
+    gap: verticalGap,
   },
   left: {
     isAhead: (from, to) => to.right < from.right,
@@ -79,6 +90,7 @@ const RULES: Readonly<Record<Direction, DirectionRule>> = {
     overlaps: overlapsVertically,
     distance: (from, to) => from.right - to.right,
     offset: (from, to) => Math.abs(to.top - from.top),
+    gap: verticalGap,
   },
 };
 
@@ -86,7 +98,9 @@ const RULES: Readonly<Record<Direction, DirectionRule>> = {
 export interface RankedCandidate<T> extends Candidate<T> {
   /** 主轴距离：越小越近 */
   readonly distance: number;
-  /** 交叉轴偏移：距离相同时越小越优先 */
+  /** 与锚点的交叉轴间距：距离相同时越小越优先；未传锚点时为 0 */
+  readonly gap: number;
+  /** 交叉轴偏移：距离、间距都相同时越小越优先 */
   readonly offset: number;
 }
 
@@ -98,7 +112,7 @@ export interface NearestAnalysis<T> {
   readonly overlapping: readonly Candidate<T>[];
   /** ② 实际参与比较的候选：有重叠的候选时为 `overlapping`，否则为完全越过起点的候选 */
   readonly pool: readonly Candidate<T>[];
-  /** ③ `pool` 按距离、偏移、原始顺序排序，第一个即为目标 */
+  /** ③ `pool` 按距离、与锚点的间距、偏移、原始顺序排序，第一个即为目标 */
   readonly ranked: readonly RankedCandidate<T>[];
 }
 
@@ -107,12 +121,16 @@ export interface NearestAnalysis<T> {
  *
  * 1. 只保留位于该方向上的候选；
  * 2. 优先考虑交叉轴与起点重叠的候选；没有时，才考虑完全越过起点的候选；
- * 3. 取主轴距离最近者，距离相同则取交叉轴偏移最小者，仍相同则取靠前者。
+ * 3. 取主轴距离最近者；距离相同时，先比较与锚点在交叉轴上的间距，再比较交叉轴偏移，仍相同则取靠前者。
+ *
+ * `anchor` 为实际获得焦点的元素：逐层向外查找时，`from` 是整个分组，
+ * 用锚点裁决并列可以让结果贴近用户眼中焦点所在的位置。不传时不参与比较。
  */
 export const analyzeNearest = <T>(
   direction: Direction,
   from: Box,
   candidates: readonly Candidate<T>[],
+  anchor?: Box,
 ): NearestAnalysis<T> => {
   const rule = RULES[direction];
   const ahead = candidates.filter((c) => rule.isAhead(from, c.box));
@@ -125,11 +143,15 @@ export const analyzeNearest = <T>(
       value: c.value,
       box: c.box,
       distance: rule.distance(from, c.box),
+      gap: anchor === undefined ? 0 : rule.gap(anchor, c.box),
       offset: rule.offset(from, c.box),
       index,
     }))
-    .sort((a, b) => a.distance - b.distance || a.offset - b.offset || a.index - b.index)
-    .map(({ value, box, distance, offset }) => ({ value, box, distance, offset }));
+    .sort(
+      (a, b) =>
+        a.distance - b.distance || a.gap - b.gap || a.offset - b.offset || a.index - b.index,
+    )
+    .map(({ value, box, distance, gap, offset }) => ({ value, box, distance, gap, offset }));
   return { ahead, overlapping, pool, ranked };
 };
 
@@ -138,7 +160,8 @@ export const pickNearest = <T>(
   direction: Direction,
   from: Box,
   candidates: readonly Candidate<T>[],
+  anchor?: Box,
 ): T | null => {
-  const [best] = analyzeNearest(direction, from, candidates).ranked;
+  const [best] = analyzeNearest(direction, from, candidates, anchor).ranked;
   return best === undefined ? null : best.value;
 };

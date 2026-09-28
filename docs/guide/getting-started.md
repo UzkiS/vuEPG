@@ -4,6 +4,7 @@
 
 - Vue **2.7** 或 **3.x**（Vue 2.6 及以下请先升级到 2.7）
 - 产物语法为 ES2015；目标设备若只支持 ES5，请让构建工具转译 `node_modules/vuepg`
+- 浏览器需提供 `CustomEvent` 构造函数、`Symbol`、`Map`、`Set`、`Object.assign` 与 `Array.from`；旧设备缺失时需要相应 polyfill。仅转译语法不会补齐这些运行时 API
 
 ## 安装
 

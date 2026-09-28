@@ -2,7 +2,14 @@
  * 类型测试（Vue 3）：只做类型检查，不运行。由 `pnpm typecheck` 通过 tsconfig.test.json 检查。
  */
 import { createApp, defineComponent } from "vue";
-import VuEPG, { useVuEPG, type EPGEvent, type EPGItem, type EPGNode } from "../../src";
+import VuEPG, {
+  useVuEPG,
+  type EPGEvent,
+  type EPGGroupOptions,
+  type EPGItem,
+  type EPGNode,
+  type ScrollMode,
+} from "../../src";
 
 const app = createApp({});
 app.use(VuEPG);
@@ -20,6 +27,15 @@ defineComponent({
 const epg = useVuEPG();
 epg.move("down");
 epg.move(document.body);
+export const navigated: boolean = epg.navigate("right");
+const releasePause: () => void = epg.pause();
+releasePause();
+const mode: ScrollMode = "nearest";
+export const groupOptions: EPGGroupOptions = { scroll: mode };
+// @ts-expect-error 滚动方式不接受 smooth
+export const invalidGroupOptions: EPGGroupOptions = { scroll: "smooth" };
+// @ts-expect-error 导航方向只能是 up / down / left / right
+epg.navigate("forward");
 // @ts-expect-error 方向只能是 up / down / left / right
 epg.move("forward");
 

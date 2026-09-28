@@ -2,7 +2,7 @@ import { mount } from "#mount";
 import { describe, expect, it, vi } from "vitest";
 import { nextTick, ref } from "vue";
 import { useVuEPG } from "../../src";
-import { press } from "../helpers/keyboard";
+import { press, pressLegacy } from "../helpers/keyboard";
 
 const epg = useVuEPG();
 
@@ -18,6 +18,14 @@ describe("back", () => {
     mount({ template: `<div></div>` }, { backHandler });
     press("Backspace");
     press("Escape");
+    expect(backHandler).toHaveBeenCalledTimes(2);
+  });
+
+  it("accepts Tizen and webOS legacy back codes", () => {
+    const backHandler = vi.fn();
+    mount({ template: `<div></div>` }, { backHandler });
+    pressLegacy(10009);
+    pressLegacy(461);
     expect(backHandler).toHaveBeenCalledTimes(2);
   });
 

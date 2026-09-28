@@ -6,6 +6,7 @@
 export {
   // 移动
   move,
+  navigate,
   up,
   down,
   left,

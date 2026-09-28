@@ -47,7 +47,7 @@ const onClick = (event: MouseEvent): void => {
 
 const press = (direction: "up" | "down" | "left" | "right"): void => {
   activate();
-  epg.move(direction);
+  epg.navigate(direction);
 };
 const confirm = (): void => {
   epg.getCurrentItem()?.el.click();
@@ -151,6 +151,7 @@ const confirm = (): void => {
 <style scoped>
 .playground {
   display: grid;
+  min-width: 0;
   gap: 16px;
   margin: 24px 0;
 }
@@ -162,6 +163,8 @@ const confirm = (): void => {
   gap: 16px;
   padding: 20px;
   aspect-ratio: 16 / 9;
+  min-width: 0;
+  min-height: 0;
   border-radius: 12px;
   background: radial-gradient(circle at 20% 0%, #3b0d2a, #0f0f1a 70%);
   color: #fff;
@@ -171,13 +174,15 @@ const confirm = (): void => {
 
 .tabs {
   display: flex;
+  min-width: 0;
   gap: 12px;
 }
 
 .body {
   display: grid;
-  grid-template-columns: 1fr 3fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
   gap: 16px;
+  min-width: 0;
   min-height: 0;
 }
 
@@ -189,11 +194,14 @@ const confirm = (): void => {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+  min-width: 0;
+  min-height: 0;
 }
 
 .tile {
+  min-width: 0;
   border: 0;
   border-radius: 8px;
   color: inherit;
@@ -222,6 +230,7 @@ const confirm = (): void => {
   align-items: flex-end;
   padding: 10px;
   font-weight: 600;
+  overflow-wrap: anywhere;
   background: linear-gradient(160deg, hsl(var(--hue) 70% 55%), hsl(var(--hue) 60% 25%));
 }
 
@@ -259,12 +268,13 @@ const confirm = (): void => {
 
 .panel {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
     "status dpad"
     "log dpad";
   gap: 12px 24px;
   align-items: start;
+  min-width: 0;
 }
 
 .status {
@@ -272,6 +282,8 @@ const confirm = (): void => {
   display: flex;
   gap: 12px;
   align-items: center;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .badge {
@@ -291,6 +303,8 @@ const confirm = (): void => {
   margin: 0;
   padding: 12px 16px;
   min-height: 150px;
+  min-width: 0;
+  overflow-wrap: anywhere;
   list-style: none;
   border-radius: 8px;
   font-family: var(--vp-font-family-mono);
@@ -349,6 +363,53 @@ const confirm = (): void => {
 }
 
 @media (max-width: 640px) {
+  .stage {
+    aspect-ratio: auto;
+    grid-template-rows: auto auto;
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .tab {
+    padding: 8px 2px;
+    font-size: 12px;
+  }
+
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .menu {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .menu-item {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .card {
+    min-height: 72px;
+    font-size: 12px;
+  }
+
+  .overlay {
+    padding: 12px;
+  }
+
   .panel {
     grid-template-columns: 1fr;
     grid-template-areas: "status" "dpad" "log";

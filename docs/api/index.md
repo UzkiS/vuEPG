@@ -31,6 +31,14 @@ epg.move("down");
 epg.move(templateRef.value);
 ```
 
+### epg.navigate
+
+```ts
+navigate(direction: Direction): boolean
+```
+
+处理一次用户方向操作，与按方向键相同：先派发可取消的方向事件，再执行默认移动。当前焦点失效时先在原分组恢复焦点。供虚拟遥控器、手柄等输入方式调用。焦点发生变化时返回 `true`；方向无效时抛出 `TypeError`。
+
 ### epg.up
 
 等同于 `epg.move("up")`。
@@ -94,10 +102,10 @@ onBack(handler: () => void): void
 ### epg.pause
 
 ```ts
-pause(): void
+pause(): () => void
 ```
 
-暂停响应按键。
+暂停响应按键，返回释放本次暂停的函数。多处同时暂停时，各自调用自己的释放函数，全部释放后才恢复响应。
 
 ### epg.resume
 
@@ -105,7 +113,7 @@ pause(): void
 resume(): void
 ```
 
-恢复响应按键。
+立即恢复响应按键，清除所有尚未释放的暂停。需要只恢复自己发起的暂停时，调用 `pause()` 返回的函数。
 
 ### epg.isPaused
 

@@ -84,6 +84,7 @@ export default defineConfig({
             { text: "EPGGroup", link: "/guide/epg-group" },
             { text: "事件", link: "/guide/events" },
             { text: "移动规则", link: "/guide/navigation" },
+            { text: "常见页面配方", link: "/guide/recipes" },
           ],
         },
         {
