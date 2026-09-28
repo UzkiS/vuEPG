@@ -1,6 +1,6 @@
 {
   "name": "vuepg",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Vue 2.7 / Vue 3 通用的大屏（TV / IPTV / 机顶盒）遥控器焦点管理与空间导航插件",
   "keywords": [
     "vue",
