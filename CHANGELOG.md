@@ -4,7 +4,20 @@
 
 ### Minor Changes
 
-- [#7](https://github.com/UzkiS/vuEPG/pull/7) [`33f8d76`](https://github.com/UzkiS/vuEPG/commit/33f8d76cb9db970feac0eac341ea68d961274803) Thanks [@UzkiS](https://github.com/UzkiS)! - 新增分组自动滚动和 `navigate(direction)`；修复旧设备按键识别、焦点失效恢复与方向事件边界行为，并改进移动端演示布局。
+- [#7](https://github.com/UzkiS/vuEPG/pull/7) [`33f8d76`](https://github.com/UzkiS/vuEPG/commit/33f8d76cb9db970feac0eac341ea68d961274803) Thanks [@UzkiS](https://github.com/UzkiS)! - 新增分组自动滚动与 `navigate(direction)`，并完善焦点恢复、方向事件和旧设备按键支持。
+
+  - 分组支持 `scroll: true` / `"nearest"` / `"start"` / `"center"`，焦点进入时将元素滚入可视区域；支持嵌套滚动容器，默认关闭。
+  - `navigate(direction)` 模拟一次用户方向输入，触发方向事件并尊重 `.prevent`；原有 `move()` 保持直接移动焦点的语义。
+  - 保存焦点路径，修复焦点元素卸载或替换后 `epg-enter` / `epg-leave` 失配；失效时优先在原来仍有效的最内层分组恢复焦点，避免穿透弹窗。
+  - 当前焦点项后来被禁用时，仍可作为方向移动的起点，但不会再次成为导航目标。
+  - 组内找不到目标时，逐层派发组级方向事件；即使整页没有目标，列表边界处理函数也能接管翻页或循环。
+  - 跨层候选距离并列时，使用当前焦点元素的位置裁决，改善侧边菜单和顶栏进入内容区的导航结果。
+  - 修复旧内核 `KeyboardEvent.code` 缺失时无法回退到数字键值的问题；默认返回键增加 Tizen `10009` 与 webOS `461`。
+  - 输入框等可编辑元素中的文字、Backspace 与左右方向键交给浏览器处理；保留上下方向键及 Esc / 遥控器返回键。
+  - `pause()` 返回释放本次暂停的函数，多个组件可独立暂停；`resume()` 仍可立即清除全部暂停。
+  - debug 模式增加每层候选、比较结果与选中目标的日志。
+  - 文档补充 Vue 2.7 组件标签事件的 `.native` 写法、旧设备运行时 API、分组时机及场景配方；修复介绍页和在线演示的手机布局，虚拟遥控器改用 `navigate()`。
+  - 新增菜单、网格、弹窗等场景测试，修正旧键盘与滚动布局测试替身；Vue 2.7 与 Vue 3 共 298 个测试通过。
 
 ## 2.0.0
 
