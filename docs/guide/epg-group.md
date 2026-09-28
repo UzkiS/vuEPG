@@ -14,7 +14,8 @@
 1. **组内优先**：按方向键时，先在当前组内寻找目标；找不到时，把整个组当作一个整体，在上一层寻找。
 2. **默认焦点**：焦点从组外进入时，落在组内的 `default` 元素上，而不是几何上最近的元素。
 3. **进出事件**：焦点进入、离开分组时派发 `epg-enter` / `epg-leave`；组内找不到方向目标时派发方向事件，可以拦截或处理边界。
-4. **可选自动滚动**：分组元素是滚动容器时，开启 `scroll` 可以在组内元素获得焦点时将其滚入可视区域。
+
+滚动容器可以与导航组是同一个元素，也可以独立存在；详见[自动滚动](./scrolling)。
 
 分组可以任意嵌套，中间隔着普通元素或其他组件也没关系：一个元素属于哪个组，由它在 DOM 中**最近的**带 `v-epg-group` 的祖先决定，并且每次按键时实时计算，不存在缓存过期的问题。
 
@@ -22,29 +23,26 @@
 
 <<< ../../src/core/nodes.ts#group-options{ts}
 
-| 字段       | 说明                                                                                 |
-| ---------- | ------------------------------------------------------------------------------------ |
-| `default`  | 焦点进入所在层级时，优先进入这个组                                                   |
-| `disabled` | 禁用：导航时整组被跳过（组内元素仍可通过 `move()` 直接聚焦）                         |
-| `scroll`   | `true` / `"nearest"` 为最小距离滚动；`"start"` 对齐起始边；`"center"` 居中；默认关闭 |
+| 字段       | 说明                                                         |
+| ---------- | ------------------------------------------------------------ |
+| `default`  | 焦点进入所在层级时，优先进入这个组                           |
+| `disabled` | 禁用：导航时整组被跳过（组内元素仍可通过 `move()` 直接聚焦） |
 
-只有需要单独的入口、边界事件或滚动容器时才分组。普通网格可以只用一个组；无需给每一行或每个卡片再加组。跨组移动会进入目标组的默认元素，和在同一组内按几何位置选目标不同。
+只有需要单独的入口或边界事件时才分组。普通网格可以只用一个组；无需给每一行或每个卡片再加组。跨组移动会进入目标组的默认元素，和在同一组内按几何位置选目标不同。
+
+<HierarchyDemo />
 
 ```vue
-<div v-epg-group="{ scroll: true }" class="movie-row">
-  <button v-for="movie in movies" :key="movie.id" v-epg-item>{{ movie.title }}</button>
-</div>
-```
+<aside v-epg-group>
+  <button v-for="entry in menu" :key="entry.id" v-epg-item>{{ entry.title }}</button>
+</aside>
 
-```css
-.movie-row {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-}
+<main v-epg-group>
+  <div v-epg-scroll class="card-list">
+    <button v-for="movie in movies" :key="movie.id" v-epg-item>{{ movie.title }}</button>
+  </div>
+</main>
 ```
-
-滚动从内层组到外层组依次执行；使用元素的可视区域计算距离。`scroll: true` 只在目标超出可视区域时滚动。若需要平滑滚动，可给容器设置 CSS `scroll-behavior: smooth`。定位与滚动使用浏览器的 `getBoundingClientRect()`、`scrollLeft` 和 `scrollTop`。
 
 ## 进入分组时焦点落在哪里
 
@@ -55,6 +53,29 @@
 3. 子节点是分组时，递归进入该分组，规则相同。
 
 没有可获得焦点元素的分组（全部隐藏、禁用或为空）不会成为方向键的目标。
+
+如果再次进入分组时希望回到上次聚焦项，可用响应式 `default` 指向该项；它被移除后，入口会自然回退到组内其他可用元素：
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+
+const lastId = ref<string | null>(null);
+</script>
+
+<template>
+  <div v-epg-group>
+    <button
+      v-for="movie in movies"
+      :key="movie.id"
+      v-epg-item="{ default: lastId === movie.id }"
+      @epg-focus="lastId = movie.id"
+    >
+      {{ movie.title }}
+    </button>
+  </div>
+</template>
+```
 
 ## 事件
 

@@ -11,7 +11,7 @@ describe("without a DOM (SSR)", () => {
     } finally {
       vi.unstubAllGlobals();
     }
-    expect(app.directive).toHaveBeenCalledTimes(2);
+    expect(app.directive).toHaveBeenCalledTimes(3);
     expect(Object.keys(app.config.globalProperties)).toEqual(["$epg"]);
   });
 });

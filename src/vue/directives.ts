@@ -3,6 +3,8 @@ import {
   isValidClassName,
   registerGroup,
   registerItem,
+  removeScroll,
+  setScroll,
   unregister,
   updateGroup,
   updateItem,
@@ -28,7 +30,8 @@ interface DirectiveLifecycle {
 }
 
 /** Vue 2 与 Vue 3 的指令钩子名不同，这是整个库唯一需要区分版本的地方 */
-const isVue2 = version.startsWith("2.");
+// eslint-disable-next-line @typescript-eslint/prefer-string-starts-ends-with -- 旧版 WebView 未必实现 String.prototype.startsWith
+const isVue2 = /^2\./.test(version);
 
 const defineDirective = (lifecycle: DirectiveLifecycle): object =>
   isVue2
@@ -58,17 +61,25 @@ const isScrollMode = (value: unknown): value is ScrollMode =>
 
 const parseGroupOptions = (value: unknown): EPGGroupOptions => {
   const source = toObject(value, "v-epg-group");
-  const scroll = "scroll" in source ? source.scroll : undefined;
   const options: EPGGroupOptions = {
     default: "default" in source && source.default === true,
     disabled: "disabled" in source && source.disabled === true,
   };
-  if (typeof scroll === "boolean" || isScrollMode(scroll)) {
-    options.scroll = scroll;
-  } else if (scroll !== undefined) {
-    warn('v-epg-group 的 scroll 必须是布尔值或 "nearest" / "start" / "center"，已忽略', scroll);
-  }
   return options;
+};
+
+const parseScroll = (value: unknown): ScrollMode | null => {
+  if (value === undefined || value === true || value === "nearest") {
+    return "nearest";
+  }
+  if (value === false || value === null) {
+    return null;
+  }
+  if (isScrollMode(value)) {
+    return value;
+  }
+  warn('v-epg-scroll 的绑定值必须是布尔值或 "nearest" / "start" / "center"，已忽略', value);
+  return null;
 };
 
 const parseItemOptions = (value: unknown): EPGItemOptions => {
@@ -109,5 +120,18 @@ export const groupDirective = defineDirective({
   },
   unmounted: (el) => {
     unregister(el);
+  },
+});
+
+/** `v-epg-scroll`：滚动容器可与 EPGGroup 是同一个元素，也可独立存在 */
+export const scrollDirective = defineDirective({
+  mounted: (el, { value }) => {
+    setScroll(el, parseScroll(value));
+  },
+  updated: (el, { value }) => {
+    setScroll(el, parseScroll(value));
+  },
+  unmounted: (el) => {
+    removeScroll(el);
   },
 });

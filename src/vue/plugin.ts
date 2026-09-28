@@ -1,6 +1,6 @@
 import { banner, listenKeyboard, setConfig, type EPGConfig } from "../core";
 import { homepage, version } from "../../package.json";
-import { groupDirective, itemDirective } from "./directives";
+import { groupDirective, itemDirective, scrollDirective } from "./directives";
 import { useVuEPG } from "./use-vuepg";
 
 /** Vue 3 应用实例中插件用到的部分 */
@@ -38,6 +38,7 @@ export const plugin: VuEPGPlugin = {
     }
     app.directive("epg-item", itemDirective);
     app.directive("epg-group", groupDirective);
+    app.directive("epg-scroll", scrollDirective);
     Object.defineProperty(isVue3App(app) ? app.config.globalProperties : app.prototype, "$epg", {
       value: useVuEPG(),
       configurable: true,

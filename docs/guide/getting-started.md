@@ -90,6 +90,10 @@ onMounted(() => {
 epg.onBack(() => {
   console.log("本页返回");
 });
+
+const play = (n: number): void => {
+  console.log("播放影片", n);
+};
 </script>
 
 <template>
@@ -139,3 +143,4 @@ export default {
 - [EPGItem](./epg-item) 与 [EPGGroup](./epg-group)：两个指令的全部用法
 - [事件](./events)：监听焦点变化、拦截方向键
 - [移动规则](./navigation)：方向键的目标是怎么选出来的
+- [自动滚动](./scrolling)：让焦点项保持可见

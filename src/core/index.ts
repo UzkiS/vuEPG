@@ -4,7 +4,7 @@
  */
 import { mergeConfig, resetConfig, type EPGConfig } from "./config";
 import { resetBack } from "./back";
-import { moveToNode, releaseFocus, resetFocus, syncFocusClass } from "./focus";
+import { getCurrentItem, moveToNode, releaseFocus, resetFocus, syncFocusClass } from "./focus";
 import { resetKeyboard } from "./keyboard";
 import { debug, warn } from "./logger";
 import { moveInDirection, navigate as navigateInDirection } from "./navigate";
@@ -17,6 +17,7 @@ import {
   type EPGNode,
 } from "./nodes";
 import { addNode, findNode, removeNode, resetRegistry } from "./registry";
+import { resetScroll } from "./scroll";
 
 export { back, registerBackHandler, type BackEntry } from "./back";
 export { getConfig, type BackHandler, type EPGConfig } from "./config";
@@ -43,14 +44,8 @@ export {
 export { banner, warn } from "./logger";
 export { findTarget } from "./navigate";
 export type { Direction } from "./navigation";
-export type {
-  EPGGroup,
-  EPGGroupOptions,
-  EPGItem,
-  EPGItemOptions,
-  EPGNode,
-  ScrollMode,
-} from "./nodes";
+export type { EPGGroup, EPGGroupOptions, EPGItem, EPGItemOptions, EPGNode } from "./nodes";
+export { removeScroll, setScroll, type ScrollBinding, type ScrollMode } from "./scroll";
 export {
   getChildren,
   getGroups,
@@ -69,7 +64,9 @@ export type FocusTarget = EPGNode | Element | { readonly $el: unknown };
  */
 export const setConfig = (patch: Partial<EPGConfig>): void => {
   mergeConfig(patch);
-  syncFocusClass();
+  if (patch.focusClass !== undefined) {
+    syncFocusClass();
+  }
 };
 
 /** 判断值是否为 EPGItem */
@@ -154,8 +151,10 @@ export const updateItem = (el: HTMLElement, options: EPGItemOptions): void => {
   const node = findNode(el);
   if (node instanceof EPGItem) {
     node.setOptions(options);
+    if (getCurrentItem() === node) {
+      syncFocusClass();
+    }
   }
-  syncFocusClass();
 };
 
 /** 更新 EPGGroup 的配置 */
@@ -164,7 +163,6 @@ export const updateGroup = (el: HTMLElement, options: EPGGroupOptions): void => 
   if (node instanceof EPGGroup) {
     node.setOptions(options);
   }
-  syncFocusClass();
 };
 
 /** 注销节点；若它是当前焦点，焦点被清除 */
@@ -181,6 +179,7 @@ export const unregister = (el: HTMLElement): void => {
 export const resetCore = (): void => {
   resetFocus();
   resetRegistry();
+  resetScroll();
   resetKeyboard();
   resetBack();
   resetConfig();

@@ -7,13 +7,15 @@ const epg = useVuEPG();
 const stage = ref<HTMLElement | null>(null);
 const { active, activate } = useDemo(stage);
 const logs = ref<string[]>([]);
+const current = ref("");
 
 const labelOf = (el: HTMLElement): string => el.dataset["label"] ?? "";
 const log = (text: string): void => {
   logs.value = [text, ...logs.value].slice(0, 5);
 };
 const onFocus = (event: EPGEvent<"epg-focus">): void => {
-  log(`epg-focus · ${labelOf(event.detail.item.el)}`);
+  current.value = labelOf(event.detail.item.el);
+  log(`epg-focus · ${current.value}`);
 };
 const onEnter = (event: EPGEvent<"epg-enter">): void => {
   log(`epg-enter · ${labelOf(event.detail.group.el)}`);
@@ -27,10 +29,54 @@ const focus = (event: MouseEvent): void => {
     epg.move(event.currentTarget);
   }
 };
+const focusLabel = (label: string): void => {
+  activate();
+  const item = Array.from(stage.value?.querySelectorAll<HTMLElement>("[data-label]") ?? []).find(
+    (el) => el.dataset["label"] === label,
+  );
+  if (item !== undefined) {
+    epg.move(item);
+  }
+};
+const diagramItems = [
+  { label: "A1", x: 34, y: 70 },
+  { label: "A2", x: 34, y: 112 },
+  { label: "A3", x: 34, y: 154 },
+  { label: "B1", x: 210, y: 70 },
+  { label: "B2", x: 280, y: 70 },
+  { label: "B3", x: 210, y: 122 },
+  { label: "B4", x: 280, y: 122 },
+];
 </script>
 
 <template>
   <div class="hierarchy">
+    <svg
+      class="overview"
+      viewBox="0 0 380 222"
+      role="img"
+      :aria-label="`分组导航实时示意，当前焦点：${current || '未选择'}`"
+    >
+      <text x="18" y="24" class="overview-title">点击图中的项目，观察焦点与事件</text>
+      <rect x="18" y="41" width="142" height="160" rx="9" class="overview-group" />
+      <rect x="194" y="41" width="166" height="160" rx="9" class="overview-group" />
+      <text x="29" y="58" class="overview-label">分组 A</text>
+      <text x="205" y="58" class="overview-label">分组 B · B2 为默认入口</text>
+      <g
+        v-for="item in diagramItems"
+        :key="item.label"
+        class="overview-item"
+        :class="{ selected: current === item.label }"
+        role="button"
+        tabindex="0"
+        :aria-label="`聚焦${item.label}`"
+        @click="focusLabel(item.label)"
+        @keydown.enter="focusLabel(item.label)"
+      >
+        <rect :x="item.x" :y="item.y" width="60" height="30" rx="5" />
+        <text :x="item.x + 30" :y="item.y + 20">{{ item.label }}</text>
+      </g>
+    </svg>
     <!-- 外层分组拦截所有方向，焦点不会离开演示区域 -->
     <div
       ref="stage"
@@ -100,6 +146,45 @@ const focus = (event: MouseEvent): void => {
   grid-template-columns: 1fr 200px;
   gap: 16px;
   margin: 20px 0;
+}
+.overview {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+.overview-title {
+  fill: var(--vp-c-text-1);
+  font: 600 14px sans-serif;
+}
+.overview-group {
+  fill: var(--vp-c-bg-soft);
+  stroke: var(--vp-c-default-1);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+.overview-label {
+  fill: var(--vp-c-text-2);
+  font: 11px sans-serif;
+}
+.overview-item {
+  cursor: pointer;
+}
+.overview-item rect {
+  fill: var(--vp-c-default-soft);
+  stroke: var(--vp-c-default-1);
+  stroke-width: 2;
+}
+.overview-item.selected rect {
+  fill: var(--vp-c-brand-soft);
+  stroke: var(--vp-c-brand-1);
+  stroke-width: 3;
+}
+.overview-item text {
+  fill: var(--vp-c-text-1);
+  text-anchor: middle;
+  font: 12px sans-serif;
+  pointer-events: none;
 }
 
 .stage {
