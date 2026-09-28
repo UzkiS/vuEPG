@@ -20,7 +20,7 @@ vuEPG 通过**原生 DOM 事件**通知焦点变化。它们都是标准的 [`Cu
 
 ## 焦点变化的顺序
 
-<HierarchyDemo />
+<EventTimelineDemo />
 
 焦点从 A 移动到 B 时，依次派发：
 

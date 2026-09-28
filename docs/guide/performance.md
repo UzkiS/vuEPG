@@ -23,6 +23,6 @@ vuEPG 面向 TV、IPTV 和机顶盒页面。方向键需要及时响应，但低
 
 库发布的产物是 **ES2015**，并使用 `Map`、`Set`、`Symbol`、`Array.from`、`Object.assign`、`CustomEvent` 构造函数等运行时能力。WebView 30 不能仅凭 npm 安装直接使用这些产物：应用构建需要转译 `vuepg`，并针对设备缺失的 API 加 polyfill。转译只改变语法，不会补齐运行时 API。
 
-还需要核对 Vue 本身的浏览器要求。Vue 3 依赖 `Proxy`，对旧 WebView 尤其需要谨慎；目标是 WebView 30 时，应优先用 Vue 2.7 在真机上验证整套应用，而不能只检查 vuEPG 的构建结果。项目目前没有 WebView 30 真机测试结果，因此不承诺该内核开箱即用。
+还需要核对 Vue 本身的浏览器要求。Android 4.4 / WebView 30 没有 Vue 3 依赖的 `Proxy`，因此这类设备应使用 **Vue 2.7**；转译 Vue 3 的语法也无法补齐 `Proxy`。
 
-滚动实现直接设置 `scrollLeft` / `scrollTop`，不依赖平滑滚动 API；它在常见 CSS `scale()` 场景下会换算视觉像素与布局像素。设备是否正确处理某些布局、输入键值和 `CustomEvent`，仍需在目标固件上验证。兼容问题可带上设备型号、内核版本和最小复现提交 Issue。
+滚动实现直接设置 `scrollLeft` / `scrollTop`，不依赖平滑滚动 API；使用 CSS `scale()` 时会换算视觉像素与布局像素。遇到具体设备问题时，可以附上设备型号、内核版本和最小复现提交 Issue。
