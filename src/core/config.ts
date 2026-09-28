@@ -1,4 +1,5 @@
 import { isValidClassName } from "./dom";
+import type { ScrollMode } from "./scroll";
 
 // #region config
 /** 返回处理函数 */
@@ -21,6 +22,11 @@ export interface EPGConfig {
    * @defaultValue `false`
    */
   debug: boolean;
+  /**
+   * 文档视口的滚动方式；`true` 等同于 `"nearest"`，`false` 关闭
+   * @defaultValue `false`
+   */
+  scrollViewport: boolean | ScrollMode;
 }
 // #endregion config
 
@@ -28,6 +34,7 @@ const DEFAULT_CONFIG: Readonly<EPGConfig> = {
   focusClass: "vuepg-focus",
   backHandler: null,
   debug: false,
+  scrollViewport: false,
 };
 
 let config: Readonly<EPGConfig> = DEFAULT_CONFIG;
@@ -46,6 +53,16 @@ export const mergeConfig = (patch: Partial<EPGConfig>): void => {
     throw new TypeError(
       `[vuEPG] focusClass 必须是不含空白字符的非空字符串，收到 "${patch.focusClass}"`,
     );
+  }
+  const viewport: unknown = patch.scrollViewport;
+  if (
+    viewport !== undefined &&
+    typeof viewport !== "boolean" &&
+    viewport !== "nearest" &&
+    viewport !== "start" &&
+    viewport !== "center"
+  ) {
+    throw new TypeError(`[vuEPG] scrollViewport 必须是布尔值或有效滚动方式`);
   }
   config = Object.assign({}, config, patch);
 };

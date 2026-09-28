@@ -1,5 +1,5 @@
 import { mount } from "#mount";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { nextTick, ref } from "vue";
 import { useVuEPG } from "../../src";
 import { byId } from "../helpers/dom";
@@ -61,5 +61,25 @@ describe("focus class", () => {
     await nextTick();
     expect(byId("a").classList.contains("dark")).toBe(true);
     expect(byId("a").classList.contains("vuepg-focus")).toBe(true);
+  });
+
+  it("avoids duplicate focus class writes when a group and unrelated item update", async () => {
+    const value = ref(false);
+    mount({
+      template: `<div v-epg-group="{ disabled: value }">
+        <div id="focused" v-epg-item style="${box(0, 0, 50, 50)}"></div>
+        <div id="other" v-epg-item="{ disabled: value }" style="${box(60, 0, 50, 50)}"></div>
+      </div>`,
+      setup: () => ({ value }),
+    });
+    epg.move(byId("focused"));
+    const add = vi.spyOn(byId("focused").classList, "add");
+    value.value = true;
+    await nextTick();
+    expect(add).toHaveBeenCalledOnce();
+    expect(byId("focused").classList.contains("vuepg-focus")).toBe(true);
+    add.mockClear();
+    epg.setConfig({ debug: true });
+    expect(add).not.toHaveBeenCalled();
   });
 });

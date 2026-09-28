@@ -251,6 +251,21 @@ describe("direction events bubble until the move is resolved", () => {
 });
 
 describe("navigate", () => {
+  it("reports candidates only while debug is enabled", () => {
+    const output = vi.mocked(console.log);
+    mount({ template: TWO_GROUPS, setup: () => ({ log: () => undefined }) });
+    epg.move(byId("a"));
+    output.mockClear();
+    epg.navigate("right");
+    expect(output).not.toHaveBeenCalled();
+
+    epg.setConfig({ debug: true });
+    epg.navigate("left");
+    epg.navigate("up");
+    epg.navigate("down");
+    expect(output.mock.calls.some((call) => call.includes("方向 left：在"))).toBe(true);
+    expect(output.mock.calls.some((call) => call.includes("方向 up：在"))).toBe(true);
+  });
   it("behaves exactly like a key press, including direction events and .prevent", () => {
     const { log, entries } = setupLog();
     mount({ template: TWO_GROUPS, setup: () => ({ log }) });

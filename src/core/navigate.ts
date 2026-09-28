@@ -1,4 +1,5 @@
 import { isHidden } from "./dom";
+import { getConfig } from "./config";
 import { emit } from "./events";
 import { getCurrentItem, getFocusPath, moveToItem, moveToNode } from "./focus";
 import { debug } from "./logger";
@@ -26,11 +27,13 @@ const searchLevel = (
     origin === anchor ? undefined : anchor.getRect(),
   );
   const [best] = analysis.ranked;
-  debug(`方向 ${direction}：在`, parent ?? "顶层", "中查找", {
-    方向上的候选: analysis.ahead.map((c) => c.value),
-    参与比较: analysis.ranked.map((c) => c.value),
-    结果: best?.value ?? null,
-  });
+  if (getConfig().debug) {
+    debug(`方向 ${direction}：在`, parent ?? "顶层", "中查找", {
+      方向上的候选: analysis.ahead.map((c) => c.value),
+      参与比较: analysis.ranked.map((c) => c.value),
+      结果: best?.value ?? null,
+    });
+  }
   return best === undefined ? null : best.value;
 };
 

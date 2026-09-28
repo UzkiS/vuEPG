@@ -78,31 +78,37 @@ export default defineConfig({
           ],
         },
         {
-          text: "核心概念",
+          text: "焦点与导航",
           items: [
             { text: "EPGItem", link: "/guide/epg-item" },
             { text: "EPGGroup", link: "/guide/epg-group" },
             { text: "事件", link: "/guide/events" },
             { text: "移动规则", link: "/guide/navigation" },
-            { text: "常见页面配方", link: "/guide/recipes" },
+            { text: "自动滚动", link: "/guide/scrolling" },
           ],
         },
         {
-          text: "进阶",
+          text: "输入与集成",
           items: [
             { text: "配置", link: "/guide/configuration" },
             { text: "按键映射", link: "/guide/key-actions" },
             { text: "返回处理", link: "/guide/back" },
             { text: "TypeScript", link: "/guide/typescript" },
+            { text: "性能与旧设备", link: "/guide/performance" },
           ],
         },
-        { text: "参考", items: [{ text: "API", link: "/api/" }] },
+        {
+          text: "参考",
+          items: [
+            { text: "API", link: "/api/" },
+            { text: "更新日志", link: "/changelog" },
+          ],
+        },
         {
           text: "迁移",
           items: [
             { text: "从 1.x 升级", link: "/migration/v1" },
             { text: "从 vue-epg 迁移", link: "/migration/vue-epg" },
-            { text: "更新日志", link: "/changelog" },
           ],
         },
       ],

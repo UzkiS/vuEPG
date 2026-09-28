@@ -175,5 +175,7 @@ export const installLayout = (): void => {
   Object.defineProperty(Element.prototype, "clientHeight", sizeAccessor("height"));
   Object.defineProperty(Element.prototype, "clientLeft", zeroAccessor);
   Object.defineProperty(Element.prototype, "clientTop", zeroAccessor);
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", sizeAccessor("width"));
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", sizeAccessor("height"));
 };
 /* eslint-enable @typescript-eslint/unbound-method */

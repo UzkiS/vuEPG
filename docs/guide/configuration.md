@@ -33,3 +33,7 @@ useVuEPG().setConfig({ debug: true });
 ### debug
 
 开启后，焦点移动、按键、注册与注销等过程会输出到控制台；方向查找还会输出每一层的候选、参与比较的目标和结果，方便排查“焦点为什么去了那里”。
+
+### scrollViewport
+
+文档视口的滚动方式，默认关闭。`true` 等同于 `"nearest"`；也可设置 `"start"` 或 `"center"`。它与元素上的 `v-epg-scroll` 独立，详见[自动滚动](./scrolling)。

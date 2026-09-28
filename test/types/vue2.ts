@@ -3,10 +3,11 @@
  * 其中 `vue` 被映射到 Vue 2.7 的类型声明。
  */
 import Vue, { defineComponent } from "vue";
-import VuEPG, { useVuEPG, type EPGGroupOptions, type ScrollMode } from "../../src";
+import VuEPG, { useVuEPG, type EPGGroupOptions, type ScrollBinding } from "../../src";
 
 Vue.use(VuEPG);
 Vue.use(VuEPG, { focusClass: "focused" });
+Vue.use(VuEPG, { scrollViewport: true });
 
 // Vue 2.7 中 `$epg` 的类型通过 defineComponent 获得
 defineComponent({
@@ -20,9 +21,11 @@ useVuEPG().onBack(() => undefined);
 export const navigated: boolean = useVuEPG().navigate("down");
 const releasePause: () => void = useVuEPG().pause();
 releasePause();
-const mode: ScrollMode = "center";
-export const groupOptions: EPGGroupOptions = { scroll: mode };
+export const scrollBinding: ScrollBinding = "center";
+export const groupOptions: EPGGroupOptions = { default: true };
 // @ts-expect-error 滚动方式不接受 smooth
-export const invalidGroupOptions: EPGGroupOptions = { scroll: "smooth" };
+export const invalidScrollBinding: ScrollBinding = "smooth";
+// @ts-expect-error 导航分组不负责滚动容器配置
+export const invalidGroupOptions: EPGGroupOptions = { scroll: true };
 // @ts-expect-error 导航方向只能是 up / down / left / right
 useVuEPG().navigate("forward");

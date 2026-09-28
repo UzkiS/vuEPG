@@ -7,7 +7,7 @@
  * - `core/`     框架无关的核心：注册表、焦点状态、导航算法、按键映射
  */
 import type { ObjectDirective } from "vue";
-import type { EPGGroupOptions, EPGItemOptions } from "./core";
+import type { EPGGroupOptions, EPGItemOptions, ScrollBinding } from "./core";
 import { plugin } from "./vue/plugin";
 import type { VuEPG } from "./vue/use-vuepg";
 
@@ -35,6 +35,7 @@ export type {
   KeyActionCallback,
   KeyActionOptions,
   KeyCode,
+  ScrollBinding,
   ScrollMode,
 } from "./core";
 
@@ -49,5 +50,7 @@ declare module "vue" {
     vEpgItem: ObjectDirective<HTMLElement, EPGItemOptions | undefined>;
     /** 将元素注册为 EPGGroup */
     vEpgGroup: ObjectDirective<HTMLElement, EPGGroupOptions | undefined>;
+    /** 将元素标记为滚动容器，与导航分组相互独立 */
+    vEpgScroll: ObjectDirective<HTMLElement, ScrollBinding | undefined>;
   }
 }

@@ -8,12 +8,13 @@ import VuEPG, {
   type EPGGroupOptions,
   type EPGItem,
   type EPGNode,
-  type ScrollMode,
+  type ScrollBinding,
 } from "../../src";
 
 const app = createApp({});
 app.use(VuEPG);
 app.use(VuEPG, { focusClass: "focused", debug: true, backHandler: () => undefined });
+app.use(VuEPG, { scrollViewport: true });
 // @ts-expect-error 插件选项只接受 EPGConfig 中的字段
 app.use(VuEPG, { unknown: true });
 
@@ -30,10 +31,12 @@ epg.move(document.body);
 export const navigated: boolean = epg.navigate("right");
 const releasePause: () => void = epg.pause();
 releasePause();
-const mode: ScrollMode = "nearest";
-export const groupOptions: EPGGroupOptions = { scroll: mode };
+export const scrollBinding: ScrollBinding = "nearest";
+export const groupOptions: EPGGroupOptions = { default: true };
 // @ts-expect-error 滚动方式不接受 smooth
-export const invalidGroupOptions: EPGGroupOptions = { scroll: "smooth" };
+export const invalidScrollBinding: ScrollBinding = "smooth";
+// @ts-expect-error 导航分组不负责滚动容器配置
+export const invalidGroupOptions: EPGGroupOptions = { scroll: true };
 // @ts-expect-error 导航方向只能是 up / down / left / right
 epg.navigate("forward");
 // @ts-expect-error 方向只能是 up / down / left / right

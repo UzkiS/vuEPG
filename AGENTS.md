@@ -32,14 +32,16 @@ src/
 ├── index.ts          公开入口：默认导出插件、useVuEPG、全部公开类型、Vue 类型增强
 ├── vue/              Vue 适配层
 │   ├── plugin.ts     插件安装：注册指令、$epg、开始监听键盘
-│   ├── directives.ts v-epg-item / v-epg-group（唯一区分 Vue 2 / 3 的地方）
+│   ├── directives.ts v-epg-item / v-epg-group / v-epg-scroll（唯一区分 Vue 2 / 3 的地方）
 │   ├── on-back.ts    onBack：把返回处理函数绑定到组件生命周期
 │   ├── api.ts        公开方法的唯一清单
 │   └── use-vuepg.ts  useVuEPG 与 VuEPG 类型
 └── core/             框架无关的核心（禁止依赖 vue）
     ├── index.ts      core 门面：对上层暴露的全部能力
-    ├── focus.ts      焦点状态机：当前焦点、焦点 class、移动、方向键处理
+    ├── focus.ts      焦点状态机：当前焦点、焦点 class、移动
+    ├── navigate.ts   方向操作：逐层查找、事件、焦点失效恢复
     ├── navigation.ts 纯几何算法：同一层级内按方向挑选目标
+    ├── scroll.ts     与导航组独立的滚动容器与文档视口处理
     ├── tree.ts       从 DOM 推导层级：父组、子节点、入口
     ├── registry.ts   注册表：元素 → 节点
     ├── keyboard.ts   按键映射与 keydown 处理

@@ -6,6 +6,7 @@ import EpgPlayground from "./components/EpgPlayground.vue";
 import HierarchyDemo from "./components/HierarchyDemo.vue";
 import LegacyNotice from "./components/LegacyNotice.vue";
 import NavigationDiagram from "./components/NavigationDiagram.vue";
+import ScrollDemo from "./components/ScrollDemo.vue";
 import "./style.css";
 
 export default {
@@ -19,5 +20,6 @@ export default {
     app.component("EpgPlayground", EpgPlayground);
     app.component("HierarchyDemo", HierarchyDemo);
     app.component("NavigationDiagram", NavigationDiagram);
+    app.component("ScrollDemo", ScrollDemo);
   },
 } satisfies Theme;
