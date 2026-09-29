@@ -103,7 +103,7 @@ export default class EPGItem {
         this.events.click = (vnode as CVNode).props.onClick!;
       }
       if ((vnode as CVNode).props?.onEnter) {
-        this.events.click = (vnode as CVNode).props.onEnter!;
+        this.events.enter = (vnode as CVNode).props.onEnter!;
       }
     }
   }

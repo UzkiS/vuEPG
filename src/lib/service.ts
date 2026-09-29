@@ -208,13 +208,14 @@ export const moveToItem = (target: EPGItem) => {
  * @returns
  */
 export const moveToGroup = (target: EPGGroup) => {
-  let buffer: EPGItem | EPGGroup | undefined = target.children.find(
+  const children = target.updateChildren();
+  let buffer: EPGItem | EPGGroup | undefined = children.find(
     (item) => item.isDefault == true
   );
   if (buffer == undefined) {
-    buffer = target.children[0];
+    buffer = children[0];
     if (buffer == undefined) {
-      throw new Error("当前 EPGGroup 不存在 EPGItem");
+      return;
     }
   }
   if (isEPGGroup(buffer.el!)) {
@@ -241,7 +242,7 @@ export const resume = () => {
 
 /** 设置按下按键事件的监听 */
 const setKeyboardEventListener = () => {
-  document.onkeydown = (event) => {
+  document.addEventListener("keydown", (event) => {
     const keyCode = event.code
       ? event.code
       : event.which
@@ -251,7 +252,7 @@ const setKeyboardEventListener = () => {
       return;
     }
     eventHandler(event, keyCode);
-  };
+  });
 };
 /** 按键事件处理器 */
 const eventHandler = (event: KeyboardEvent, keyCode: string | number) => {

@@ -1,23 +1,16 @@
 {
   "name": "vuepg",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Vue2/3 通用大屏端焦点管理工具",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "git:fixup": "git add . && git commit --amend --no-edit",
-    "update:version": "node ./scripts/updateVersion.mjs",
-    "autobuild": "npm run update:version && npm run git:fixup && npm run build",
-    "build": "rimraf dist/ && tsc",
-    "test:2": "vue-demi-switch 2 && jest",
-    "test:3": "vue-demi-switch 3 vue3 && jest",
-    "publish:major": "npm version major && npm run autobuild && npm publish && git push",
-    "publish:minor": "npm version minor && npm run autobuild && npm publish && git push",
-    "publish:patch": "npm version patch && npm run autobuild && npm publish && git push",
-    "publish:premajor": "npm version premajor && npm run autobuild && npm publish && git push",
-    "publish:preminor": "npm version preminor && npm run autobuild && npm publish && git push",
-    "publish:prepatch": "npm version prepatch && npm run autobuild && npm publish && git push",
-    "publish:prerelease": "npm version prerelease && npm run autobuild && npm publish && git push"
+    "build": "vue-demi-switch 3 && rimraf dist/ && tsc",
+    "test": "pnpm test:3 && pnpm test:2",
+    "test:2": "vue-demi-switch 2 vue2 && vitest run",
+    "test:3": "vue-demi-switch 3 && vitest run",
+    "check": "pnpm test && pnpm build",
+    "publish:v1": "pnpm check && npm publish --tag v1"
   },
   "repository": {
     "type": "git",
@@ -39,8 +32,11 @@
     "url": "https://github.com/UzkiS/vuEPG/issues"
   },
   "homepage": "https://github.com/UzkiS/vuEPG#readme",
+  "publishConfig": {
+    "tag": "v1"
+  },
   "dependencies": {
-    "vue-demi": "latest"
+    "vue-demi": "0.14.10"
   },
   "peerDependencies": {
     "@vue/composition-api": "^1.0.0-rc.1",
@@ -51,9 +47,13 @@
       "optional": true
     }
   },
+  "packageManager": "pnpm@12.6.0",
   "devDependencies": {
-    "vue": "latest",
-    "rimraf": "latest",
-    "typescript": "latest"
+    "jsdom": "26.1.0",
+    "rimraf": "5.0.10",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4",
+    "vue": "3.5.43",
+    "vue2": "npm:vue@2.7.16"
   }
 }

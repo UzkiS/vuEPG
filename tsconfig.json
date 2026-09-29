@@ -7,5 +7,5 @@
     "strict": true,
     "moduleResolution": "Node"
   },
-  "exclude": ["./scripts"]
+  "include": ["src/**/*.ts"]
 }

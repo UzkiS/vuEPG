@@ -27,7 +27,7 @@ export const keyActions: KeyActions = {
     callback: null,
   },
   BACK: {
-    code: ["Backspace", 4, 27, 8],
+    code: ["Backspace", "Escape", 4, 27, 8],
     preventDefault: true,
     callback: null,
   },

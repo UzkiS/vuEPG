@@ -36,7 +36,7 @@ export const getRecentTarget = (
     isTopGroup = true;
     selfLog("父元素获取失败，使用全局父元素");
   } else {
-    children = parent.children;
+    children = parent.updateChildren();
   }
   selfLog("该层所有子元素", children);
   /** 如果是最顶层且只有该元素本身 直接返回 */

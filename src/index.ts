@@ -52,7 +52,9 @@ export default {
       const index = dataContainer.groupArray.findIndex(
         (item: EPGGroup) => item.id === el.dataset.epgGroupId
       );
-      dataContainer.groupArray.splice(index, 1);
+      if (index !== -1) {
+        dataContainer.groupArray.splice(index, 1);
+      }
     };
     app.directive(
       "epg-group",
@@ -95,7 +97,7 @@ export default {
     console.log(
       "\n %c vuEPG loaded " +
         PACKAGE_VERSION +
-        " %c https://docs.ito.fun/vuepg \n",
+        " %c https://uzkis.github.io/vuEPG/v1/introduction \n",
       "color: white; background: pink; padding:5px 0;",
       "background: skyblue; padding:5px 0;"
     );

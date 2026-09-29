@@ -4,14 +4,14 @@ Vue2/3 通用大屏端焦点管理工具，基于 vue-epg 完全重写， with T
 
 [![npm](https://img.shields.io/npm/v/vuepg.svg)](https://www.npmjs.com/package/vuepg)
 
-[document](http://docs.ito.fun/vuepg)
+[1.x 文档](https://uzkis.github.io/vuEPG/v1/introduction)
 
 # 快速开始
 
 ## 安装
 
 ```sh
-pnpm install vuepg
+pnpm add vuepg@^1.2.2
 ```
 
 ## 注册和配置插件实例

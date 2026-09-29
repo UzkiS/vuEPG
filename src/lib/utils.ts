@@ -34,7 +34,7 @@ export const generateID = (pre: string = ""): string =>
  * @returns
  */
 export const isHidden = (el: HTMLElement) => {
-  return el.offsetParent == null;
+  return !el.isConnected || el.getClientRects().length === 0;
 };
 
 /**

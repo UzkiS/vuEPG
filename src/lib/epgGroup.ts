@@ -79,7 +79,7 @@ export default class EPGGroup {
         this.events.right = (vnode as CVNode).props.onRight!;
       }
       if ((vnode as CVNode).props?.onEnter) {
-        this.events.right = (vnode as CVNode).props.onEnter!;
+        this.events.enter = (vnode as CVNode).props.onEnter!;
       }
     }
   }
