@@ -56,7 +56,7 @@ interface EPGGroupDirective {
 焦点进入本组、且本组的默认（或第一个）子节点是 EPGGroup 时触发。
 
 ::: warning 已知问题
-Vue 3 中 `@enter` 不生效，并且会覆盖同一分组上的 `@right`。该问题已在 2.0 中修复（2.0 中为 `@epg-enter`，焦点从组外进入时总会触发）。
+Vue 3 的 1.2.1 及更早版本中，`@enter` 不生效，并且会覆盖同一分组上的 `@right`。1.2.2 已修复绑定错误。2.x 中事件改为 `@epg-enter`，焦点从组外进入时总会触发。
 :::
 
 `@leave`（未实现）
