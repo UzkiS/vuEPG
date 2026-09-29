@@ -1,28 +1,116 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { useVuEPG } from "vuepg";
 
 const props = defineProps<{ kind: "horizontal" | "vertical" | "nested" }>();
 const epg = useVuEPG();
 const stage = ref<HTMLElement | null>(null);
 const current = ref("");
+const step = ref(-1);
 const outerOffset = ref(0);
 const firstOffset = ref(0);
 const secondOffset = ref(0);
+const contentSize = ref(0);
+const viewSize = ref(1);
+const frameHeight = ref(80);
 
 interface Mark {
-  id: string;
-  label: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  readonly id: string;
+  readonly label: string;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
 }
+
 const marks = ref<Mark[]>([]);
-const rows = ref<Mark[]>([]);
 const entries = Array.from({ length: 7 }, (_, index) => index);
 const clipId = `scroll-demo-${props.kind}`;
-const areaHeight = props.kind === "nested" ? 172 : props.kind === "vertical" ? 150 : 84;
+const frame = computed(() => {
+  if (props.kind === "vertical") {
+    return { x: 62, y: 60, width: 296, height: 275 };
+  }
+  if (props.kind === "nested") {
+    return { x: 42, y: 60, width: 322, height: 330 };
+  }
+  return { x: 26, y: 64, width: 368, height: 222 };
+});
+const title = computed(() =>
+  props.kind === "horizontal"
+    ? "横向列表"
+    : props.kind === "vertical"
+      ? "纵向列表"
+      : "跨组与嵌套容器",
+);
+const labels = computed(() =>
+  props.kind === "nested"
+    ? ["起点", "① 上排向右", "② 进入下排", "③ 下排向右"]
+    : props.kind === "vertical"
+      ? ["起点", "① 超出下缘", "② 到达末项"]
+      : ["起点", "① 超出右缘", "② 到达末项"],
+);
+const caption = computed(() => {
+  if (step.value < 0) {
+    return current.value === ""
+      ? "点击步骤，看焦点进入可视区域时滚动了哪个容器。"
+      : `当前焦点是${focusLabel.value}，滚动位置由真实容器计算。`;
+  }
+  if (props.kind === "nested") {
+    return [
+      "焦点从上排第一项开始，三个容器都未滚动。",
+      "上排向右滚动；下排和外层目录保持原位。",
+      "进入下排时，外层目录向下滚动；上排保留原位置。",
+      "下排再向右滚动；上排的滚动位置仍然保留。",
+    ][step.value];
+  }
+  const offset = outerOffset.value;
+  if (step.value === 0) {
+    return "焦点已在可视区域内，nearest 不会滚动。";
+  }
+  return `${props.kind === "vertical" ? "列表向下" : "列表向右"}滚动 ${String(offset)}px，让焦点项完整可见。`;
+});
+const focusLabel = computed(() => {
+  if (current.value === "") {
+    return "未选择";
+  }
+  const number = Number(current.value.slice(1)) + 1;
+  if (props.kind === "nested") {
+    return `${current.value.startsWith("a") ? "上排" : "下排"} ${String(number)}`;
+  }
+  return `${props.kind === "vertical" ? "频道" : "卡片"} ${String(number)}`;
+});
+const progress = computed(() => {
+  const max = Math.max(0, contentSize.value - viewSize.value);
+  const width = frame.value.width;
+  const visible = max === 0 ? width : Math.max(44, (viewSize.value / contentSize.value) * width);
+  const position = max === 0 ? 0 : (Math.min(outerOffset.value, max) / max) * (width - visible);
+  return { visible, position };
+});
+const lanes = computed(() => [
+  {
+    id: "first",
+    label: "组 A · 上排",
+    y: 93,
+    offset: firstOffset.value,
+    marks: marks.value.filter((mark) => mark.id.startsWith("a")),
+    active: current.value.startsWith("a"),
+  },
+  {
+    id: "second",
+    label: "组 B · 下排",
+    y: 194,
+    offset: secondOffset.value,
+    marks: marks.value.filter((mark) => mark.id.startsWith("b")),
+    active: current.value.startsWith("b"),
+  },
+]);
+const outerProgress = computed(() => {
+  const height = 161;
+  const max = Math.max(0, contentSize.value - viewSize.value);
+  const visible = max === 0 ? height : Math.max(32, (viewSize.value / contentSize.value) * height);
+  const position = max === 0 ? 0 : (Math.min(outerOffset.value, max) / max) * (height - visible);
+  return { visible, position };
+});
 
 const measure = (): void => {
   const root = stage.value;
@@ -30,32 +118,29 @@ const measure = (): void => {
     return;
   }
   const view = root.getBoundingClientRect();
-  const scale = Math.min(300 / view.width, areaHeight / view.height);
+  const scene = frame.value;
+  const scale = scene.width / view.width;
+  frameHeight.value = view.height * scale;
   marks.value = Array.from(root.querySelectorAll<HTMLElement>("[data-demo-id]"), (el) => {
     const box = el.getBoundingClientRect();
+    const row = props.kind === "nested" ? el.closest<HTMLElement>("[data-row]") : null;
+    const rowBox = row?.getBoundingClientRect();
+    const itemScale = rowBox === undefined ? scale : scene.width / rowBox.width;
+    const top = row?.dataset["row"] === "first" ? 93 : 194;
     return {
       id: el.dataset["demoId"] ?? "",
       label: el.textContent.trim(),
-      x: 24 + (box.left - view.left) * scale,
-      y: 36 + (box.top - view.top) * scale,
-      width: box.width * scale,
-      height: box.height * scale,
+      x: scene.x + (box.left - (rowBox?.left ?? view.left)) * itemScale,
+      y: rowBox === undefined ? scene.y + (box.top - view.top) * scale : top + 5,
+      width: box.width * itemScale,
+      height: props.kind === "nested" ? 49 : box.height * scale,
     };
   });
-  rows.value = Array.from(root.querySelectorAll<HTMLElement>("[data-row]"), (el) => {
-    const box = el.getBoundingClientRect();
-    return {
-      id: el.dataset["row"] ?? "",
-      label: el.dataset["row"] === "first" ? "上排" : "下排",
-      x: 24 + (box.left - view.left) * scale,
-      y: 36 + (box.top - view.top) * scale,
-      width: box.width * scale,
-      height: box.height * scale,
-    };
-  });
-  outerOffset.value = root.scrollTop || root.scrollLeft;
+  outerOffset.value = props.kind === "horizontal" ? root.scrollLeft : root.scrollTop;
   firstOffset.value = root.querySelector<HTMLElement>("[data-row='first']")?.scrollLeft ?? 0;
   secondOffset.value = root.querySelector<HTMLElement>("[data-row='second']")?.scrollLeft ?? 0;
+  contentSize.value = props.kind === "horizontal" ? root.scrollWidth : root.scrollHeight;
+  viewSize.value = props.kind === "horizontal" ? root.clientWidth : root.clientHeight;
 };
 
 const focus = (id: string): void => {
@@ -68,76 +153,179 @@ const focus = (id: string): void => {
   }
 };
 
-const step = (difference: number): void => {
-  const index = Number(current.value.slice(1));
-  const next = Number.isNaN(index) ? 0 : Math.min(6, Math.max(0, index + difference));
-  focus(`${props.kind === "vertical" ? "v" : "h"}${String(next)}`);
+const chooseItem = (id: string): void => {
+  focus(id);
+  step.value = -1;
 };
 
-const navigateNested = (direction: "up" | "down" | "left" | "right"): void => {
-  if (current.value === "") {
-    focus("a0");
+const selectStep = (index: number): void => {
+  const root = stage.value;
+  if (root === null) {
     return;
   }
-  if (epg.navigate(direction)) {
-    const focused = epg.getCurrentItem()?.el.dataset["demoId"];
-    if (focused !== undefined) {
-      current.value = focused;
-    }
-    measure();
+  if (props.kind !== "nested") {
+    root.scrollLeft = 0;
+    root.scrollTop = 0;
+    focus(`${props.kind === "vertical" ? "v" : "h"}0`);
+    focus(`${props.kind === "vertical" ? "v" : "h"}${String([0, 3, 6][index])}`);
+    step.value = index;
+    return;
   }
+  const first = root.querySelector<HTMLElement>("[data-row='first']");
+  const second = root.querySelector<HTMLElement>("[data-row='second']");
+  root.scrollTop = 0;
+  if (first !== null) {
+    first.scrollLeft = 0;
+  }
+  if (second !== null) {
+    second.scrollLeft = 0;
+  }
+  focus("a0");
+  if (index >= 1) {
+    focus("a6");
+  }
+  if (index >= 2 && epg.navigate("down")) {
+    current.value = epg.getCurrentItem()?.el.dataset["demoId"] ?? current.value;
+  }
+  if (index >= 3) {
+    focus("b6");
+  }
+  step.value = index;
+  measure();
 };
 
 onMounted(() => {
-  void nextTick(measure);
+  void nextTick(() => {
+    selectStep(0);
+  });
 });
 </script>
 
 <template>
   <figure class="scroll-demo">
     <svg
-      viewBox="0 0 350 245"
+      :viewBox="`0 0 420 ${frame.height}`"
       role="img"
-      :aria-label="`滚动位置实时示意，当前焦点：${current || '未选择'}`"
+      :aria-label="`${title}实时演示，焦点：${focusLabel}`"
     >
       <defs>
         <clipPath :id="clipId">
-          <rect x="24" y="36" width="300" :height="areaHeight" rx="8" />
+          <rect :x="frame.x" :y="frame.y" :width="frame.width" :height="frameHeight" rx="10" />
+        </clipPath>
+        <clipPath v-for="lane in lanes" :id="`${clipId}-${lane.id}`" :key="lane.id">
+          <rect x="42" :y="lane.y" width="322" height="60" rx="8" />
         </clipPath>
       </defs>
-      <text x="24" y="24" class="title">
+      <text x="26" y="27" class="title">{{ title }}</text>
+      <text x="26" y="46" class="subtitle">
         {{
-          kind === "horizontal" ? "横向列表" : kind === "vertical" ? "纵向列表" : "跨组与嵌套容器"
+          kind === "nested" ? "两排展开显示，右侧滑块记录目录滚动" : "可视区域固定，内容随焦点移动"
         }}
       </text>
-      <rect x="24" y="36" width="300" :height="areaHeight" rx="8" class="viewport" />
-      <g :clip-path="`url(#${clipId})`">
-        <g v-for="row in rows" :key="row.id" class="row-mark">
-          <rect :x="row.x" :y="row.y" :width="row.width" :height="row.height" rx="5" />
-          <text :x="row.x + 8" :y="row.y + 14">{{ row.label }}</text>
+      <template v-if="kind === 'nested'">
+        <rect class="outer-frame" x="26" y="61" width="354" height="216" rx="12" />
+        <g v-for="lane in lanes" :key="lane.id" class="lane" :class="{ active: lane.active }">
+          <text x="43" :y="lane.y - 10" class="lane-label">{{ lane.label }}</text>
+          <text x="363" :y="lane.y - 10" text-anchor="end" class="lane-offset">
+            {{ lane.offset }}px
+          </text>
+          <rect class="lane-frame" x="42" :y="lane.y" width="322" height="60" rx="8" />
+          <g :clip-path="`url(#${clipId}-${lane.id})`">
+            <g
+              v-for="mark in lane.marks"
+              :key="mark.id"
+              class="mark"
+              :class="{ selected: mark.id === current }"
+              role="button"
+              tabindex="0"
+              :aria-label="`聚焦${mark.label}`"
+              @click="chooseItem(mark.id)"
+              @keydown.enter="chooseItem(mark.id)"
+              @keydown.space.prevent="chooseItem(mark.id)"
+            >
+              <rect :x="mark.x" :y="mark.y" :width="mark.width" :height="mark.height" rx="7" />
+              <text :x="mark.x + mark.width / 2" :y="mark.y + mark.height / 2">
+                {{ mark.label }}
+              </text>
+            </g>
+          </g>
         </g>
-        <g
-          v-for="mark in marks"
-          :key="mark.id"
-          class="mark"
-          :class="{ selected: mark.id === current }"
-          role="button"
-          tabindex="0"
-          :aria-label="`移动到${mark.label}`"
-          @click="focus(mark.id)"
-          @keydown.enter="focus(mark.id)"
-        >
-          <rect :x="mark.x" :y="mark.y" :width="mark.width" :height="mark.height" rx="5" />
-          <text :x="mark.x + mark.width / 2" :y="mark.y + mark.height / 2">{{ mark.label }}</text>
+        <rect class="rail" x="396" y="93" width="6" height="161" rx="3" />
+        <rect
+          class="thumb"
+          x="393"
+          :y="93 + outerProgress.position"
+          width="12"
+          :height="outerProgress.visible"
+          rx="6"
+        />
+        <text x="26" y="306" class="readout">焦点：{{ focusLabel }}</text>
+        <text x="380" y="306" text-anchor="end" class="readout">目录向下 {{ outerOffset }}px</text>
+      </template>
+      <template v-else>
+        <rect
+          class="viewport"
+          :x="frame.x"
+          :y="frame.y"
+          :width="frame.width"
+          :height="frameHeight"
+          rx="10"
+        />
+        <g :clip-path="`url(#${clipId})`">
+          <g
+            v-for="mark in marks"
+            :key="mark.id"
+            class="mark"
+            :class="{ selected: mark.id === current }"
+            role="button"
+            tabindex="0"
+            :aria-label="`聚焦${mark.label}`"
+            @click="chooseItem(mark.id)"
+            @keydown.enter="chooseItem(mark.id)"
+            @keydown.space.prevent="chooseItem(mark.id)"
+          >
+            <rect :x="mark.x" :y="mark.y" :width="mark.width" :height="mark.height" rx="7" />
+            <text :x="mark.x + mark.width / 2" :y="mark.y + mark.height / 2">{{ mark.label }}</text>
+          </g>
         </g>
-      </g>
-      <text x="24" y="228" class="status">
-        {{
-          kind === "nested"
-            ? `外层 ↓ ${outerOffset}px · 上排 → ${firstOffset}px · 下排 → ${secondOffset}px`
-            : `${kind === "vertical" ? "纵向" : "横向"}滚动 ${outerOffset}px · 焦点 ${current || "未选择"}`
-        }}
-      </text>
+        <g v-if="kind === 'horizontal'">
+          <rect class="rail" :x="frame.x" y="158" :width="frame.width" height="7" rx="3.5" />
+          <rect
+            class="thumb"
+            :x="frame.x + progress.position"
+            y="155"
+            :width="progress.visible"
+            height="13"
+            rx="6.5"
+          />
+          <text :x="frame.x" y="195" class="readout">焦点：{{ focusLabel }}</text>
+          <text :x="frame.x + frame.width" y="195" text-anchor="end" class="readout">
+            向右滚动 {{ outerOffset }}px
+          </text>
+        </g>
+        <g v-else>
+          <rect
+            class="rail"
+            :x="frame.x + frame.width + 9"
+            :y="frame.y"
+            width="7"
+            :height="frameHeight"
+            rx="3.5"
+          />
+          <rect
+            class="thumb"
+            :x="frame.x + frame.width + 6"
+            :y="frame.y + progress.position * (frameHeight / frame.width)"
+            width="13"
+            :height="progress.visible * (frameHeight / frame.width)"
+            rx="6.5"
+          />
+          <text :x="frame.x" y="251" class="readout">焦点：{{ focusLabel }}</text>
+          <text :x="frame.x + frame.width" y="251" text-anchor="end" class="readout">
+            向下滚动 {{ outerOffset }}px
+          </text>
+        </g>
+      </template>
     </svg>
 
     <div
@@ -155,8 +343,6 @@ onMounted(() => {
         type="button"
         tabindex="-1"
         :data-demo-id="`h${String(index)}`"
-        :class="{ selected: current === `h${String(index)}` }"
-        @click="focus(`h${String(index)}`)"
       >
         卡片 {{ index + 1 }}
       </button>
@@ -176,8 +362,6 @@ onMounted(() => {
         type="button"
         tabindex="-1"
         :data-demo-id="`v${String(index)}`"
-        :class="{ selected: current === `v${String(index)}` }"
-        @click="focus(`v${String(index)}`)"
       >
         频道 {{ index + 1 }}
       </button>
@@ -203,8 +387,6 @@ onMounted(() => {
           type="button"
           tabindex="-1"
           :data-demo-id="`a${String(index)}`"
-          :class="{ selected: current === `a${String(index)}` }"
-          @click="focus(`a${String(index)}`)"
         >
           上 {{ index + 1 }}
         </button>
@@ -217,8 +399,6 @@ onMounted(() => {
           type="button"
           tabindex="-1"
           :data-demo-id="`b${String(index)}`"
-          :class="{ selected: current === `b${String(index)}` }"
-          @click="focus(`b${String(index)}`)"
         >
           下 {{ index + 1 }}
         </button>
@@ -226,31 +406,18 @@ onMounted(() => {
     </div>
 
     <figcaption>
-      <div v-if="kind === 'nested'" class="controls">
-        <button type="button" @click="focus('a0')">从上排开始</button>
-        <button type="button" @click="navigateNested('left')">←</button>
-        <button type="button" @click="navigateNested('up')">↑</button>
-        <button type="button" @click="navigateNested('down')">↓</button>
-        <button type="button" @click="navigateNested('right')">→</button>
-      </div>
-      <div v-else class="controls">
-        <button type="button" @click="step(-1)">
-          {{ kind === "vertical" ? "↑ 上一项" : "← 上一项" }}
-        </button>
-        <button type="button" @click="step(1)">
-          {{ kind === "vertical" ? "↓ 下一项" : "→ 下一项" }}
-        </button>
-        <button type="button" @click="focus(`${kind === 'vertical' ? 'v' : 'h'}6`)">
-          跳到末项
+      <div class="steps" role="group" :aria-label="`${title}演示步骤`">
+        <button
+          v-for="(label, index) in labels"
+          :key="label"
+          type="button"
+          :class="{ on: step === index }"
+          @click="selectStep(index)"
+        >
+          {{ label }}
         </button>
       </div>
-      <p>
-        {{
-          kind === "nested"
-            ? "先点「从上排开始」，再用方向键观察行内和跨组滚动。"
-            : "点击图中的卡片或方向按钮，观察焦点与可视区域。"
-        }}
-      </p>
+      <p>{{ caption }}</p>
     </figcaption>
   </figure>
 </template>
@@ -258,7 +425,7 @@ onMounted(() => {
 <style scoped>
 .scroll-demo {
   margin: 20px 0;
-  padding: 14px;
+  padding: 16px;
   border: 1px solid var(--vp-c-divider);
   border-radius: 12px;
   background: var(--vp-c-bg-soft);
@@ -266,14 +433,14 @@ onMounted(() => {
 svg {
   display: block;
   width: 100%;
-  max-width: 440px;
-  margin: 0 auto 12px;
+  max-width: 520px;
+  margin: 0 auto;
 }
 .title {
   fill: var(--vp-c-text-1);
-  font: 600 14px sans-serif;
+  font: 600 16px sans-serif;
 }
-.status {
+.subtitle {
   fill: var(--vp-c-text-2);
   font: 12px sans-serif;
 }
@@ -282,6 +449,29 @@ svg {
   stroke: var(--vp-c-brand-1);
   stroke-width: 2;
 }
+.outer-frame {
+  fill: var(--vp-c-bg);
+  stroke: var(--vp-c-divider);
+  stroke-width: 2;
+}
+.lane-frame {
+  fill: var(--vp-c-bg-soft);
+  stroke: var(--vp-c-default-1);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+.lane.active .lane-frame {
+  fill: var(--vp-c-brand-soft);
+  stroke: var(--vp-c-brand-1);
+}
+.lane-label {
+  fill: var(--vp-c-text-1);
+  font: 600 13px sans-serif;
+}
+.lane-offset {
+  fill: var(--vp-c-text-2);
+  font: 12px sans-serif;
+}
 .mark {
   cursor: pointer;
 }
@@ -289,29 +479,37 @@ svg {
   fill: var(--vp-c-default-soft);
   stroke: var(--vp-c-default-1);
   stroke-width: 2;
+  transition:
+    fill 0.18s ease,
+    stroke 0.18s ease;
 }
 .mark.selected rect {
-  fill: var(--vp-c-brand-soft);
+  fill: var(--vp-c-brand-1);
   stroke: var(--vp-c-brand-1);
   stroke-width: 3;
-}
-.row-mark rect {
-  fill: var(--vp-c-brand-soft);
-  stroke: var(--vp-c-brand-1);
-  stroke-width: 1;
-  stroke-dasharray: 4 3;
-}
-.row-mark text {
-  fill: var(--vp-c-brand-1);
-  font: 11px sans-serif;
-  pointer-events: none;
 }
 .mark text {
   fill: var(--vp-c-text-1);
   text-anchor: middle;
-  dominant-baseline: middle;
-  font: 12px sans-serif;
+  dominant-baseline: central;
+  font: 600 15px sans-serif;
   pointer-events: none;
+}
+.mark.selected text {
+  fill: #fff;
+}
+.rail {
+  fill: var(--vp-c-default-soft);
+}
+.thumb {
+  fill: var(--vp-c-brand-1);
+  transition:
+    x 0.18s ease,
+    y 0.18s ease;
+}
+.readout {
+  fill: var(--vp-c-text-2);
+  font: 12px sans-serif;
 }
 .real {
   position: fixed;
@@ -319,23 +517,14 @@ svg {
   top: 0;
   opacity: 0;
   pointer-events: none;
-  max-width: 300px;
-  margin: 0 auto;
-  border: 1px dashed var(--vp-c-text-3);
-  border-radius: 7px;
+  width: 300px;
+  border: 1px solid transparent;
 }
 .real button {
   flex: 0 0 auto;
-  border: 1px solid var(--vp-c-divider);
+  border: 0;
   border-radius: 5px;
-  color: var(--vp-c-text-1);
   background: var(--vp-c-bg);
-  cursor: pointer;
-}
-.real button.selected {
-  border-color: var(--vp-c-brand-1);
-  color: var(--vp-c-brand-1);
-  background: var(--vp-c-brand-soft);
 }
 .horizontal {
   display: flex;
@@ -373,27 +562,29 @@ svg {
 .row button {
   width: 78px;
 }
-.controls {
+.steps {
   display: flex;
-  justify-content: center;
   flex-wrap: wrap;
-  gap: 8px;
+  justify-content: center;
+  gap: 6px;
   margin-top: 12px;
 }
-.controls button {
-  padding: 6px 10px;
+.steps button {
+  padding: 4px 10px;
   border: 1px solid var(--vp-c-divider);
   border-radius: 6px;
+  font-size: 13px;
   background: var(--vp-c-bg);
   cursor: pointer;
 }
-.controls button:hover {
+.steps button.on {
+  color: #fff;
   border-color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-1);
 }
 figcaption p {
-  margin: 8px 0 0;
-  text-align: center;
-  color: var(--vp-c-text-2);
-  font-size: 13px;
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.7;
 }
 </style>
