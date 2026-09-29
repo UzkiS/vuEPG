@@ -28,6 +28,16 @@
   - API 统一命名（如 `getFocusClass`、`findTarget`、`getNodeByElement`、`setKeyAction`），完整对照见迁移指南
   - 文档迁移至 GitHub Pages：https://uzkis.github.io/vuEPG/
 
+## 1.2.2
+
+- 1.x 维护补丁，保留原有 API 与 Vue 2/3 使用方式。
+- 修复 Vue 3 中分组 `@enter` 覆盖 `@right`、条目 `@enter` 覆盖 `@click` 的问题。
+- 修复卸载分组时误删其他分组、动态新增的子项无法通过方向键到达，以及移动到空分组时抛错的问题。
+- 修复 `position: fixed` 元素被误判为隐藏、导入时覆盖 `document.onkeydown`，以及 `Escape` 不触发返回的问题。
+- 补充 Vue 2.7 和 Vue 3 回归测试，更新 [1.x 文档](https://uzkis.github.io/vuEPG/v1/introduction)。
+
+安装：`pnpm add vuepg@^1.2.2`。npm 的 `legacy` 标签指向此版本，`latest` 仍指向 2.x。
+
 ## 1.2.1
 
 - 更新作者信息与构建脚本
