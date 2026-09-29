@@ -120,7 +120,7 @@ export default defineConfig({
     editLink: { pattern: `${REPO}/edit/main/docs/:path`, text: "在 GitHub 上编辑此页" },
     footer: {
       message: "基于 MIT 许可发布",
-      copyright: "Copyright © 2022-Present UzkiS",
+      copyright: "Copyright © 2022 – Present UzkiS",
     },
     search: {
       provider: "local",

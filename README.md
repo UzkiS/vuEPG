@@ -112,4 +112,4 @@ epg.onBack(() => closeDialog());
 
 ## License
 
-[MIT](./LICENSE) © 2022-present UzkiS
+[MIT](./LICENSE) © 2022 – Present UzkiS
