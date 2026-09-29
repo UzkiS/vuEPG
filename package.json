@@ -10,7 +10,7 @@
     "test:2": "vue-demi-switch 2 vue2 && vitest run",
     "test:3": "vue-demi-switch 3 && vitest run",
     "check": "pnpm test && pnpm build",
-    "publish:v1": "pnpm check && npm publish --tag v1"
+    "publish:legacy": "pnpm check && npm publish --tag legacy"
   },
   "repository": {
     "type": "git",
@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/UzkiS/vuEPG#readme",
   "publishConfig": {
-    "tag": "v1"
+    "tag": "legacy"
   },
   "dependencies": {
     "vue-demi": "0.14.10"
