@@ -4,7 +4,7 @@ title: EPGGroup
 
 # EPGGroup
 
-`EPGGroup` 是可移动焦点的集合，一个 `EPGGroup` 通常情况下至少包含一个 `EPGItem` | `EPGGroup` 。
+`EPGGroup` 是可移动焦点的集合，可以包含 `EPGItem` 或其他 `EPGGroup`。空分组不会成为导航落点。
 
 ## 指令绑定
 
@@ -54,9 +54,5 @@ interface EPGGroupDirective {
 `@enter`
 
 焦点进入本组、且本组的默认（或第一个）子节点是 EPGGroup 时触发。
-
-::: warning 已知问题
-Vue 3 的 1.2.1 及更早版本中，`@enter` 不生效，并且会覆盖同一分组上的 `@right`。1.2.2 已修复绑定错误。2.x 中事件改为 `@epg-enter`，焦点从组外进入时总会触发。
-:::
 
 `@leave`（未实现）

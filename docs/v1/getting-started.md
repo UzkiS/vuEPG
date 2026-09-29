@@ -7,7 +7,7 @@ title: 快速开始
 ## 安装
 
 ```sh
-pnpm install vuepg@1
+pnpm add vuepg@^1.2.2
 ```
 
 ## 注册和配置插件实例

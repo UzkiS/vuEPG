@@ -44,7 +44,7 @@ const keyActions = {
     callback: null,
   },
   BACK: {
-    code: ["Backspace", 4, 27, 8],
+    code: ["Backspace", "Escape", 4, 27, 8],
     preventDefault: true,
     callback: null,
   },
@@ -109,9 +109,9 @@ const keyActions = {
 程序会依次读取`event.code`、`event.which`、`event.keyCode`的值，他们的值可以在控制台用如下方法查询，所以你如果需要添加某一个按键，那么你需要将这三个 code 都填写进去，程序会自动帮你去重。
 
 ```javascript
-document.onkeydown = (event) => {
+document.addEventListener("keydown", (event) => {
   console.log(event.code, event.which, event.keyCode);
-};
+});
 ```
 
 ## 注册新的按键事件

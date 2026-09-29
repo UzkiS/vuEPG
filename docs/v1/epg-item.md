@@ -73,3 +73,5 @@ interface EPGItemDirective {
 `@blur`
 
 当聚焦/失焦时触发。
+
+`@enter` 在获得焦点时触发，与 `@click` 相互独立。
