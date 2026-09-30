@@ -40,7 +40,7 @@ The Vite legacy plugin only transforms production builds, not its development se
 
 Transpilation converts unsupported syntax such as arrows and optional chaining into compatible syntax. Babel must process both application code and bundled dependencies; processing only src misses vuepg.
 
-Install in an existing webpack project:
+These installation commands and settings apply to webpack projects using the tool combination in the [complete example](./business-example). Existing projects should retain compatible webpack, Babel and loader versions. For Vue CLI, use the [project configuration below](#when-using-vue-cli).
 
 ```sh
 pnpm add core-js
@@ -113,23 +113,33 @@ Babel downlevels the whole bundle's syntax. Supply any additional runtime APIs r
 
 Load polyfills before their users. Recheck final output after changing dependencies.
 
-## Existing Vue CLI projects
+## When using Vue CLI
 
-Vue CLI 5 uses webpack 5. Check the browser target and dependency transpilation:
+First inspect the CLI service and Babel plugin versions actually installed in the project:
+
+```sh
+pnpm list @vue/cli-service @vue/cli-plugin-babel --depth 0
+```
+
+Retain the project's tool versions and add the required engine to its existing browser targets. For example, when Chromium 30 is the minimum target:
 
 ```text
 # .browserslistrc
 chrome >= 30
 ```
 
+Add vuepg to dependency transpilation in the Vue configuration file already used by the project:
+
 ```js
-// vue.config.cjs
+// Merge into the existing vue.config.js or another config file supported by the project.
 module.exports = {
-  transpileDependencies: true,
+  transpileDependencies: ["vuepg"],
 };
 ```
 
-Configure the Babel preset and core-js and check DOM APIs separately. Transpiling only src can leave unsupported dependency code.
+Append "vuepg" to an existing transpileDependencies list and retain other entries. Add other libraries that need transpilation according to actual usage. Enable the Babel plugin and preset that match the CLI so browser targets control syntax transforms.
+
+Supply runtime APIs as described in [the previous section](#load-runtime-polyfills). Check the final application scripts, dependencies and development client, then verify startup, input and updates in the target browser. Checking only src is insufficient.
 
 ## Remote and native Back
 

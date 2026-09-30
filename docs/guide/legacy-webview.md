@@ -41,7 +41,7 @@ webpack 开发入口会转译业务、库依赖和开发客户端。在相同 Ch
 
 「转译」指构建工具将旧浏览器无法解析的语法转换为兼容语法，例如将箭头函数和可选链转为旧浏览器可执行的代码。webpack 的 Babel loader 必须处理应用代码和打包进来的依赖；只处理 `src` 会遗漏 vuepg。
 
-已有 webpack 工程可以安装：
+以下安装命令和配置用于采用本仓库[完整示例](./business-example)工具组合的 webpack 工程。已有工程应沿用自己的 webpack、Babel 和 loader 配套版本；使用 Vue CLI 时，按[下文](#使用-vue-cli-时)的工程配置入口调整。
 
 ```sh
 pnpm add core-js
@@ -114,23 +114,33 @@ Babel 负责将整个 bundle 的语法降级；应用依赖与开发客户端所
 
 polyfill 必须在 Vue、vuEPG 和其他依赖使用这些 API 前加载。示例的 `src/polyfills.ts` 可以作为接入起点；调整依赖后继续检查最终产物。
 
-## 已有 Vue CLI 工程
+## 使用 Vue CLI 时
 
-Vue CLI 5 使用 webpack 5。保留现有工程时，核对浏览器目标与依赖转译配置：
+先查看工程实际安装的 CLI 服务与 Babel 插件版本：
+
+```sh
+pnpm list @vue/cli-service @vue/cli-plugin-babel --depth 0
+```
+
+沿用工程原有的工具版本，在现有浏览器目标中加入需要兼容的内核。例如，最低目标为 Chromium 30 时：
 
 ```text
 # .browserslistrc
 chrome >= 30
 ```
 
+在工程已使用的 Vue 配置文件中，把 vuepg 加入依赖转译列表：
+
 ```js
-// vue.config.cjs
+// 合并到现有的 vue.config.js 或工程已支持的配置文件。
 module.exports = {
-  transpileDependencies: true,
+  transpileDependencies: ["vuepg"],
 };
 ```
 
-同时配置 Babel preset 和 core-js，并单独核对 DOM API。仅转译自己的 `src` 目录，可能在 vuepg 或其他依赖中留下旧设备无法执行的代码。
+已有 `transpileDependencies` 列表时追加 `"vuepg"`，保留其他依赖；仍需转译的库也按实际情况加入列表。工程需启用与 CLI 配套的 Babel 插件和 preset，让浏览器目标参与语法转译。
+
+运行时 API 按[上一节](#加载运行时-polyfill)补齐。配置完成后检查最终业务脚本、依赖及开发客户端，并在目标浏览器验证启动、输入与更新；不能只检查自己的 `src` 目录。
 
 ## 遥控器和原生返回
 
