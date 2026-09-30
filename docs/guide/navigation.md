@@ -1,3 +1,7 @@
+---
+description: vuEPG 如何按方向、重叠和距离选择下一焦点，以及跨分组、默认入口和焦点失效时的移动规则。
+---
+
 # 移动规则
 
 按下方向键时，vuEPG 根据元素在屏幕上的**实际位置**选出下一个焦点。整个过程可以概括为两句话：
@@ -7,7 +11,7 @@
 
 本页的示意图都由 vuEPG 真实的导航算法实时计算，点击图下方的步骤按钮，可以逐步查看每一步保留和排除了哪些元素。
 
-<div class="legend">
+<div class="legend vuepg-demo">
   <span><i class="origin"></i>当前焦点 O</span>
   <span><i class="idle"></i>候选</span>
   <span><i class="pool"></i>参与比较</span>
@@ -107,30 +111,3 @@
 
 - 同一层级的挑选：[`src/core/navigation.ts`](https://github.com/UzkiS/vuEPG/blob/main/src/core/navigation.ts)
 - 逐层向外与进入分组：[`src/core/navigate.ts`](https://github.com/UzkiS/vuEPG/blob/main/src/core/navigate.ts)、[`src/core/tree.ts`](https://github.com/UzkiS/vuEPG/blob/main/src/core/tree.ts)
-
-<style>
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  margin: 16px 0;
-  font-size: 14px;
-}
-.legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.legend i {
-  display: inline-block;
-  width: 16px;
-  height: 12px;
-  border: 2px solid;
-  border-radius: 3px;
-}
-.legend .origin { background: var(--vp-c-brand-1); border-color: var(--vp-c-brand-1); }
-.legend .idle { background: var(--vp-c-default-soft); border-color: var(--vp-c-default-1); }
-.legend .pool { background: rgba(245, 158, 11, 0.16); border-color: #f59e0b; }
-.legend .chosen { background: var(--vp-c-success-soft); border-color: var(--vp-c-success-1); }
-.legend .excluded { border-style: dashed; border-color: var(--vp-c-text-3); opacity: 0.5; }
-</style>

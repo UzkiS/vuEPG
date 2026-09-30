@@ -1,0 +1,10 @@
+node_modules
+dist
+dist-modern
+.webpack-dev
+.cache
+legacy-results
+test-results
+playwright-report
+*.log
+*.tsbuildinfo

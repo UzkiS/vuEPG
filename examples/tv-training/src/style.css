@@ -1,0 +1,500 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+body {
+  background: #f7f7f8;
+  color: #3c3c43;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+  font: inherit;
+  border: 0;
+  border-radius: 14px;
+  padding: 16px 26px;
+  color: #3c3c43;
+  background: #ffffff;
+}
+button:focus {
+  outline: none;
+}
+.vuepg-focus {
+  background-color: #fff1f6;
+  outline: 4px solid #d81b60;
+  outline-offset: 5px;
+  box-shadow: 0 0 0 9px rgba(216, 27, 96, 0.14);
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+.example-topbar {
+  height: 58px;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #67676c;
+}
+.example-brand {
+  font-weight: 700;
+  font-size: 19px;
+  color: #3c3c43;
+}
+.example-brand span {
+  font-size: 12px;
+  margin-left: 10px;
+  color: #67676c;
+}
+.stage-wrapper {
+  margin: 0 auto;
+  overflow: hidden;
+}
+.tv-stage {
+  width: 1280px;
+  height: 720px;
+  transform-origin: left top;
+  background: #ffffff;
+  color: #3c3c43;
+  overflow: hidden;
+  position: relative;
+}
+.tv-header {
+  height: 106px;
+  padding: 0 65px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e2e2e5;
+}
+.brand-mark {
+  width: 49px;
+  height: 49px;
+  border-radius: 15px;
+  background: #d81b60;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 25px;
+  line-height: 49px;
+  text-align: center;
+}
+.brand-name {
+  margin-left: 15px;
+  font-size: 22px;
+  font-weight: 700;
+}
+.brand-name small {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  color: #77777f;
+  letter-spacing: 2px;
+}
+.tv-header-actions {
+  margin-left: auto;
+}
+.tv-header-actions button {
+  margin-left: 18px;
+}
+.quiet-button {
+  background: transparent;
+  padding: 12px 20px;
+  border-radius: 10px;
+}
+.home-screen {
+  padding: 55px 75px;
+  position: relative;
+  height: 614px;
+}
+.eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #77777f;
+}
+h1 {
+  margin: 20px 0;
+  font-size: 54px;
+  line-height: 1.25;
+  letter-spacing: -2px;
+}
+p {
+  color: #67676c;
+  font-size: 17px;
+  line-height: 1.9;
+}
+.hero-copy {
+  width: 545px;
+}
+.button-primary {
+  background: #d81b60;
+  color: #ffffff;
+}
+.hero-start {
+  margin-top: 12px;
+  width: 246px;
+  text-align: left;
+  font-weight: 700;
+}
+.hero-start span {
+  float: right;
+}
+.hero-progress {
+  margin-top: 27px;
+  font-size: 12px;
+  color: #77777f;
+}
+.hero-progress div {
+  margin-top: 10px;
+  height: 5px;
+  width: 240px;
+  background: #e8e8ec;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.hero-progress i {
+  display: block;
+  height: 100%;
+  background: #d81b60;
+}
+.hero-art {
+  position: absolute;
+  left: 704px;
+  top: 80px;
+  width: 460px;
+  height: 420px;
+}
+.orbit {
+  position: absolute;
+  border: 1px solid #e2e2e5;
+  border-radius: 50%;
+}
+.orbit-one {
+  left: -18px;
+  top: 34px;
+  width: 450px;
+  height: 350px;
+  transform: rotate(-25deg);
+}
+.orbit-two {
+  left: 20px;
+  top: 0;
+  width: 360px;
+  height: 430px;
+  transform: rotate(28deg);
+}
+.art-card {
+  border: 1px solid #e2e2e5;
+  position: absolute;
+  width: 220px;
+  height: 295px;
+  padding: 23px;
+  border-radius: 24px;
+  box-shadow: 0 20px 35px rgba(102, 34, 65, 0.12);
+}
+.art-card span {
+  font-size: 23px;
+  font-weight: 700;
+  opacity: 0.5;
+}
+.art-card i {
+  display: block;
+  font-style: normal;
+  font-size: 133px;
+  line-height: 180px;
+  text-align: center;
+}
+.art-card small {
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+.card-back {
+  background: #f4f4f6;
+  left: 170px;
+  top: 2px;
+  transform: rotate(16deg);
+  color: #77777f;
+}
+.card-front {
+  background: #ffffff;
+  left: 35px;
+  top: 66px;
+  transform: rotate(-10deg);
+  color: #d81b60;
+}
+.art-bubble {
+  position: absolute;
+  left: 180px;
+  top: 340px;
+  padding: 15px 24px;
+  background: #ffffff;
+  border-radius: 25px;
+  font-size: 14px;
+  box-shadow: 0 10px 30px rgba(102, 34, 65, 0.08);
+}
+.art-star {
+  position: absolute;
+  color: #d81b60;
+  font-size: 35px;
+}
+.star-one {
+  left: 9px;
+  top: 12px;
+}
+.star-two {
+  left: 390px;
+  top: 265px;
+}
+.home-bottom {
+  position: absolute;
+  bottom: 30px;
+  left: 75px;
+  right: 75px;
+  display: flex;
+  justify-content: space-between;
+  color: #77777f;
+  font-size: 11px;
+}
+.lesson-screen {
+  padding: 40px 60px 0;
+}
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.section-heading h1 {
+  font-size: 35px;
+  margin: 12px 0 0;
+}
+.section-heading p {
+  font-size: 12px;
+}
+.lesson-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin-top: 32px;
+  padding: 12px 12px 20px;
+  scrollbar-width: none;
+}
+.lesson-scroll::-webkit-scrollbar {
+  display: none;
+}
+.lesson-track {
+  display: flex;
+}
+.lesson-card {
+  border: 1px solid #e2e2e5;
+  flex: 0 0 224px;
+  height: 305px;
+  margin-right: 20px;
+  padding: 22px;
+  text-align: left;
+  position: relative;
+  border-radius: 22px;
+}
+.lesson-tone-0 {
+  background: #ffffff;
+}
+.lesson-tone-1 {
+  background: #ffffff;
+}
+.lesson-tone-2 {
+  background: #ffffff;
+}
+.lesson-number {
+  font-size: 17px;
+  opacity: 0.5;
+}
+.lesson-symbol {
+  display: block;
+  font-size: 94px;
+  height: 118px;
+  line-height: 118px;
+  text-align: center;
+}
+.lesson-card strong {
+  font-size: 22px;
+  display: block;
+  margin-top: 12px;
+}
+.lesson-card small {
+  display: block;
+  font-size: 11px;
+  margin-top: 8px;
+  opacity: 0.7;
+}
+.lesson-state {
+  font-size: 10px;
+  display: block;
+  margin-top: 20px;
+  opacity: 0.65;
+}
+.lesson-footer {
+  margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #77777f;
+}
+.player-screen {
+  text-align: center;
+  padding: 36px 60px;
+}
+.player-screen h1 {
+  font-size: 35px;
+  margin: 15px 0;
+}
+.player-screen p {
+  font-size: 14px;
+}
+.practice-board {
+  display: flex;
+  justify-content: center;
+  margin: 40px 0;
+}
+.practice-board span {
+  margin: 0 15px;
+  background: #f4f4f6;
+  width: 115px;
+  height: 115px;
+  border-radius: 22px;
+  font-size: 68px;
+  line-height: 115px;
+}
+.practice-actions button {
+  margin: 0 12px;
+}
+.dialog-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 720px;
+  background: rgba(48, 20, 37, 0.68);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.focus-dialog {
+  width: 590px;
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 46px;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+}
+.focus-dialog h2 {
+  font-size: 30px;
+  margin: 20px 0;
+}
+.focus-dialog p {
+  font-size: 15px;
+}
+.dialog-actions {
+  margin: 32px 0;
+}
+.dialog-actions button {
+  margin: 0 9px;
+  padding: 16px 20px;
+}
+.focus-dialog small {
+  font-size: 10px;
+  color: #77777f;
+}
+.notice {
+  position: absolute;
+  bottom: 26px;
+  left: 380px;
+  width: 520px;
+  padding: 18px;
+  border-radius: 12px;
+  background: #d81b60;
+  color: #ffffff;
+  text-align: center;
+  z-index: 20;
+  font-size: 14px;
+}
+.example-controls {
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+.example-controls button {
+  padding: 8px 14px;
+  font-size: 11px;
+  background: #ffffff;
+  color: #3c3c43;
+  margin-right: 6px;
+  border-radius: 7px;
+}
+.native-controls {
+  margin-left: 25px;
+}
+.native-controls > span {
+  margin-right: 10px;
+}
+.native-controls small {
+  display: block;
+  margin-top: 8px;
+  color: #77777f;
+}
+@media (max-width: 700px) {
+  .example-topbar {
+    padding: 0 12px;
+  }
+  .example-topbar > span {
+    font-size: 10px;
+  }
+  .example-controls {
+    display: block;
+    text-align: center;
+  }
+  .native-controls {
+    margin-left: 0;
+    margin-top: 12px;
+  }
+}
+
+.lesson-filter {
+  text-align: right;
+}
+.lesson-filter p {
+  margin: 0 0 8px;
+}
+.lesson-filter button {
+  padding: 9px 15px;
+  font-size: 12px;
+  background: #f4f4f6;
+}
+
+.lesson-empty {
+  padding: 75px 24px;
+  text-align: center;
+  border-radius: 22px;
+  background: #f4f4f6;
+}
+.lesson-empty strong {
+  font-size: 26px;
+}
+.lesson-empty p {
+  margin: 12px 0 0;
+  font-size: 15px;
+}
+
+.button-primary.vuepg-focus {
+  background-color: #d81b60;
+}

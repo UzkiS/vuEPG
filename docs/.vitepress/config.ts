@@ -1,6 +1,11 @@
 import { fileURLToPath } from "node:url";
+import { cp } from "node:fs/promises";
+import { createReadStream, existsSync, statSync } from "node:fs";
+import { resolve, extname, sep } from "node:path";
+import { pageHead } from "./seo";
+import { nav, sidebar } from "./navigation";
 import { defineConfig } from "vitepress";
-import { description, homepage, repository, version } from "../../package.json";
+import { description, homepage, repository } from "../../package.json";
 
 const REPO = repository.url.replace(/^git\+/, "").replace(/\.git$/, "");
 const BASE = new URL(homepage).pathname;
@@ -10,18 +15,110 @@ export default defineConfig({
   title: "vuEPG",
   titleTemplate: ":title | vuEPG",
   description,
+  locales: {
+    root: { label: "简体中文", lang: "zh-CN" },
+    en: {
+      label: "English",
+      lang: "en",
+      description:
+        "Vue 2.7 / Vue 3 focus management and spatial navigation for modern browsers, TV, IPTV and set-top boxes, including Android 4.x devices.",
+      themeConfig: {
+        editLink: { pattern: `${REPO}/edit/main/docs/:path`, text: "Edit this page on GitHub" },
+        outline: { level: [2, 3], label: "On this page" },
+        docFooter: { prev: "Previous", next: "Next" },
+        lastUpdated: { text: "Last updated" },
+        returnToTopLabel: "Back to top",
+        sidebarMenuLabel: "Menu",
+        darkModeSwitchLabel: "Appearance",
+        lightModeSwitchTitle: "Switch to light mode",
+        darkModeSwitchTitle: "Switch to dark mode",
+        langMenuLabel: "Change language",
+        search: {
+          provider: "local",
+          options: {
+            _render: (src, env, md) =>
+              /(?:^|\/)v1\//.test(env.relativePath) ? "" : md.render(src, env),
+            translations: {
+              button: { buttonText: "Search", buttonAriaLabel: "Search documentation" },
+              modal: {
+                noResultsText: "No results found",
+                resetButtonTitle: "Clear query",
+                footer: { selectText: "Select", navigateText: "Navigate", closeText: "Close" },
+              },
+            },
+          },
+        },
+        footer: {
+          message: `Released under the MIT License · <a href="${BASE}en/#support">Support the project</a>`,
+          copyright: "Copyright © 2022 – Present UzkiS",
+        },
+        nav: nav(true),
+        sidebar: sidebar(true),
+      },
+    },
+  },
   base: BASE,
   cleanUrls: true,
+  // 业务示例是构建结束后复制的独立 HTML 应用。
+  ignoreDeadLinks: [/^\/example\/tv-training(?:\/index)?\/?$/],
   lastUpdated: true,
   head: [
     ["link", { rel: "icon", type: "image/svg+xml", href: `${BASE}logo.svg` }],
     ["meta", { name: "theme-color", content: "#d81b60" }],
-    ["meta", { property: "og:type", content: "website" }],
-    ["meta", { property: "og:title", content: "vuEPG" }],
-    ["meta", { property: "og:description", content: description }],
-    ["meta", { property: "og:url", content: homepage }],
   ],
+  sitemap: {
+    hostname: homepage,
+    transformItems: (items) => items.filter((item) => !/(?:^|\/)v1\//.test(item.url)),
+  },
+  transformPageData: (page) => {
+    // 未单独提供摘要的页面仍有与标题相关的描述；重要入口使用明确的 frontmatter。
+    const summary: unknown = page.frontmatter["description"];
+    if (typeof summary !== "string" || summary.length === 0) {
+      page.description = page.relativePath.startsWith("en/")
+        ? `${page.title}: Vue 2.7 / Vue 3 focus management and spatial navigation.`
+        : `${page.title}：${description}`;
+    }
+  },
+  transformHead: ({ pageData, title, description: summary }) =>
+    pageHead(pageData.relativePath, title, summary),
+  buildEnd: async (site) => {
+    await cp(
+      fileURLToPath(new URL("../../examples/tv-training/dist", import.meta.url)),
+      `${site.outDir}/example/tv-training`,
+      { recursive: true },
+    );
+  },
   vite: {
+    plugins: [
+      {
+        name: "vuepg-business-example",
+        configureServer: (server) => {
+          const root = fileURLToPath(new URL("../../examples/tv-training/dist", import.meta.url));
+          server.middlewares.use(`${BASE}example/tv-training`, (request, response, next) => {
+            const pathname = new URL(request.url ?? "/", "http://localhost").pathname;
+            const file = resolve(root, `.${pathname === "/" ? "/index.html" : pathname}`);
+            if (!file.startsWith(root + sep) || !existsSync(file) || !statSync(file).isFile()) {
+              next();
+              return;
+            }
+            const types: Readonly<Record<string, string>> = {
+              ".js": "application/javascript",
+              ".html": "text/html; charset=utf-8",
+              ".css": "text/css",
+            };
+            response.setHeader("Content-Type", types[extname(file)] ?? "application/octet-stream");
+            const stream = createReadStream(file);
+            stream.on("error", () => {
+              if (!response.headersSent) {
+                response.writeHead(404);
+              }
+              response.end();
+            });
+            stream.pipe(response);
+          });
+        },
+      },
+    ],
     resolve: {
       // 文档中的示例与演示直接使用仓库源码，保证与发布内容一致
       alias: { vuepg: fileURLToPath(new URL("../../src/index.ts", import.meta.url)) },
@@ -29,104 +126,23 @@ export default defineConfig({
   },
   themeConfig: {
     logo: "/logo.svg",
-    nav: [
-      { text: "指引", link: "/guide/introduction", activeMatch: "/guide/" },
-      { text: "API", link: "/api/", activeMatch: "/api/" },
-      { text: "在线演示", link: "/guide/playground" },
-      {
-        text: `v${version}`,
-        items: [
-          { text: "更新日志", link: "/changelog" },
-          { text: "从 1.x 升级", link: "/migration/v1" },
-          { text: "从 vue-epg 迁移", link: "/migration/vue-epg" },
-          { text: "v1.x 文档（旧版）", link: "/v1/introduction" },
-        ],
-      },
-    ],
-    sidebar: {
-      // 1.x 旧版文档：内容冻结，仅做事实修正
-      "/v1/": [
-        {
-          text: "指引（1.x）",
-          items: [
-            { text: "什么是 vuEPG", link: "/v1/introduction" },
-            { text: "快速开始", link: "/v1/getting-started" },
-            { text: "vue-epg 差异", link: "/v1/difference" },
-          ],
-        },
-        {
-          text: "使用（1.x）",
-          items: [
-            { text: "配置 EPG", link: "/v1/configuration" },
-            { text: "按键事件", link: "/v1/key-action" },
-            { text: "返回回调", link: "/v1/back-callback" },
-            { text: "EPGItem", link: "/v1/epg-item" },
-            { text: "EPGGroup", link: "/v1/epg-group" },
-            { text: "移动规则", link: "/v1/move-rule" },
-            { text: "API", link: "/v1/api" },
-          ],
-        },
-        { text: "升级到 2.x", items: [{ text: "从 1.x 升级", link: "/migration/v1" }] },
-      ],
-      "/": [
-        {
-          text: "开始",
-          items: [
-            { text: "介绍", link: "/guide/introduction" },
-            { text: "快速开始", link: "/guide/getting-started" },
-            { text: "在线演示", link: "/guide/playground" },
-          ],
-        },
-        {
-          text: "焦点与导航",
-          items: [
-            { text: "EPGItem", link: "/guide/epg-item" },
-            { text: "EPGGroup", link: "/guide/epg-group" },
-            { text: "事件", link: "/guide/events" },
-            { text: "移动规则", link: "/guide/navigation" },
-            { text: "自动滚动", link: "/guide/scrolling" },
-          ],
-        },
-        {
-          text: "输入与集成",
-          items: [
-            { text: "配置", link: "/guide/configuration" },
-            { text: "按键映射", link: "/guide/key-actions" },
-            { text: "返回处理", link: "/guide/back" },
-            { text: "TypeScript", link: "/guide/typescript" },
-            { text: "性能与旧设备", link: "/guide/performance" },
-          ],
-        },
-        {
-          text: "参考",
-          items: [
-            { text: "API", link: "/api/" },
-            { text: "更新日志", link: "/changelog" },
-          ],
-        },
-        {
-          text: "迁移",
-          items: [
-            { text: "从 1.x 升级", link: "/migration/v1" },
-            { text: "从 vue-epg 迁移", link: "/migration/vue-epg" },
-          ],
-        },
-      ],
-    },
+    nav: nav(false),
+    sidebar: sidebar(false),
     socialLinks: [
       { icon: "github", link: REPO },
       { icon: "npm", link: "https://www.npmjs.com/package/vuepg" },
     ],
     editLink: { pattern: `${REPO}/edit/main/docs/:path`, text: "在 GitHub 上编辑此页" },
     footer: {
-      message: "基于 MIT 许可发布",
+      message: `基于 MIT 许可发布 · <a href="${BASE}#support">支持项目</a>`,
       copyright: "Copyright © 2022 – Present UzkiS",
     },
     search: {
       provider: "local",
       options: {
         // 站内搜索只收录当前版本，避免搜到 1.x 的旧用法
-        _render: (src, env, md) => (env.relativePath.startsWith("v1/") ? "" : md.render(src, env)),
+        _render: (src, env, md) =>
+          /(?:^|\/)v1\//.test(env.relativePath) ? "" : md.render(src, env),
         translations: {
           button: { buttonText: "搜索文档", buttonAriaLabel: "搜索文档" },
           modal: {
@@ -145,5 +161,6 @@ export default defineConfig({
     darkModeSwitchLabel: "外观",
     lightModeSwitchTitle: "切换到浅色模式",
     darkModeSwitchTitle: "切换到深色模式",
+    langMenuLabel: "切换语言",
   },
 });

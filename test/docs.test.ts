@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { useVuEPG } from "../src";
 
@@ -8,30 +8,58 @@ const read = (path: string): string => readFileSync(join(process.cwd(), path), "
 
 /** docs/ 下的全部 Markdown 页面（排除 VitePress 生成目录） */
 const pages = readdirSync(join(process.cwd(), "docs"), { recursive: true })
-  .map(String)
+  .map((file) => String(file).replaceAll("\\", "/"))
   .filter((file) => file.endsWith(".md") && !file.startsWith(".vitepress"));
 
 describe("documentation", () => {
-  it("documents exactly the public API (docs/api/index.md ⇄ src/vue/api.ts)", () => {
-    const documented = Array.from(
-      read("docs/api/index.md").matchAll(/^### epg\.(\w+)$/gm),
-      (m) => m[1],
-    );
+  it("documents exactly the public API in both languages", () => {
     const exposed = Object.keys(useVuEPG());
-    expect([...documented].sort()).toEqual([...exposed].sort());
+    for (const file of ["docs/api/index.md", "docs/en/api/index.md"]) {
+      const documented = Array.from(read(file).matchAll(/^### epg\.(\w+)$/gm), (m) => m[1]);
+      expect([...documented].sort(), file).toEqual([...exposed].sort());
+    }
+  });
+
+  it("provides matching Chinese and English pages, source references and interactive demos", () => {
+    const chinese = pages.filter((page) => !page.startsWith("en/")).sort();
+    const english = pages
+      .filter((page) => page.startsWith("en/"))
+      .map((page) => page.slice(3))
+      .sort();
+    expect(english).toEqual(chinese);
+    for (const page of chinese) {
+      const source = read(`docs/${page}`);
+      const translated = read(`docs/en/${page}`);
+      const regions = (content: string): string[] =>
+        Array.from(content.matchAll(/^<<< \S+#([\w-]+)/gm), (match) => String(match[1])).sort();
+      const demos = (content: string): string[] =>
+        Array.from(content.matchAll(/<(\w+(?:Demo|Diagram|Playground|Example))\b/g), (match) =>
+          String(match[1]),
+        ).sort();
+      expect(regions(translated), `${page} 源码引用`).toEqual(regions(source));
+      expect(demos(translated), `${page} 交互演示`).toEqual(demos(source));
+    }
+  });
+
+  it("keeps translated release versions synchronized", () => {
+    const versions = (content: string): string[] =>
+      Array.from(content.matchAll(/^## (\d+\.\d+\.\d+)$/gm), (match) => String(match[1]));
+    expect(versions(read("docs/en/changelog.md"))).toEqual(versions(read("CHANGELOG.md")));
   });
 
   it("only references source regions that exist", () => {
     const references = pages.flatMap((page) =>
-      Array.from(read(`docs/${page}`).matchAll(/^<<< \.\.\/\.\.\/(\S+?)#([\w-]+)/gm), (m) => ({
+      Array.from(read(`docs/${page}`).matchAll(/^<<< (\S+?)#([\w-]+)/gm), (m) => ({
         page,
-        file: String(m[1]),
+        file: resolve(process.cwd(), "docs", dirname(page), String(m[1])),
         region: String(m[2]),
       })),
     );
     expect(references.length).toBeGreaterThan(0);
     for (const { page, file, region } of references) {
-      expect(read(file), `${page} → ${file}#${region}`).toContain(`// #region ${region}`);
+      expect(readFileSync(file, "utf8"), `${page} → ${file}#${region}`).toContain(
+        `// #region ${region}`,
+      );
     }
   });
 });

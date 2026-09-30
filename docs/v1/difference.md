@@ -19,7 +19,7 @@ vuEPG 中，默认只会对预定义的 7 种按键事件执行`preventDefault()
 
 ### 自定义指令变更
 
-vue-epg 使用 `v-items`/`v-groups` 指令来注册可移动对象和组。vuEPG 1.0 起不再支持这两个指令，请改为 `v-epg-item`/`v-epg-group`。
+vue-epg 使用 `v-items`/`v-group` 指令来注册可移动对象和组。vuEPG 1.0 起不再支持这两个指令，请改为 `v-epg-item`/`v-epg-group`。
 
 ## 已移除，可恢复的
 

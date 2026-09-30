@@ -18,3 +18,12 @@ docs/.vitepress/dist
 !.vscode/extensions.json
 !.vscode/settings.json
 *.local
+
+# 独立示例与浏览器验证
+dist-modern
+.webpack-dev
+test-results
+playwright-report
+
+.cache/
+legacy-results

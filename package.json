@@ -1,7 +1,7 @@
 {
   "name": "vuepg",
   "version": "2.2.0",
-  "description": "Vue 2.7 / Vue 3 通用的大屏（TV / IPTV / 机顶盒）遥控器焦点管理与空间导航插件",
+  "description": "Vue 2.7 / Vue 3 焦点管理与空间导航，支持键盘与遥控器，适用于现代浏览器、TV、IPTV、机顶盒，兼顾 Android 4.x 等运营商存量盒子 | Vue focus & spatial navigation",
   "keywords": [
     "vue",
     "vue2",
@@ -15,7 +15,11 @@
     "focus",
     "focus-management",
     "spatial-navigation",
-    "keyboard-navigation"
+    "keyboard-navigation",
+    "android-tv",
+    "webview",
+    "legacy-browser",
+    "vuepg"
   ],
   "homepage": "https://uzkis.github.io/vuEPG/",
   "bugs": {
@@ -51,14 +55,24 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc -b && vue-tsc -p docs/tsconfig.json",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
+    "typecheck": "tsc -b && vue-tsc -p docs/tsconfig.json && pnpm --filter @vuepg/tv-training typecheck",
+    "docs:dev": "pnpm example:build && vitepress dev docs --host 0.0.0.0",
+    "docs:build": "pnpm example:build && vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm coverage && pnpm build && pnpm docs:build",
+    "check": "pnpm build && pnpm lint && pnpm format:check && pnpm typecheck && pnpm coverage && pnpm --filter @vuepg/tv-training build:modern && pnpm docs:build && pnpm example:check && node scripts/check-site.mjs",
     "changeset": "changeset",
     "release": "pnpm build && changeset publish",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "example:dev": "pnpm build && pnpm --filter @vuepg/tv-training dev",
+    "example:dev:tv": "pnpm build && pnpm --filter @vuepg/tv-training dev:tv",
+    "example:build": "pnpm build && pnpm --filter @vuepg/tv-training build",
+    "example:preview": "pnpm --filter @vuepg/tv-training preview",
+    "example:check": "node scripts/check-example.mjs",
+    "example:test": "pnpm build && pnpm --filter @vuepg/tv-training test:browser",
+    "legacy:install": "pnpm --filter @vuepg/tv-training legacy:install",
+    "test:chrome30": "pnpm build && pnpm --filter @vuepg/tv-training test:chrome30",
+    "legacy:clean": "pnpm --filter @vuepg/tv-training legacy:clean",
+    "benchmark:navigation": "node scripts/benchmark-navigation.mjs"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm exec lint-staged"
@@ -73,7 +87,7 @@
   "peerDependencies": {
     "vue": "^2.7.0 || ^3.0.0"
   },
-  "packageManager": "pnpm@12.6.0",
+  "packageManager": "pnpm@12.8.1",
   "publishConfig": {
     "access": "public",
     "provenance": true
@@ -104,6 +118,8 @@
     "vue": "3.5.43",
     "vue-eslint-parser": "10.4.1",
     "vue-tsc": "3.3.11",
-    "vue2": "npm:vue@2.7.16"
+    "vue2": "npm:vue@2.7.16",
+    "acorn": "8.18.0",
+    "@playwright/test": "1.63.0"
   }
 }

@@ -36,12 +36,12 @@ jobs:
       - uses: ./.github/actions/setup
 
       - name: Verify
-        run: pnpm lint && pnpm typecheck && pnpm coverage && pnpm build
+        run: pnpm build && pnpm lint && pnpm typecheck && pnpm coverage
 
       - id: changesets
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          version-script: pnpm changeset version
+          version-script: node scripts/prepare-release.ts
           commit-message: "chore: release"
           pr-title: "chore: release"
         env:

@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { useDocsText } from "../composables/use-docs-text";
 import { computed, nextTick, onMounted, ref } from "vue";
 import { useVuEPG } from "vuepg";
 
+const { text } = useDocsText();
 const props = defineProps<{ kind: "horizontal" | "vertical" | "nested" }>();
 const epg = useVuEPG();
 const stage = ref<HTMLElement | null>(null);
@@ -37,47 +39,84 @@ const frame = computed(() => {
 });
 const title = computed(() =>
   props.kind === "horizontal"
-    ? "横向列表"
+    ? text("横向列表", "Horizontal list")
     : props.kind === "vertical"
-      ? "纵向列表"
-      : "跨组与嵌套容器",
+      ? text("纵向列表", "Vertical list")
+      : text("跨组与嵌套容器", "Groups and nested scrolling"),
 );
 const labels = computed(() =>
   props.kind === "nested"
-    ? ["起点", "① 上排向右", "② 进入下排", "③ 下排向右"]
+    ? [
+        text("起点", "Start"),
+        text("① 上排向右", "① Top row right"),
+        text("② 进入下排", "② Enter bottom row"),
+        text("③ 下排向右", "③ Bottom row right"),
+      ]
     : props.kind === "vertical"
-      ? ["起点", "① 超出下缘", "② 到达末项"]
-      : ["起点", "① 超出右缘", "② 到达末项"],
+      ? [
+          text("起点", "Start"),
+          text("① 超出下缘", "① Below view"),
+          text("② 到达末项", "② Last item"),
+        ]
+      : [
+          text("起点", "Start"),
+          text("① 超出右缘", "① Beyond right"),
+          text("② 到达末项", "② Last item"),
+        ],
 );
 const caption = computed(() => {
   if (step.value < 0) {
     return current.value === ""
-      ? "点击步骤，看焦点进入可视区域时滚动了哪个容器。"
-      : `当前焦点是${focusLabel.value}，滚动位置由真实容器计算。`;
+      ? text(
+          "点击步骤，看焦点进入可视区域时滚动了哪个容器。",
+          "Choose a step to see which container scrolls to reveal focus.",
+        )
+      : text(
+          `当前焦点是${focusLabel.value}，滚动位置由真实容器计算。`,
+          `Focus is ${focusLabel.value}; offsets come from the actual containers.`,
+        );
   }
   if (props.kind === "nested") {
     return [
-      "焦点从上排第一项开始，三个容器都未滚动。",
-      "上排向右滚动；下排和外层目录保持原位。",
-      "进入下排时，外层目录向下滚动；上排保留原位置。",
-      "下排再向右滚动；上排的滚动位置仍然保留。",
+      text(
+        "焦点从上排第一项开始，三个容器都未滚动。",
+        "Focus starts at the first top-row item; no container has scrolled.",
+      ),
+      text(
+        "上排向右滚动；下排和外层目录保持原位。",
+        "The top row scrolls right; the bottom row and outer list stay in place.",
+      ),
+      text(
+        "进入下排时，外层目录向下滚动；上排保留原位置。",
+        "Entering the bottom row scrolls the outer list down; the top row keeps its position.",
+      ),
+      text(
+        "下排再向右滚动；上排的滚动位置仍然保留。",
+        "The bottom row scrolls right; the top row retains its position.",
+      ),
     ][step.value];
   }
   const offset = outerOffset.value;
   if (step.value === 0) {
-    return "焦点已在可视区域内，nearest 不会滚动。";
+    return text(
+      "焦点已在可视区域内，nearest 不会滚动。",
+      "Focus is already visible; nearest does not scroll.",
+    );
   }
-  return `${props.kind === "vertical" ? "列表向下" : "列表向右"}滚动 ${String(offset)}px，让焦点项完整可见。`;
+  return text(
+    `${props.kind === "vertical" ? "列表向下" : "列表向右"}滚动 ${String(offset)}px，让焦点项完整可见。`,
+    `The list scrolls ${props.kind === "vertical" ? "down" : "right"} by ${String(offset)}px to reveal the whole item.`,
+  );
 });
 const focusLabel = computed(() => {
   if (current.value === "") {
-    return "未选择";
+    return text("未选择", "None");
   }
   const number = Number(current.value.slice(1)) + 1;
   if (props.kind === "nested") {
-    return `${current.value.startsWith("a") ? "上排" : "下排"} ${String(number)}`;
+    return `${current.value.startsWith("a") ? text("上排", "Top row") : text("下排", "Bottom row")} ${String(number)}`;
   }
-  return `${props.kind === "vertical" ? "频道" : "卡片"} ${String(number)}`;
+  return `${props.kind === "vertical" ? text("频道", "Channel") : text("卡片", "Card")} ${String(number)}`;
 });
 const progress = computed(() => {
   const max = Math.max(0, contentSize.value - viewSize.value);
@@ -89,7 +128,7 @@ const progress = computed(() => {
 const lanes = computed(() => [
   {
     id: "first",
-    label: "组 A · 上排",
+    label: text("组 A · 上排", "Group A · Top row"),
     y: 93,
     offset: firstOffset.value,
     marks: marks.value.filter((mark) => mark.id.startsWith("a")),
@@ -97,7 +136,7 @@ const lanes = computed(() => [
   },
   {
     id: "second",
-    label: "组 B · 下排",
+    label: text("组 B · 下排", "Group B · Bottom row"),
     y: 194,
     offset: secondOffset.value,
     marks: marks.value.filter((mark) => mark.id.startsWith("b")),
@@ -202,11 +241,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <figure class="scroll-demo">
+  <figure class="scroll-demo vuepg-demo">
     <svg
       :viewBox="`0 0 420 ${frame.height}`"
       role="img"
-      :aria-label="`${title}实时演示，焦点：${focusLabel}`"
+      :aria-label="
+        text(`${title}实时演示，焦点：${focusLabel}`, `${title} demo, focus: ${focusLabel}`)
+      "
     >
       <defs>
         <clipPath :id="clipId">
@@ -219,7 +260,12 @@ onMounted(() => {
       <text x="26" y="27" class="title">{{ title }}</text>
       <text x="26" y="46" class="subtitle">
         {{
-          kind === "nested" ? "两排展开显示，右侧滑块记录目录滚动" : "可视区域固定，内容随焦点移动"
+          kind === "nested"
+            ? text(
+                "两排展开显示，右侧滑块记录目录滚动",
+                "Rows shown separately; the right thumb tracks outer scrolling",
+              )
+            : text("可视区域固定，内容随焦点移动", "Fixed viewport; content follows focus")
         }}
       </text>
       <template v-if="kind === 'nested'">
@@ -238,7 +284,7 @@ onMounted(() => {
               :class="{ selected: mark.id === current }"
               role="button"
               tabindex="0"
-              :aria-label="`聚焦${mark.label}`"
+              :aria-label="text(`聚焦${mark.label}`, `Focus ${mark.label}`)"
               @click="chooseItem(mark.id)"
               @keydown.enter="chooseItem(mark.id)"
               @keydown.space.prevent="chooseItem(mark.id)"
@@ -259,8 +305,10 @@ onMounted(() => {
           :height="outerProgress.visible"
           rx="6"
         />
-        <text x="26" y="306" class="readout">焦点：{{ focusLabel }}</text>
-        <text x="380" y="306" text-anchor="end" class="readout">目录向下 {{ outerOffset }}px</text>
+        <text x="26" y="306" class="readout">{{ text("焦点：", "Focus: ") }} {{ focusLabel }}</text>
+        <text x="380" y="306" text-anchor="end" class="readout">
+          {{ text("目录向下", "Outer list down") }} {{ outerOffset }}px
+        </text>
       </template>
       <template v-else>
         <rect
@@ -279,7 +327,7 @@ onMounted(() => {
             :class="{ selected: mark.id === current }"
             role="button"
             tabindex="0"
-            :aria-label="`聚焦${mark.label}`"
+            :aria-label="text(`聚焦${mark.label}`, `Focus ${mark.label}`)"
             @click="chooseItem(mark.id)"
             @keydown.enter="chooseItem(mark.id)"
             @keydown.space.prevent="chooseItem(mark.id)"
@@ -298,9 +346,11 @@ onMounted(() => {
             height="13"
             rx="6.5"
           />
-          <text :x="frame.x" y="195" class="readout">焦点：{{ focusLabel }}</text>
+          <text :x="frame.x" y="195" class="readout">
+            {{ text("焦点：", "Focus: ") }}{{ focusLabel }}
+          </text>
           <text :x="frame.x + frame.width" y="195" text-anchor="end" class="readout">
-            向右滚动 {{ outerOffset }}px
+            {{ text("向右滚动", "Scroll right") }} {{ outerOffset }}px
           </text>
         </g>
         <g v-else>
@@ -320,9 +370,11 @@ onMounted(() => {
             :height="progress.visible * (frameHeight / frame.width)"
             rx="6.5"
           />
-          <text :x="frame.x" y="251" class="readout">焦点：{{ focusLabel }}</text>
+          <text :x="frame.x" y="251" class="readout">
+            {{ text("焦点：", "Focus: ") }}{{ focusLabel }}
+          </text>
           <text :x="frame.x + frame.width" y="251" text-anchor="end" class="readout">
-            向下滚动 {{ outerOffset }}px
+            {{ text("向下滚动", "Scroll down") }} {{ outerOffset }}px
           </text>
         </g>
       </template>
@@ -344,7 +396,7 @@ onMounted(() => {
         tabindex="-1"
         :data-demo-id="`h${String(index)}`"
       >
-        卡片 {{ index + 1 }}
+        {{ text("卡片", "Card") }} {{ index + 1 }}
       </button>
     </div>
     <div
@@ -363,7 +415,7 @@ onMounted(() => {
         tabindex="-1"
         :data-demo-id="`v${String(index)}`"
       >
-        频道 {{ index + 1 }}
+        {{ text("频道", "Channel") }} {{ index + 1 }}
       </button>
     </div>
     <div
@@ -388,7 +440,7 @@ onMounted(() => {
           tabindex="-1"
           :data-demo-id="`a${String(index)}`"
         >
-          上 {{ index + 1 }}
+          {{ text("上", "Top") }} {{ index + 1 }}
         </button>
       </div>
       <div v-epg-group v-epg-scroll data-row="second" class="row" @scroll="measure">
@@ -400,13 +452,13 @@ onMounted(() => {
           tabindex="-1"
           :data-demo-id="`b${String(index)}`"
         >
-          下 {{ index + 1 }}
+          {{ text("下", "Bottom") }} {{ index + 1 }}
         </button>
       </div>
     </div>
 
     <figcaption>
-      <div class="steps" role="group" :aria-label="`${title}演示步骤`">
+      <div class="steps" role="group" :aria-label="text(`${title}演示步骤`, `${title} demo steps`)">
         <button
           v-for="(label, index) in labels"
           :key="label"
@@ -423,12 +475,20 @@ onMounted(() => {
 </template>
 
 <style scoped>
+[role="button"]:focus {
+  outline: none;
+}
+[role="button"]:focus-visible rect {
+  stroke: var(--demo-primary);
+  stroke-width: 3;
+}
+
 .scroll-demo {
   margin: 20px 0;
   padding: 16px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 12px;
-  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--demo-border);
+  border-radius: 18px;
+  background: var(--demo-canvas);
 }
 svg {
   display: block;
@@ -437,78 +497,78 @@ svg {
   margin: 0 auto;
 }
 .title {
-  fill: var(--vp-c-text-1);
+  fill: var(--demo-text);
   font: 600 16px sans-serif;
 }
 .subtitle {
-  fill: var(--vp-c-text-2);
+  fill: var(--demo-text-muted);
   font: 12px sans-serif;
 }
 .viewport {
-  fill: var(--vp-c-bg);
-  stroke: var(--vp-c-brand-1);
+  fill: var(--demo-surface);
+  stroke: var(--demo-primary);
   stroke-width: 2;
 }
 .outer-frame {
-  fill: var(--vp-c-bg);
-  stroke: var(--vp-c-divider);
+  fill: var(--demo-surface);
+  stroke: var(--demo-border);
   stroke-width: 2;
 }
 .lane-frame {
-  fill: var(--vp-c-bg-soft);
-  stroke: var(--vp-c-default-1);
+  fill: var(--demo-canvas);
+  stroke: var(--demo-border);
   stroke-width: 2;
   stroke-dasharray: 5 4;
 }
 .lane.active .lane-frame {
-  fill: var(--vp-c-brand-soft);
-  stroke: var(--vp-c-brand-1);
+  fill: var(--demo-primary-soft);
+  stroke: var(--demo-primary);
 }
 .lane-label {
-  fill: var(--vp-c-text-1);
+  fill: var(--demo-text);
   font: 600 13px sans-serif;
 }
 .lane-offset {
-  fill: var(--vp-c-text-2);
+  fill: var(--demo-text-muted);
   font: 12px sans-serif;
 }
 .mark {
   cursor: pointer;
 }
 .mark rect {
-  fill: var(--vp-c-default-soft);
-  stroke: var(--vp-c-default-1);
+  fill: var(--demo-muted);
+  stroke: var(--demo-border);
   stroke-width: 2;
   transition:
     fill 0.18s ease,
     stroke 0.18s ease;
 }
 .mark.selected rect {
-  fill: var(--vp-c-brand-1);
-  stroke: var(--vp-c-brand-1);
+  fill: var(--demo-primary-soft);
+  stroke: var(--demo-focus);
   stroke-width: 3;
 }
 .mark text {
-  fill: var(--vp-c-text-1);
+  fill: var(--demo-text);
   text-anchor: middle;
   dominant-baseline: central;
   font: 600 15px sans-serif;
   pointer-events: none;
 }
 .mark.selected text {
-  fill: #fff;
+  fill: var(--demo-text);
 }
 .rail {
-  fill: var(--vp-c-default-soft);
+  fill: var(--demo-muted);
 }
 .thumb {
-  fill: var(--vp-c-brand-1);
+  fill: var(--demo-primary);
   transition:
     x 0.18s ease,
     y 0.18s ease;
 }
 .readout {
-  fill: var(--vp-c-text-2);
+  fill: var(--demo-text-muted);
   font: 12px sans-serif;
 }
 .real {
@@ -524,7 +584,7 @@ svg {
   flex: 0 0 auto;
   border: 0;
   border-radius: 5px;
-  background: var(--vp-c-bg);
+  background: var(--demo-surface);
 }
 .horizontal {
   display: flex;
@@ -571,16 +631,16 @@ svg {
 }
 .steps button {
   padding: 4px 10px;
-  border: 1px solid var(--vp-c-divider);
+  border: 1px solid var(--demo-border);
   border-radius: 6px;
   font-size: 13px;
-  background: var(--vp-c-bg);
+  background: var(--demo-surface);
   cursor: pointer;
 }
 .steps button.on {
-  color: #fff;
-  border-color: var(--vp-c-brand-1);
-  background: var(--vp-c-brand-1);
+  color: var(--demo-on-primary);
+  border-color: var(--demo-primary);
+  background: var(--demo-primary);
 }
 figcaption p {
   margin: 10px 0 0;

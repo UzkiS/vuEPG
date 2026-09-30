@@ -1,6 +1,14 @@
-# pnpm 配置（单包仓库同样通过此文件配置 pnpm）
+linkWorkspacePackages: true
+
+packages:
+  - .
+  - examples/*
+
+# 库与独立业务示例共用 pnpm，示例依赖不进入库运行时
 
 # 允许执行安装脚本的依赖（pnpm 默认拦截所有依赖的安装脚本）
 allowBuilds:
+  core-js: false
   esbuild: true
   simple-git-hooks: true
+  vue-demi: true

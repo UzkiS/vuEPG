@@ -1,0 +1,51 @@
+{
+  "name": "@vuepg/tv-training",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5175 --strictPort",
+    "dev:tv": "webpack serve --config webpack.config.cjs --mode development",
+    "build": "webpack --config webpack.config.cjs --mode production",
+    "build:modern": "vite build",
+    "preview": "node scripts/serve.mjs",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "check:build": "node scripts/check-build.mjs",
+    "test:browser": "webpack --config webpack.config.cjs --mode production && playwright test",
+    "legacy:install": "node scripts/legacy.mjs install",
+    "test:chrome30": "webpack --config webpack.config.cjs --mode production && node scripts/legacy.mjs test",
+    "legacy:clean": "node scripts/legacy.mjs clean",
+    "check": "vue-tsc --noEmit -p tsconfig.json && webpack --config webpack.config.cjs --mode production && node scripts/check-build.mjs && vite build"
+  },
+  "dependencies": {
+    "vue": "2.7.16",
+    "vuepg": "^2.2.0",
+    "core-js": "3.50.0",
+    "whatwg-fetch": "3.6.20"
+  },
+  "devDependencies": {
+    "@babel/core": "8.0.6",
+    "@babel/preset-env": "8.0.6",
+    "@babel/preset-typescript": "8.0.1",
+    "@vitejs/plugin-vue2": "2.3.4",
+    "babel-loader": "10.1.1",
+    "css-loader": "7.1.5",
+    "html-webpack-plugin": "5.6.8",
+    "style-loader": "4.0.0",
+    "typescript": "6.0.3",
+    "vite": "7.3.6",
+    "vue-loader": "15.11.1",
+    "vue-template-compiler": "2.7.16",
+    "vue-tsc": "3.3.11",
+    "webpack": "5.111.1",
+    "webpack-cli": "7.2.3",
+    "webpack-dev-server": "6.0.0",
+    "acorn": "8.18.0",
+    "@playwright/test": "1.63.0",
+    "@types/node": "22.20.4"
+  },
+  "packageManager": "pnpm@12.8.1",
+  "engines": {
+    "node": ">=22.18.0"
+  }
+}

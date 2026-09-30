@@ -9,7 +9,18 @@ import tseslint from "typescript-eslint";
 const ARROW_FUNCTIONS_ONLY = "统一使用箭头函数，禁止使用 function 关键字";
 
 export default defineConfig(
-  globalIgnores(["dist", "coverage", "docs/.vitepress/cache", "docs/.vitepress/dist"]),
+  globalIgnores([
+    "dist",
+    "coverage",
+    "docs/.vitepress/cache",
+    "docs/.vitepress/dist",
+    "**/dist/**",
+    "**/dist-modern",
+    "**/.webpack-dev",
+    "**/.cache/**",
+    "**/test-results/**",
+    "**/playwright-report/**",
+  ]),
 
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
@@ -91,6 +102,29 @@ export default defineConfig(
     },
   },
 
+  // 独立示例的构建配置与检查脚本使用原生 Node 模块，不参加 TS 项目检查。
+  {
+    files: ["**/*.cjs", "**/*.mjs"],
+    ...tseslint.configs.disableTypeChecked,
+    languageOptions: {
+      globals: globals.node,
+      sourceType: "module",
+      parserOptions: { projectService: false, project: false },
+    },
+  },
+  {
+    files: ["**/*.cjs"],
+    languageOptions: { sourceType: "commonjs" },
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
+  {
+    files: ["scripts/**/*.mjs", "examples/**/scripts/**/*.mjs"],
+    rules: { "no-console": "off" },
+  },
+  {
+    files: ["examples/**/*.ts", "examples/**/*.vue"],
+    rules: { "@typescript-eslint/prefer-includes": "off" },
+  },
   // Node 环境的配置文件与脚本
   {
     files: ["*.config.ts", "docs/.vitepress/config.ts", "scripts/**/*.ts"],
@@ -103,7 +137,7 @@ export default defineConfig(
 
   // 测试：允许使用断言构造测试替身、断言 console 调用，单文件内可定义多个测试组件
   {
-    files: ["test/**/*.ts"],
+    files: ["test/**/*.ts", "examples/**/test/**/*.ts"],
     rules: {
       "@typescript-eslint/consistent-type-assertions": "off",
       "no-console": "off",

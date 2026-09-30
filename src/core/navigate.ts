@@ -3,7 +3,7 @@ import { getConfig } from "./config";
 import { emit } from "./events";
 import { getCurrentItem, getFocusPath, moveToItem, moveToNode } from "./focus";
 import { debug } from "./logger";
-import { analyzeNearest, type Direction } from "./navigation";
+import { analyzeNearest, pickNearest, type Direction } from "./navigation";
 import type { EPGGroup, EPGItem, EPGNode } from "./nodes";
 import { entryOf, getChildren, getParentGroup, resolveEntry } from "./tree";
 
@@ -20,20 +20,18 @@ const searchLevel = (
   const candidates = getChildren(parent)
     .filter((node) => node !== origin && entryOf(node) !== null)
     .map((node) => ({ value: node, box: node.getRect() }));
-  const analysis = analyzeNearest(
-    direction,
-    origin.getRect(),
-    candidates,
-    origin === anchor ? undefined : anchor.getRect(),
-  );
-  const [best] = analysis.ranked;
-  if (getConfig().debug) {
-    debug(`方向 ${direction}：在`, parent ?? "顶层", "中查找", {
-      方向上的候选: analysis.ahead.map((c) => c.value),
-      参与比较: analysis.ranked.map((c) => c.value),
-      结果: best?.value ?? null,
-    });
+  const from = origin.getRect();
+  const anchorRect = origin === anchor ? undefined : anchor.getRect();
+  if (!getConfig().debug) {
+    return pickNearest(direction, from, candidates, anchorRect);
   }
+  const analysis = analyzeNearest(direction, from, candidates, anchorRect);
+  const [best] = analysis.ranked;
+  debug(`方向 ${direction}：在`, parent ?? "顶层", "中查找", {
+    方向上的候选: analysis.ahead.map((c) => c.value),
+    参与比较: analysis.ranked.map((c) => c.value),
+    结果: best?.value ?? null,
+  });
   return best === undefined ? null : best.value;
 };
 
