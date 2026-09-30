@@ -87,7 +87,7 @@ Production is served inside the container. Docker Desktop accesses dev servers t
 | Host                                       | Status                                              |
 | ------------------------------------------ | --------------------------------------------------- |
 | WSL2 / Ubuntu 24.04 + Docker Desktop amd64 | Regression passed                                   |
-| Linux Docker Engine amd64                  | CI configured                                       |
+| Linux Docker Engine amd64                  | Regression passed in GitHub Actions                 |
 | Windows/macOS + Docker Desktop             | Shared Linux image; host execution not yet verified |
 | Apple Silicon                              | amd64 emulation; not yet verified                   |
 
