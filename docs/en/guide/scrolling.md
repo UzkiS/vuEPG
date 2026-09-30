@@ -6,6 +6,8 @@ description: "Keep focus visible with v-epg-scroll, configure horizontal and ver
 
 vuEPG uses logical focus without calling native `focus()`. Only marked containers scroll when focus changes. Scroll configuration is independent from navigation groups and disabled by default.
 
+Scrolling uses the element's border rectangle, which excludes outlines and shadows. Reserve extra space for these outward effects to avoid overflow clipping. Include horizontal end spacing in the content track's actual width; padding on the clipping container alone may still leave the last item at the clipping edge. See the `lesson-track` layout in the [complete example](./business-example).
+
 ## Horizontal and vertical lists
 
 Apply `v-epg-scroll` to the **actual scrolling element**. CSS still controls its size and overflow.

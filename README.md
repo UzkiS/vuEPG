@@ -111,7 +111,7 @@ const open = (id: number): void => {
 
 [遥控学习中心](https://uzkis.github.io/vuEPG/guide/business-example)可直接作为新工程的起点，开发、构建与兼容验证配置都已包含。它展示循环导航、滚动、页面位置恢复、动态列表、弹窗复焦和原生按键接入。学习主题只是演示内容，交互代码可以用于自己的菜单、列表和卡片。
 
-<img src="https://raw.githubusercontent.com/UzkiS/vuEPG/main/docs/public/example-preview.png" alt="vuEPG 完整遥控交互示例" width="960">
+<a href="https://uzkis.github.io/vuEPG/example/tv-training/"><img src="https://raw.githubusercontent.com/UzkiS/vuEPG/main/docs/public/example-preview.png" alt="打开 vuEPG 完整遥控交互示例" width="960"></a>
 
 复制 [examples/tv-training](./examples/tv-training) 目录后，在该目录运行：
 

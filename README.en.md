@@ -89,7 +89,7 @@ For existing focus-library applications, follow the [migration guides](https://u
 
 The [TV learning center](./examples/tv-training) provides a starting point for a new project, including development, build and compatibility test configuration. It demonstrates circular navigation, scrolling, saved page position, dialogs, focus restoration and a mock Android key bridge. The learning theme is demonstration content; reuse these interactions in your own menus, lists and cards.
 
-<img src="https://raw.githubusercontent.com/UzkiS/vuEPG/main/docs/public/example-preview.png" alt="vuEPG complete interaction example" width="960">
+<a href="https://uzkis.github.io/vuEPG/example/tv-training/"><img src="https://raw.githubusercontent.com/UzkiS/vuEPG/main/docs/public/example-preview.png" alt="Open the vuEPG complete interaction example" width="960"></a>
 
 Copy the example directory and run its commands independently:
 

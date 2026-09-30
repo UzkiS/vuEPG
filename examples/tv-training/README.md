@@ -36,6 +36,10 @@ Node 版本见 .node-version，pnpm 版本见 package.json 的 packageManager。
 
 首页 → 十二站探索地图 → 模拟练习 → 完成弹窗，另有退出弹窗。覆盖循环导航、自动滚动、业务位置记忆、内容筛选、焦点失效恢复和返回处理。
 
+顶部「文档」「GitHub」在新窗口打开项目说明和源码，链接从所安装 vuepg 包的信息读取。自己的项目可按需替换这些入口。
+
+卡片轨道的首尾留白计入实际内容宽度，为向外扩出的焦点描边预留空间；修改卡片尺寸或样式时，同时检查首项、末项和缩放后的裁剪边界。
+
 原生 Mock 使用 window 上的 `vuepg-native-key` CustomEvent，detail 为 `{ keyCode: number }`。接入实际宿主时可把按键回调连接到 src/bridge.ts，核对宿主协议与重复输入。
 
 当前用法对应 package.json 中的依赖范围；升级 vuepg 或 Vue 时，依据实际安装版本的类型声明、文档和迁移说明更新应用与测试。

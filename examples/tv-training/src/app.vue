@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useVuEPG } from "vuepg";
+import packageInfo from "vuepg/package.json";
 import FocusDialog from "./focus-dialog.vue";
 import { attachNativeBridge, dispatchNativeKey } from "./bridge";
 import { lessons } from "./data";
 
 const epg = useVuEPG();
+const documentationUrl = packageInfo.homepage;
+const repositoryUrl = packageInfo.repository.url.replace(/^git\+/, "").replace(/\.git$/, "");
 const screen = ref<"home" | "lessons" | "player">("home");
 const activeLesson = ref(1);
 const rememberedLesson = ref(1);
@@ -130,8 +133,18 @@ onUnmounted(() => {
 <template>
   <div class="example-shell">
     <header class="example-topbar">
-      <a class="example-brand" href="./">vuEPG <span>业务示例</span></a>
-      <span>方向键移动 · Enter 确定 · Esc 返回</span>
+      <a class="example-brand" :href="documentationUrl" target="_blank" rel="noopener"
+        >vuEPG <span>业务示例</span></a
+      >
+      <span class="example-key-hint">方向键移动 · Enter 确定 · Esc 返回</span>
+      <nav class="example-project-links" aria-label="项目链接">
+        <a :href="documentationUrl" target="_blank" rel="noopener" data-testid="docs-link"
+          >文档 ↗</a
+        >
+        <a :href="repositoryUrl" target="_blank" rel="noopener" data-testid="github-link"
+          >GitHub ↗</a
+        >
+      </nav>
     </header>
     <div class="stage-wrapper" :style="{ width: 1280 * scale + 'px', height: 720 * scale + 'px' }">
       <div class="tv-stage" :style="{ transform: 'scale(' + scale + ')' }">

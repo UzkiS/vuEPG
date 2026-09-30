@@ -1,5 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import packageInfo from "vuepg/package.json" with { type: "json" };
 
 /** 发给 Chromium 30 的脚本文本仅使用 ES5；驱动使用 JSON Wire Protocol。 */
 export const runScenarios = async ({
@@ -33,6 +34,21 @@ export const runScenarios = async ({
   };
   const focus =
     'return document.querySelector(".vuepg-focus") && document.querySelector(".vuepg-focus").getAttribute("data-testid");';
+  const cardFrameVisible = `
+    var item = document.querySelector(".lesson-card.vuepg-focus");
+    var container = document.querySelector("[data-testid=lesson-scroll]");
+    if (!item || !container) { return false; }
+    var rect = item.getBoundingClientRect();
+    var view = container.getBoundingClientRect();
+    var style = window.getComputedStyle(item);
+    var outline = parseFloat(style.outlineWidth) + parseFloat(style.outlineOffset);
+    var scaleX = view.width / container.offsetWidth;
+    var scaleY = view.height / container.offsetHeight;
+    return rect.left - outline * scaleX >= view.left - 0.5 * scaleX &&
+      rect.right + outline * scaleX <= view.right + 0.5 * scaleX &&
+      rect.top - outline * scaleY >= view.top - 0.5 * scaleY &&
+      rect.bottom + outline * scaleY <= view.bottom + 0.5 * scaleY;
+  `;
   const click = async (selector) => {
     await execute("document.querySelector(arguments[0]).click();", [selector]);
   };
@@ -43,12 +59,23 @@ export const runScenarios = async ({
     await navigate(url);
     await check(`${label}：默认焦点`, focus, "start");
     await check(
+      `${label}：文档入口`,
+      'return document.querySelector("[data-testid=docs-link]").getAttribute("href");',
+      packageInfo.homepage,
+    );
+    await check(
+      `${label}：GitHub 入口`,
+      'return document.querySelector("[data-testid=github-link]").getAttribute("href");',
+      packageInfo.repository.url.replace(/^git\+/, "").replace(/\.git$/, ""),
+    );
+    await check(
       `${label}：JavaScript / DOM API 已补齐`,
       "return [typeof Map, typeof Set, typeof Symbol, typeof Array.from, typeof Object.assign, typeof CustomEvent];",
       ["function", "function", "function", "function", "function", "function"],
     );
     await key("\uE007");
     await check(`${label}：确定进入页面`, focus, "lesson-1");
+    await check(`${label}：首站卡片与焦点框完整可见`, cardFrameVisible, true);
     await execute(
       'window.__vuepgTestPauseRelease = document.querySelector(".example-shell").__vue__.$epg.pause();',
     );
@@ -70,9 +97,11 @@ export const runScenarios = async ({
       'return document.querySelector("[data-testid=lesson-scroll]").scrollLeft > 0;',
       true,
     );
+    await check(`${label}：末站卡片与焦点框完整可见`, cardFrameVisible, true);
     await screenshot(`${label}-scrolled`);
     await key("\uE014");
     await check(`${label}：向右循环到首站`, focus, "lesson-1");
+    await check(`${label}：循环后的首站焦点框完整可见`, cardFrameVisible, true);
     await key("\uE014");
     await check(`${label}：方向导航`, focus, "lesson-2");
     await key("\uE007");
@@ -157,6 +186,26 @@ export const runScenarios = async ({
       await check(`${label}：完成站点 ${String(id)}`, focus, "dialog-cancel");
       await click("[data-testid=dialog-confirm]");
       await check(`${label}：完成后返回站点 ${String(id)}`, focus, `lesson-${String(id)}`);
+      if (id === 9) {
+        await click("[data-testid=filter-completed]");
+        await check(
+          `${label}：筛选后仅保留三个站点`,
+          'return document.querySelectorAll(".lesson-card").length;',
+          3,
+        );
+        await check(
+          `${label}：短列表没有多余滚动空间`,
+          'var el = document.querySelector("[data-testid=lesson-scroll]"); return el.scrollWidth === el.clientWidth;',
+          true,
+        );
+        await key("\uE015");
+        await check(`${label}：短列表首站焦点`, focus, "lesson-10");
+        await check(`${label}：短列表首站焦点框完整可见`, cardFrameVisible, true);
+        await key("\uE012");
+        await check(`${label}：短列表循环到末站`, focus, "lesson-12");
+        await check(`${label}：短列表末站焦点框完整可见`, cardFrameVisible, true);
+        await click("[data-testid=filter-completed]");
+      }
     }
     await click("[data-testid=filter-completed]");
     await check(
@@ -174,6 +223,7 @@ export const runScenarios = async ({
     await key("\uE007");
     await key("\uE015");
     await check(`${label}：重新显示后恢复列表入口`, focus, "lesson-12");
+    await check(`${label}：重新显示后末站焦点框完整可见`, cardFrameVisible, true);
     await click("[data-testid=native-back]");
     await screenshot(label);
     const entries = await logs();

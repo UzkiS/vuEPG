@@ -56,6 +56,18 @@ a {
   margin-left: 10px;
   color: #67676c;
 }
+.example-project-links {
+  display: flex;
+  white-space: nowrap;
+}
+.example-project-links a {
+  margin-left: 18px;
+  color: #d81b60;
+}
+.example-topbar a:focus-visible {
+  outline: 2px solid #d81b60;
+  outline-offset: 4px;
+}
 .stage-wrapper {
   margin: 0 auto;
   overflow: hidden;
@@ -284,24 +296,37 @@ p {
   overflow-x: auto;
   overflow-y: hidden;
   margin-top: 32px;
-  padding: 12px 12px 20px;
   scrollbar-width: none;
 }
 .lesson-scroll::-webkit-scrollbar {
   display: none;
 }
 .lesson-track {
-  display: flex;
+  /* 留白属于内容轨道，保证滚到首尾时也能完整绘制向外扩出的焦点框。 */
+  /* Chromium 30 的 flex 内在宽度不可靠，使用单行 inline-block 计入尾部留白。 */
+  display: inline-block;
+  min-width: 100%;
+  padding: 12px 12px 20px;
+  vertical-align: top;
+  white-space: nowrap;
+  font-size: 0;
 }
 .lesson-card {
   border: 1px solid #e2e2e5;
-  flex: 0 0 224px;
+  display: inline-block;
+  width: 224px;
   height: 305px;
   margin-right: 20px;
   padding: 22px;
+  vertical-align: top;
+  white-space: normal;
+  font-size: 16px;
   text-align: left;
   position: relative;
   border-radius: 22px;
+}
+.lesson-card:last-child {
+  margin-right: 0;
 }
 .lesson-tone-0 {
   background: #ffffff;
@@ -454,9 +479,15 @@ p {
 }
 @media (max-width: 700px) {
   .example-topbar {
-    padding: 0 12px;
+    height: auto;
+    min-height: 58px;
+    padding: 12px;
+    flex-wrap: wrap;
   }
-  .example-topbar > span {
+  .example-key-hint {
+    order: 3;
+    width: 100%;
+    margin-top: 8px;
     font-size: 10px;
   }
   .example-controls {

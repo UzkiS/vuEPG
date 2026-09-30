@@ -10,6 +10,8 @@ vuEPG includes the TV learning center as a complete example project that can be 
 
 [Source](https://github.com/UzkiS/vuEPG/tree/main/examples/tv-training)
 
+The example header links to the documentation and GitHub in a new window. The card track reserves space for focus outlines at both ends, keeping the last card fully visible during circular navigation.
+
 ## Reusable interactions
 
 The learning theme is just page content. Use the interactions for your own menus, cards or channel lists.
