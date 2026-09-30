@@ -1,0 +1,79 @@
+/* 文档演示沿用项目粉色主色，并随文档浅色／深色主题调整背景。 */
+.vuepg-demo {
+  --demo-canvas: #fff;
+  --demo-surface: #f8f8fa;
+  --demo-muted: #f4f4f6;
+  --demo-border: #e2e2e5;
+  --demo-text: #3c3c43;
+  --demo-text-muted: #67676c;
+  --demo-text-soft: #8a8a92;
+  --demo-primary: var(--vp-c-brand-1);
+  --demo-primary-soft: var(--vp-c-brand-soft);
+  --demo-on-primary: #fff;
+  --demo-focus: var(--vp-c-brand-1);
+  --demo-focus-soft: var(--vp-c-brand-soft);
+  --demo-overlay: rgba(255, 255, 255, 0.9);
+  --demo-candidate-border: #b8b8c0;
+  --demo-tone-0: #f8f8fa;
+  --demo-tone-1: #f8f8fa;
+  --demo-tone-2: #f0f0f3;
+
+  color: var(--demo-text);
+}
+.dark .vuepg-demo {
+  --demo-canvas: #1b1b1f;
+  --demo-surface: #252529;
+  --demo-muted: #2e2e33;
+  --demo-border: #414148;
+  --demo-text: #f0f0f3;
+  --demo-text-muted: #bcbcc4;
+  --demo-text-soft: #92929c;
+  --demo-on-primary: #351723;
+  --demo-overlay: rgba(27, 27, 31, 0.9);
+  --demo-candidate-border: #b8b8c0;
+  --demo-tone-0: #252529;
+  --demo-tone-1: #252529;
+  --demo-tone-2: #313137;
+}
+
+/* 图例与几何演示共用同一组状态色。 */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 16px 0;
+  font-size: 14px;
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend i {
+  display: inline-block;
+  width: 16px;
+  height: 12px;
+  border: 2px solid;
+  border-radius: 3px;
+}
+.legend .origin {
+  background: var(--demo-primary);
+  border-color: var(--demo-primary);
+}
+.legend .idle {
+  background: var(--demo-muted);
+  border-color: var(--demo-border);
+}
+.legend .pool {
+  background: var(--demo-tone-2);
+  border-color: var(--demo-candidate-border);
+}
+.legend .chosen {
+  background: var(--demo-primary-soft);
+  border-color: var(--demo-focus);
+}
+.legend .excluded {
+  border-style: dashed;
+  border-color: var(--demo-text-soft);
+  opacity: 0.5;
+}

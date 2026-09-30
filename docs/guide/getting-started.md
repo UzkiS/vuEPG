@@ -1,11 +1,17 @@
+---
+description: 安装 vuEPG，在 Vue 2.7 或 Vue 3 注册插件、标记焦点项、设置初始位置并处理遥控器输入。Android 4.x 另提供旧设备接入方案。
+---
+
 # 快速开始
 
 ## 环境要求
 
 - Vue **2.7** 或 **3.x**（Vue 2.6 及以下请先升级到 2.7）
-- Android 4.4 / WebView 30 等缺少 `Proxy` 的设备使用 **Vue 2.7**；Vue 3 依赖 `Proxy`，不能仅靠语法转译运行
+- Android 4.x / WebView 30 等缺少 `Proxy` 的设备使用 **Vue 2.7**；Vue 3 依赖 `Proxy`，不能仅靠语法转译运行
 - 产物语法为 ES2015；目标设备若只支持 ES5，请让构建工具转译 `node_modules/vuepg`
 - 浏览器需提供 `CustomEvent` 构造函数、`Symbol`、`Map`、`Set`、`Object.assign` 与 `Array.from`；旧设备缺失时需要相应 polyfill。仅转译语法不会补齐这些运行时 API
+
+希望直接从完整工程开始，可以复制仓库附带的[完整示例](./business-example)，替换页面与数据后开始开发。它配好 Vue 2.7、双开发入口、ES5 构建与必要 polyfill，适合快速上手 Android 4.x 等运营商存量盒子；兼容步骤见[旧设备接入](./legacy-webview)。
 
 ## 安装
 
@@ -59,7 +65,7 @@ new Vue({ render: (h) => h(App) }).$mount("#app");
 
 插件会：
 
-- 注册全局指令 `v-epg-item` 与 `v-epg-group`；
+- 注册全局指令 `v-epg-item`、`v-epg-group` 与 `v-epg-scroll`；
 - 注册全局属性 `$epg`，可在模板中直接使用；
 - 开始监听键盘。
 

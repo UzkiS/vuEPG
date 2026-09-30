@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { useDocsText } from "../composables/use-docs-text";
 import { ref } from "vue";
 import { useVuEPG, type EPGEvent } from "vuepg";
 import { useDemo } from "../composables/use-demo";
 
+const { text } = useDocsText();
 const epg = useVuEPG();
 const stage = ref<HTMLElement | null>(null);
 const { active, activate } = useDemo(stage);
@@ -50,18 +52,27 @@ const diagramItems = [
 </script>
 
 <template>
-  <div class="hierarchy">
+  <div class="hierarchy vuepg-demo">
     <svg
       class="overview"
       viewBox="0 0 380 222"
       role="img"
-      :aria-label="`分组导航实时示意，当前焦点：${current || '未选择'}`"
+      :aria-label="
+        text(
+          `分组导航实时示意，当前焦点：${current || '未选择'}`,
+          `Group navigation, current focus: ${current || 'None'}`,
+        )
+      "
     >
-      <text x="18" y="24" class="overview-title">点击图中的项目，观察焦点与事件</text>
+      <text x="18" y="24" class="overview-title">
+        {{ text("点击图中的项目，观察焦点与事件", "Select an item to see focus and events") }}
+      </text>
       <rect x="18" y="41" width="142" height="160" rx="9" class="overview-group" />
       <rect x="194" y="41" width="166" height="160" rx="9" class="overview-group" />
-      <text x="29" y="58" class="overview-label">分组 A</text>
-      <text x="205" y="58" class="overview-label">分组 B · B2 为默认入口</text>
+      <text x="29" y="58" class="overview-label">{{ text("分组 A", "Group A") }}</text>
+      <text x="205" y="58" class="overview-label">
+        {{ text("分组 B · B2 为默认入口", "Group B · B2 is default") }}
+      </text>
       <g
         v-for="item in diagramItems"
         :key="item.label"
@@ -69,9 +80,10 @@ const diagramItems = [
         :class="{ selected: current === item.label }"
         role="button"
         tabindex="0"
-        :aria-label="`聚焦${item.label}`"
+        :aria-label="text(`聚焦${item.label}`, `Focus ${item.label}`)"
         @click="focusLabel(item.label)"
         @keydown.enter="focusLabel(item.label)"
+        @keydown.space.prevent="focusLabel(item.label)"
       >
         <rect :x="item.x" :y="item.y" width="60" height="30" rx="5" />
         <text :x="item.x + 30" :y="item.y + 20">{{ item.label }}</text>
@@ -91,11 +103,11 @@ const diagramItems = [
       <section
         v-epg-group
         class="group column"
-        data-label="分组 A"
+        :data-label="text('分组 A', 'Group A')"
         @epg-enter="onEnter"
         @epg-leave="onLeave"
       >
-        <span class="tag">分组 A</span>
+        <span class="tag">{{ text("分组 A", "Group A") }}</span>
         <button
           v-for="n in 3"
           :key="n"
@@ -113,11 +125,11 @@ const diagramItems = [
       <section
         v-epg-group
         class="group grid"
-        data-label="分组 B"
+        :data-label="text('分组 B', 'Group B')"
         @epg-enter="onEnter"
         @epg-leave="onLeave"
       >
-        <span class="tag">分组 B</span>
+        <span class="tag">{{ text("分组 B", "Group B") }}</span>
         <button
           v-for="n in 4"
           :key="n"
@@ -131,16 +143,26 @@ const diagramItems = [
           B{{ n }}<span v-if="n === 2" class="star" title="default">★</span>
         </button>
       </section>
-      <div v-if="!active" class="overlay">点击后用方向键操作</div>
+      <div v-if="!active" class="overlay">
+        {{ text("点击后用方向键操作", "Click, then use arrow keys") }}
+      </div>
     </div>
     <ol class="log">
       <li v-for="(entry, index) in logs" :key="`${String(index)}-${entry}`">{{ entry }}</li>
-      <li v-if="logs.length === 0" class="empty">事件日志</li>
+      <li v-if="logs.length === 0" class="empty">{{ text("事件日志", "Event log") }}</li>
     </ol>
   </div>
 </template>
 
 <style scoped>
+[role="button"]:focus {
+  outline: none;
+}
+[role="button"]:focus-visible rect {
+  stroke: var(--demo-primary);
+  stroke-width: 3;
+}
+
 .hierarchy {
   display: grid;
   grid-template-columns: 1fr 200px;
@@ -154,34 +176,37 @@ const diagramItems = [
   margin: 0 auto;
 }
 .overview-title {
-  fill: var(--vp-c-text-1);
+  fill: var(--demo-text);
   font: 600 14px sans-serif;
 }
 .overview-group {
-  fill: var(--vp-c-bg-soft);
-  stroke: var(--vp-c-default-1);
+  fill: var(--demo-canvas);
+  stroke: var(--demo-border);
   stroke-width: 2;
   stroke-dasharray: 5 4;
 }
 .overview-label {
-  fill: var(--vp-c-text-2);
+  fill: var(--demo-text-muted);
   font: 11px sans-serif;
 }
 .overview-item {
   cursor: pointer;
 }
 .overview-item rect {
-  fill: var(--vp-c-default-soft);
-  stroke: var(--vp-c-default-1);
+  fill: var(--demo-muted);
+  stroke: var(--demo-border);
   stroke-width: 2;
 }
 .overview-item.selected rect {
-  fill: var(--vp-c-brand-soft);
-  stroke: var(--vp-c-brand-1);
+  fill: var(--demo-primary-soft);
+  stroke: var(--demo-focus);
   stroke-width: 3;
 }
+.overview-item.selected text {
+  fill: var(--demo-text);
+}
 .overview-item text {
-  fill: var(--vp-c-text-1);
+  fill: var(--demo-text);
   text-anchor: middle;
   font: 12px sans-serif;
   pointer-events: none;
@@ -193,9 +218,9 @@ const diagramItems = [
   grid-template-columns: 1fr 2fr;
   gap: 24px;
   padding: 20px;
-  border: 1px solid var(--vp-c-divider);
+  border: 1px solid var(--demo-border);
   border-radius: 12px;
-  background: var(--vp-c-bg-soft);
+  background: var(--demo-canvas);
   cursor: pointer;
 }
 
@@ -204,7 +229,7 @@ const diagramItems = [
   display: grid;
   gap: 10px;
   padding: 26px 12px 12px;
-  border: 2px dashed var(--vp-c-text-3);
+  border: 2px dashed var(--demo-text-soft);
   border-radius: 10px;
 }
 
@@ -218,7 +243,7 @@ const diagramItems = [
   top: 4px;
   left: 10px;
   font-size: 12px;
-  color: var(--vp-c-text-2);
+  color: var(--demo-text-muted);
 }
 
 .item {
@@ -227,16 +252,16 @@ const diagramItems = [
   border: 2px solid transparent;
   border-radius: 8px;
   font-weight: 600;
-  background: var(--vp-c-default-soft);
+  background: var(--demo-muted);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .item.vuepg-focus {
-  color: #fff;
-  border-color: var(--vp-c-brand-1);
-  background: var(--vp-c-brand-1);
-  transform: scale(1.05);
+  color: var(--demo-on-primary);
+  border-color: var(--demo-focus);
+  background: var(--demo-primary);
+  box-shadow: 0 0 0 3px var(--demo-focus-soft);
 }
 
 .star {
@@ -244,11 +269,11 @@ const diagramItems = [
   top: 2px;
   right: 6px;
   font-size: 12px;
-  color: var(--vp-c-warning-1);
+  color: var(--demo-focus);
 }
 
 .item.vuepg-focus .star {
-  color: #fff;
+  color: var(--demo-on-primary);
 }
 
 .overlay {
@@ -258,7 +283,7 @@ const diagramItems = [
   place-content: center;
   border-radius: 12px;
   font-weight: 600;
-  background: color-mix(in srgb, var(--vp-c-bg) 70%, transparent);
+  background: var(--demo-overlay);
 }
 
 .log {
@@ -268,7 +293,7 @@ const diagramItems = [
   border-radius: 8px;
   font-family: var(--vp-font-family-mono);
   font-size: 12px;
-  background: var(--vp-c-bg-soft);
+  background: var(--demo-canvas);
 }
 
 .log li {
@@ -276,7 +301,7 @@ const diagramItems = [
 }
 
 .log .empty {
-  color: var(--vp-c-text-3);
+  color: var(--demo-text-soft);
 }
 
 @media (max-width: 640px) {

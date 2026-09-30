@@ -4,7 +4,7 @@
 
 ## 项目概述
 
-vuEPG 是 Vue 2.7 / Vue 3 通用的大屏（TV / IPTV / 机顶盒）遥控器焦点管理与空间导航插件，发布为 npm 包 `vuepg`，文档部署在 GitHub Pages：<https://uzkis.github.io/vuEPG/>。
+vuEPG 是 Vue 2.7 / Vue 3 通用的大屏（TV / IPTV / 机顶盒）焦点管理与空间导航插件，发布为 npm 包 `vuepg`，文档部署在 GitHub Pages：<https://uzkis.github.io/vuEPG/>。
 
 - 运行时：浏览器，**零运行时依赖**，`vue` 为 peer dependency（`^2.7.0 || ^3.0.0`）
 - 产物：ES2015，ESM + CJS 双格式，附带类型声明
@@ -57,8 +57,10 @@ test/
 ├── types/            类型测试（只做类型检查，不运行）
 ├── helpers/          布局模拟、按键模拟、Vue 2 / 3 挂载工具
 └── docs.test.ts      文档与源码一致性校验
-docs/                 VitePress 文档站（中文）
-scripts/publish.ts    发布脚本（CI 调用）
+docs/                 VitePress 中英文文档站
+examples/tv-training/ Vue 2.7 独立业务示例，Vite + webpack 双开发入口
+examples/tv-training/legacy/chrome30/  真实 Chromium 30 Docker 环境与固定下载清单
+scripts/             发布、兼容检查与浏览器回归脚本（CI 调用）
 ```
 
 **依赖方向只能自上而下**：`index.ts` → `vue/` → `core/index.ts` → `core/*`。由 ESLint 强制：
@@ -94,7 +96,7 @@ scripts/publish.ts    发布脚本（CI 调用）
 - 导出的函数必须显式标注返回类型。
 - 所有 `if` / 循环必须带花括号；只用 `===`。
 - 文件名使用 kebab-case。
-- 注释、文档、日志与错误信息使用中文；标识符使用英文。错误信息以 `[vuEPG]` 开头。
+- 注释、中文文档、日志与错误信息使用中文；英文文档及其示例文案使用英文，标识符使用英文。错误信息以 `[vuEPG]` 开头。
 - 使用者的误用（非法参数、操作不存在的按键事件）直接抛出错误；来自模板、可以降级的问题（非法绑定值）用 `warn()` 警告。
 
 ### 库源码（`src/`）的兼容性约束
@@ -130,14 +132,32 @@ scripts/publish.ts    发布脚本（CI 调用）
 
 - 新增、修改、删除公开方法时，同步修改 `docs/api/index.md`（标题格式 `### epg.方法名`），否则 `test/docs.test.ts` 失败。
 - 行为变化同步修改对应的指南页面；破坏性变更同步修改 `docs/migration/`。
+- 中文与英文文档必须在同一改动中同步：页面、导航、API、示例、兼容步骤和交互组件文案都要覆盖。`docs/en/` 与中文页面使用相同相对路径，README.md 与 README.en.md 同步，两种语言保持完整的页面覆盖与导航入口。
+- Agent 负责英文同步、翻译审校以及与代码、链接和导航的一致性检查。新增／删除页面、修改源码引用、调整标题或链接时同步对应语言，并执行页面覆盖与公开 API 校验。
+- 接入说明先定义必要术语，再给出可执行的安装命令和配置示例。兼容指南提供依赖转译与运行时 API 补齐的具体步骤，配置与仓库可运行工程一致。
+- 迁移入口与跨项目列举统一按 vuEPG 1.x、vue-epg、vue-tv-focusable 排序。
+- 导航按阅读任务组织：入门、焦点与导航、输入与集成、开发与调试、参考、迁移。语言和构建工具说明不混入按键或返回操作分组。
 - 类型、默认值等可以从源码引用的内容，一律用 `<<< ../../src/…#region` 引用，不要手抄。
-- `docs/v1/` 是 1.x 旧版文档的归档：内容冻结，只做与 1.2.1 实际行为一致的事实修正；它描述的是已不在仓库中的旧代码，因此不引用源码 region，也不参与站内搜索。所有 v1 页面顶部的提示由 `LegacyNotice.vue` 统一渲染，不要在页面内重复添加。
+- 产品介绍围绕功能、使用条件和接入步骤组织，事实与代码及验证结果一致。Android 4.x 旧设备入口在首页与快速开始中可见。
+- API 和接入指南用于应用开发者；测试环境和构建验证放在开发与验证中；SEO、收录与发布操作放在贡献文档，不混入使用导航。
+- 示例展示可复用的交互，并说明如何复制与替换页面；不得把示例业务主题写成库的适用业务限制。
+- `docs/v1/` 与 `docs/en/v1/` 是 1.x 旧版文档的归档：内容冻结，只做与归档版本实际行为一致的事实修正；它描述的是已不在仓库中的旧代码，因此不引用源码 region，也不参与站内搜索。所有 v1 页面顶部的提示由 `LegacyNotice.vue` 统一渲染，不要在页面内重复添加。
+- 文档、交互演示和完整示例以白色／中性色为主体，使用与 Logo 一致的粉色强调主要按钮和焦点；文档演示配色集中维护在 `docs/.vitepress/theme/demo.css`，独立示例使用旧浏览器可执行的 CSS。配色修改同步图例、预览图及两种语言的颜色说明。
 - 文档内的交互组件位于 `docs/.vitepress/theme/components/`，直接使用仓库源码（别名 `vuepg`）；文档站平时处于 `pause()` 状态，演示激活时才 `resume()`，见 `composables/use-demo.ts`。
+
+## 业务示例与旧浏览器回归
+
+- 示例额外遵守 [examples/tv-training/AGENTS.md](./examples/tv-training/AGENTS.md)。示例使用库的构建产物，文档站的原理演示直接使用源码。
+- 示例保留 Vite 现代浏览器入口与 webpack 旧设备开发入口。旧浏览器验证包含开发客户端、资源加载和更新，不能仅检查业务 bundle。
+- `pnpm example:test` 运行现代浏览器场景；`pnpm test:chrome30` 运行 Docker 中真实 Chromium 30 的生产／开发回归。旧浏览器安装使用 `pnpm legacy:install`。
+- 固定下载地址与校验值维护于 `examples/tv-training/legacy/chrome30/manifest.json`。浏览器实际版本必须核验，不以修改 UA 代替真实旧浏览器。
+- 下载缓存、镜像产物、截图及日志结果不提交；公开兼容范围对应实际平台和测试结果，设备宿主桥与性能另行记录。
 
 ## 提交与发布
 
 - 提交信息遵循 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/)：`feat:`、`fix:`、`docs:`、`test:`、`refactor:`、`chore:` 等。
 - 面向用户的改动（功能、修复、破坏性变更）必须附带 changeset：`pnpm changeset`。纯文档、测试、工程配置的改动不需要。
+- Agent 同时在 `.changeset/translations/` 添加同名英文说明；发布流程通过 `scripts/prepare-release.ts` 调用 Changesets 生成版本和中文记录，并同步英文更新记录。
 - 发布全自动，**不要手动修改 `package.json` 的 `version` 或 `CHANGELOG.md`**：
   1. 带 changeset 的改动合并到 `main` 后，Release 工作流创建或更新「chore: release」PR；
   2. 合并该 PR 后，`scripts/publish.ts` 发布到 npm（可信发布 + provenance）并创建 GitHub Release；

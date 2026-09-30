@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useDocsText } from "../composables/use-docs-text";
 import { computed, ref } from "vue";
 import {
   analyzeNearest,
@@ -8,6 +9,7 @@ import {
 } from "../../../../src/core/navigation";
 import { SCENARIOS, type Scenario, type ScenarioName } from "../navigation-scenarios";
 
+const { text } = useDocsText();
 const props = defineProps<{ scenario: ScenarioName }>();
 
 const WIDTH = 420;
@@ -16,13 +18,18 @@ const HEIGHT = 260;
 const TOLERANCE = 0.05;
 
 const ARROWS: Readonly<Record<Direction, string>> = { up: "↑", down: "↓", left: "←", right: "→" };
-const SIDES: Readonly<Record<Direction, string>> = {
-  up: "上",
-  down: "下",
-  left: "左",
-  right: "右",
-};
-const STEPS = ["全部候选", "① 方向", "② 重叠", "③ 最近"] as const;
+const SIDES = computed((): Readonly<Record<Direction, string>> => ({
+  up: text("上", "Up"),
+  down: text("下", "Down"),
+  left: text("左", "Left"),
+  right: text("右", "right"),
+}));
+const STEPS = computed(() => [
+  text("全部候选", "All candidates"),
+  text("① 方向", "① Direction"),
+  text("② 重叠", "② Overlap"),
+  text("③ 最近", "③ Nearest"),
+]);
 
 const scenario = computed((): Scenario => SCENARIOS[props.scenario]);
 const direction = ref<Direction>(scenario.value.direction);
@@ -36,14 +43,17 @@ const analysis = computed(() =>
   ),
 );
 
-const names = (list: readonly { value: string }[]): string => list.map((c) => c.value).join("、");
+const names = (list: readonly { value: string }[]): string =>
+  list.map((c) => c.value).join(text("、", ", "));
 const has = (list: readonly { value: string }[], name: string): boolean =>
   list.some((c) => c.value === name);
 
 const target = computed(() => analysis.value.ranked[0]?.value ?? null);
 const vertical = computed(() => direction.value === "up" || direction.value === "down");
-const crossAxis = computed(() => (vertical.value ? "左右" : "上下"));
-const side = computed(() => SIDES[direction.value]);
+const crossAxis = computed(() =>
+  vertical.value ? text("左右", "horizontal") : text("上下", "vertical"),
+);
+const side = computed(() => SIDES.value[direction.value]);
 
 type Status = "idle" | "excluded" | "pool" | "chosen";
 
@@ -114,30 +124,54 @@ const caption = computed(() => {
   const dropped = ahead.filter((c) => !has(pool, c.value));
   switch (step.value) {
     case 0:
-      return `红色 O 是当前焦点，灰色是同一层级的其他元素。按下 ${ARROWS[direction.value]} 键时，按以下三步挑选目标。`;
+      return text(
+        `粉色 O 是当前焦点，浅色是同一层级的其他元素。按下 ${ARROWS[direction.value]} 键时，按以下三步挑选目标。`,
+        `Pink O is current focus; pale elements share its level. Pressing ${ARROWS[direction.value]} selects a target in three steps.`,
+      );
     case 1:
       return ahead.length === 0
-        ? `O 的${side.value}方没有任何元素。`
-        : `只看位于 O ${side.value}方的元素：${names(ahead)}。${outside.length > 0 ? `${names(outside)} 不在这个方向，排除。` : ""}`;
+        ? text(`O 的${side.value}方没有任何元素。`, `No elements lie ${side.value} of O.`)
+        : text(
+            `只看位于 O ${side.value}方的元素：${names(ahead)}。${outside.length > 0 ? `${names(outside)} 不在这个方向，排除。` : ""}`,
+            `Keep elements ${side.value} of O: ${names(ahead)}. ${outside.length > 0 ? `Exclude ${names(outside)} outside this direction.` : ""}`,
+          );
     case 2:
       if (overlapping.length > 0) {
-        return `${names(overlapping)} 与 O 在${crossAxis.value}方向上有重叠（阴影带），优先只在它们之中挑选。${dropped.length > 0 ? `${names(dropped)} 没有重叠，排除。` : ""}`;
+        return text(
+          `${names(overlapping)} 与 O 在${crossAxis.value}方向上有重叠（阴影带），优先只在它们之中挑选。${dropped.length > 0 ? `${names(dropped)} 没有重叠，排除。` : ""}`,
+          `${names(overlapping)} overlap O on the ${crossAxis.value} axis (shaded band), so they take priority. ${dropped.length > 0 ? `Exclude non-overlapping ${names(dropped)}.` : ""}`,
+        );
       }
       return pool.length > 0
-        ? `没有元素与 O 在${crossAxis.value}方向上重叠，于是只看完全位于 O ${side.value}方的元素：${names(pool)}。${dropped.length > 0 ? `${names(dropped)} 与 O 有交叠，排除。` : ""}`
-        : `既没有重叠的元素，也没有完全位于 O ${side.value}方的元素。`;
+        ? text(
+            `没有元素与 O 在${crossAxis.value}方向上重叠，于是只看完全位于 O ${side.value}方的元素：${names(pool)}。${dropped.length > 0 ? `${names(dropped)} 与 O 有交叠，排除。` : ""}`,
+            `No cross-axis overlap. Keep elements fully ${side.value} of O: ${names(pool)}. ${dropped.length > 0 ? `Exclude ${names(dropped)} intersecting O.` : ""}`,
+          )
+        : text(
+            `既没有重叠的元素，也没有完全位于 O ${side.value}方的元素。`,
+            `No overlapping elements or elements fully ${side.value} of O.`,
+          );
     default: {
       const [first, second] = ranked;
       if (first === undefined) {
-        return "没有目标，焦点不动。如果 O 在分组中，会以整个分组为起点，向外一层继续查找。";
+        return text(
+          "没有目标，焦点不动。如果 O 在分组中，会以整个分组为起点，向外一层继续查找。",
+          "No target: focus stays put. Within a group, search continues one level outward using the whole group as the origin.",
+        );
       }
       if (second?.distance === first.distance) {
         const tied = pool.filter((c) =>
           ranked.some((r) => r.value === c.value && r.distance === first.distance),
         );
-        return `${names(tied)} 距离相同，取与 O 更对齐的 ${first.value}。`;
+        return text(
+          `${names(tied)} 距离相同，取与 O 更对齐的 ${first.value}。`,
+          `${names(tied)} have equal distance; choose ${first.value}, better aligned with O.`,
+        );
       }
-      return `${first.value} 距离最近，成为目标。`;
+      return text(
+        `${first.value} 距离最近，成为目标。`,
+        `${first.value} is nearest and becomes the target.`,
+      );
     }
   }
 });
@@ -149,7 +183,7 @@ const setDirection = (next: Direction): void => {
 </script>
 
 <template>
-  <figure class="diagram">
+  <figure class="diagram vuepg-demo">
     <svg :viewBox="`0 0 ${WIDTH} ${HEIGHT}`" role="img" :aria-label="caption">
       <defs>
         <marker
@@ -189,7 +223,7 @@ const setDirection = (next: Direction): void => {
 
     <figcaption>
       <div class="controls">
-        <div class="steps" role="group" aria-label="步骤">
+        <div class="steps" role="group" :aria-label="text('步骤', 'Steps')">
           <button
             v-for="(label, index) in STEPS"
             :key="label"
@@ -200,7 +234,12 @@ const setDirection = (next: Direction): void => {
             {{ label }}
           </button>
         </div>
-        <div v-if="scenario.switchable" class="directions" role="group" aria-label="方向">
+        <div
+          v-if="scenario.switchable"
+          class="directions"
+          role="group"
+          :aria-label="text('方向', 'Direction')"
+        >
           <button
             v-for="d in DIRECTIONS"
             :key="d"
@@ -222,9 +261,9 @@ const setDirection = (next: Direction): void => {
 .diagram {
   margin: 20px 0;
   padding: 16px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 12px;
-  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--demo-border);
+  border-radius: 18px;
+  background: var(--demo-canvas);
 }
 
 svg {
@@ -248,11 +287,11 @@ svg {
 }
 
 .idle rect {
-  fill: var(--vp-c-default-soft);
-  stroke: var(--vp-c-default-1);
+  fill: var(--demo-muted);
+  stroke: var(--demo-border);
 }
 .idle text {
-  fill: var(--vp-c-text-1);
+  fill: var(--demo-text);
 }
 
 .excluded {
@@ -260,48 +299,48 @@ svg {
 }
 .excluded rect {
   fill: transparent;
-  stroke: var(--vp-c-text-3);
+  stroke: var(--demo-text-soft);
   stroke-dasharray: 5 4;
 }
 .excluded text {
-  fill: var(--vp-c-text-3);
+  fill: var(--demo-text-soft);
 }
 
 .pool rect {
-  fill: rgba(245, 158, 11, 0.16);
-  stroke: #f59e0b;
+  fill: var(--demo-tone-2);
+  stroke: var(--demo-candidate-border);
 }
 .pool text {
-  fill: var(--vp-c-text-1);
+  fill: var(--demo-text);
 }
 
 .chosen rect {
-  fill: var(--vp-c-success-soft);
-  stroke: var(--vp-c-success-1);
+  fill: var(--demo-primary-soft);
+  stroke: var(--demo-focus);
   stroke-width: 3;
 }
 .chosen text {
-  fill: var(--vp-c-success-1);
+  fill: var(--demo-text);
 }
 
 .origin rect {
-  fill: var(--vp-c-brand-1);
-  stroke: var(--vp-c-brand-1);
+  fill: var(--demo-primary);
+  stroke: var(--demo-primary);
 }
 .origin text {
-  fill: #fff;
+  fill: var(--demo-on-primary);
 }
 
 .band {
-  fill: rgba(245, 158, 11, 0.14);
+  fill: var(--demo-focus-soft);
 }
 
 .arrow {
-  stroke: var(--vp-c-success-1);
+  stroke: var(--demo-primary);
   stroke-width: 3;
 }
 .arrow-head {
-  fill: var(--vp-c-success-1);
+  fill: var(--demo-primary);
 }
 
 .controls {
@@ -320,17 +359,17 @@ svg {
 
 .controls button {
   padding: 2px 10px;
-  border: 1px solid var(--vp-c-divider);
+  border: 1px solid var(--demo-border);
   border-radius: 6px;
   font-size: 13px;
-  background: var(--vp-c-bg);
+  background: var(--demo-surface);
   cursor: pointer;
 }
 
 .controls button.on {
-  color: #fff;
-  border-color: var(--vp-c-brand-1);
-  background: var(--vp-c-brand-1);
+  color: var(--demo-on-primary);
+  border-color: var(--demo-primary);
+  background: var(--demo-primary);
 }
 
 figcaption p {

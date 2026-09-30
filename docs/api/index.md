@@ -1,3 +1,7 @@
+---
+description: vuEPG API 参考：移动焦点、方向导航、查询节点、配置按键、暂停响应与生命周期返回处理。
+---
+
 # API
 
 ## 入口
@@ -10,7 +14,7 @@ import VuEPG, { useVuEPG } from "vuepg";
 | ------------ | ---------------------------------------------------------------------------------------------------------- |
 | 默认导出     | 插件，`app.use(VuEPG, options?)` / `Vue.use(VuEPG, options?)`，`options` 同 [配置](../guide/configuration) |
 | `useVuEPG()` | 返回 vuEPG 实例（全局单例），即下文的 `epg`；模板与组件实例中也可以通过 `$epg` 访问                        |
-| 类型         | 见 [TypeScript](../guide/typescript)                                                                       |
+| 类型         | 见 [TypeScript 接入](../guide/typescript)                                                                  |
 
 ## 移动
 

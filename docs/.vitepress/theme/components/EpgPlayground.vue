@@ -1,20 +1,32 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { useDocsText } from "../composables/use-docs-text";
+import { computed, ref } from "vue";
 import { useVuEPG, type EPGEvent } from "vuepg";
 import { useDemo } from "../composables/use-demo";
 
+const { text } = useDocsText();
 const epg = useVuEPG();
 
-const tabs = ["推荐", "电影", "剧集", "综艺"];
-const menu = ["继续观看", "我的收藏", "观看历史", "设置"];
-const cards = [
-  { title: "星际穿越", hue: 330 },
-  { title: "流浪地球", hue: 210 },
-  { title: "海上钢琴师", hue: 30 },
-  { title: "千与千寻", hue: 160 },
-  { title: "疯狂动物城", hue: 270 },
-  { title: "盗梦空间", hue: 190 },
-];
+const tabs = computed(() => [
+  text("推荐", "Featured"),
+  text("电影", "Movies"),
+  text("剧集", "Series"),
+  text("综艺", "Shows"),
+]);
+const menu = computed(() => [
+  text("继续观看", "Continue watching"),
+  text("我的收藏", "Favorites"),
+  text("观看历史", "History"),
+  text("设置", "Settings"),
+]);
+const cards = computed(() => [
+  { title: text("星际穿越", "Interstellar") },
+  { title: text("流浪地球", "The Wandering Earth") },
+  { title: text("海上钢琴师", "The Legend of 1900") },
+  { title: text("千与千寻", "Spirited Away") },
+  { title: text("疯狂动物城", "Zootopia") },
+  { title: text("盗梦空间", "Inception") },
+]);
 
 const stage = ref<HTMLElement | null>(null);
 const { active, activate } = useDemo(stage);
@@ -55,7 +67,7 @@ const confirm = (): void => {
 </script>
 
 <template>
-  <div class="playground">
+  <div class="playground vuepg-demo">
     <!-- 外层分组拦截所有方向，焦点不会离开演示区域 -->
     <div
       ref="stage"
@@ -68,7 +80,13 @@ const confirm = (): void => {
       @epg-left.prevent
       @epg-right.prevent
     >
-      <header v-epg-group class="tabs" data-label="顶栏" @epg-enter="onEnter" @epg-leave="onLeave">
+      <header
+        v-epg-group
+        class="tabs"
+        :data-label="text('顶栏', 'Tabs')"
+        @epg-enter="onEnter"
+        @epg-leave="onLeave"
+      >
         <button
           v-for="tab in tabs"
           :key="tab"
@@ -83,7 +101,13 @@ const confirm = (): void => {
       </header>
 
       <div class="body">
-        <aside v-epg-group class="menu" data-label="菜单" @epg-enter="onEnter" @epg-leave="onLeave">
+        <aside
+          v-epg-group
+          class="menu"
+          :data-label="text('菜单', 'Menu')"
+          @epg-enter="onEnter"
+          @epg-leave="onLeave"
+        >
           <button
             v-for="item in menu"
             :key="item"
@@ -100,7 +124,7 @@ const confirm = (): void => {
         <main
           v-epg-group="{ default: true }"
           class="grid"
-          data-label="内容"
+          :data-label="text('内容', 'Content')"
           @epg-enter="onEnter"
           @epg-leave="onLeave"
         >
@@ -111,38 +135,81 @@ const confirm = (): void => {
             class="tile card"
             type="button"
             :data-entry="index === 0 ? '' : undefined"
-            :style="{ '--hue': card.hue }"
+            :class="`card-tone-${index % 3}`"
+            :data-label="card.title"
             @epg-focus="onFocus"
             @click.stop="onClick"
           >
-            {{ card.title }}
+            <span class="card-number" aria-hidden="true">{{
+              String(index + 1).padStart(2, "0")
+            }}</span>
+            <strong>{{ card.title }}</strong>
           </button>
         </main>
       </div>
 
       <div v-if="!active" class="overlay">
-        <strong>点击激活演示</strong>
-        <span>方向键移动 · Enter 确定 · Esc / Backspace 退出</span>
+        <strong>{{ text("点击激活演示", "Activate demo") }}</strong>
+        <span>{{
+          text(
+            "方向键移动 · Enter 确定 · Esc / Backspace 退出",
+            "Arrow keys move · Enter confirms · Esc / Backspace exits",
+          )
+        }}</span>
       </div>
     </div>
 
     <div class="panel">
       <div class="status">
-        <span class="badge" :class="{ on: active }">{{ active ? "已激活" : "未激活" }}</span>
+        <span class="badge" :class="{ on: active }">{{
+          active ? text("已激活", "Active") : text("未激活", "Inactive")
+        }}</span>
         <span
-          >当前焦点：<b>{{ current }}</b></span
+          >{{ text("当前焦点：", "Current focus: ") }}<b>{{ current }}</b></span
         >
       </div>
-      <div class="dpad" aria-label="虚拟遥控器">
-        <button type="button" class="up" aria-label="上" @click.stop="press('up')">▲</button>
-        <button type="button" class="left" aria-label="左" @click.stop="press('left')">◀</button>
-        <button type="button" class="ok" aria-label="确定" @click.stop="confirm">OK</button>
-        <button type="button" class="right" aria-label="右" @click.stop="press('right')">▶</button>
-        <button type="button" class="down" aria-label="下" @click.stop="press('down')">▼</button>
+      <div class="dpad" :aria-label="text('虚拟遥控器', 'Virtual controls')">
+        <button type="button" class="up" :aria-label="text('上', 'Up')" @click.stop="press('up')">
+          ▲
+        </button>
+        <button
+          type="button"
+          class="left"
+          :aria-label="text('左', 'Left')"
+          @click.stop="press('left')"
+        >
+          ◀
+        </button>
+        <button
+          type="button"
+          class="ok"
+          :aria-label="text('确定', 'Confirm')"
+          @click.stop="confirm"
+        >
+          OK
+        </button>
+        <button
+          type="button"
+          class="right"
+          :aria-label="text('右', 'Right')"
+          @click.stop="press('right')"
+        >
+          ▶
+        </button>
+        <button
+          type="button"
+          class="down"
+          :aria-label="text('下', 'Down')"
+          @click.stop="press('down')"
+        >
+          ▼
+        </button>
       </div>
       <ol class="log">
         <li v-for="(entry, index) in logs" :key="`${String(index)}-${entry}`">{{ entry }}</li>
-        <li v-if="logs.length === 0" class="empty">事件日志会显示在这里</li>
+        <li v-if="logs.length === 0" class="empty">
+          {{ text("事件日志会显示在这里", "Events appear here") }}
+        </li>
       </ol>
     </div>
   </div>
@@ -160,14 +227,14 @@ const confirm = (): void => {
   position: relative;
   display: grid;
   grid-template-rows: auto 1fr;
-  gap: 16px;
-  padding: 20px;
+  gap: 20px;
+  padding: 24px;
   aspect-ratio: 16 / 9;
   min-width: 0;
   min-height: 0;
-  border-radius: 12px;
-  background: radial-gradient(circle at 20% 0%, #3b0d2a, #0f0f1a 70%);
-  color: #fff;
+  border: 1px solid var(--demo-border);
+  border-radius: 22px;
+  background: var(--demo-canvas);
   overflow: hidden;
   cursor: pointer;
 }
@@ -175,13 +242,15 @@ const confirm = (): void => {
 .tabs {
   display: flex;
   min-width: 0;
-  gap: 12px;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--demo-border);
 }
 
 .body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
-  gap: 16px;
+  gap: 20px;
   min-width: 0;
   min-height: 0;
 }
@@ -189,13 +258,13 @@ const confirm = (): void => {
 .menu {
   display: grid;
   align-content: start;
-  gap: 10px;
+  gap: 12px;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
   min-width: 0;
   min-height: 0;
 }
@@ -203,47 +272,72 @@ const confirm = (): void => {
 .tile {
   min-width: 0;
   border: 0;
-  border-radius: 8px;
-  color: inherit;
+  border-radius: 12px;
+  color: var(--demo-text);
   font: inherit;
   cursor: pointer;
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    background-color 0.15s ease;
+  transition: box-shadow 0.15s ease;
+}
+
+.tile:focus {
+  outline: none;
+}
+
+.tile:focus-visible,
+.dpad button:focus-visible {
+  outline: 2px solid var(--demo-primary);
+  outline-offset: 3px;
 }
 
 .tab {
-  padding: 6px 16px;
+  padding: 6px 12px;
   background: transparent;
-  opacity: 0.7;
+  font-weight: 600;
 }
 
 .menu-item {
-  padding: 10px 12px;
+  padding: 12px;
   text-align: left;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--demo-surface);
 }
 
 .card {
+  border: 1px solid var(--demo-border);
   display: flex;
-  align-items: flex-end;
-  padding: 10px;
-  font-weight: 600;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: 16px;
   overflow-wrap: anywhere;
-  background: linear-gradient(160deg, hsl(var(--hue) 70% 55%), hsl(var(--hue) 60% 25%));
+  text-align: left;
+}
+
+.card-tone-0 {
+  background: var(--demo-tone-0);
+}
+.card-tone-1 {
+  background: var(--demo-tone-1);
+}
+.card-tone-2 {
+  background: var(--demo-tone-2);
+}
+
+.card-number {
+  font-size: 13px;
+  opacity: 0.65;
+}
+
+.card strong {
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 .tile.vuepg-focus {
-  opacity: 1;
-  transform: scale(1.06);
-  box-shadow:
-    0 0 0 3px #fff,
-    0 8px 24px rgba(0, 0, 0, 0.45);
-}
-
-.tab.vuepg-focus {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--demo-primary-soft);
+  outline: 3px solid var(--demo-focus);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 7px var(--demo-focus-soft);
 }
 
 .overlay {
@@ -251,19 +345,24 @@ const confirm = (): void => {
   inset: 0;
   display: grid;
   place-content: center;
-  gap: 6px;
+  gap: 12px;
+  padding: 20px;
   text-align: center;
-  background: rgba(10, 10, 20, 0.6);
-  backdrop-filter: blur(2px);
+  background: var(--demo-overlay);
 }
 
 .overlay strong {
-  font-size: 20px;
+  justify-self: center;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 18px;
+  color: var(--demo-on-primary);
+  background: var(--demo-primary);
 }
 
 .overlay span {
-  font-size: 13px;
-  opacity: 0.8;
+  font-size: 12px;
+  color: var(--demo-text-muted);
 }
 
 .panel {
@@ -272,9 +371,13 @@ const confirm = (): void => {
   grid-template-areas:
     "status dpad"
     "log dpad";
-  gap: 12px 24px;
+  gap: 14px 24px;
   align-items: start;
   min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--demo-border);
+  border-radius: 18px;
+  background: var(--demo-canvas);
 }
 
 .status {
@@ -284,40 +387,41 @@ const confirm = (): void => {
   align-items: center;
   min-width: 0;
   flex-wrap: wrap;
+  font-size: 13px;
 }
 
 .badge {
   padding: 2px 10px;
   border-radius: 999px;
   font-size: 12px;
-  background: var(--vp-c-default-soft);
+  background: var(--demo-muted);
 }
 
 .badge.on {
-  color: #fff;
-  background: var(--vp-c-brand-1);
+  color: var(--demo-on-primary);
+  background: var(--demo-primary);
 }
 
 .log {
   grid-area: log;
   margin: 0;
-  padding: 12px 16px;
+  padding: 12px 14px;
   min-height: 150px;
   min-width: 0;
   overflow-wrap: anywhere;
   list-style: none;
-  border-radius: 8px;
+  border: 1px solid var(--demo-border);
+  border-radius: 12px;
   font-family: var(--vp-font-family-mono);
-  font-size: 13px;
-  background: var(--vp-c-bg-soft);
+  font-size: 12px;
+  background: var(--demo-surface);
 }
 
 .log li {
   margin: 0;
 }
-
 .log .empty {
-  color: var(--vp-c-text-3);
+  color: var(--demo-text-muted);
 }
 
 .dpad {
@@ -331,17 +435,17 @@ const confirm = (): void => {
 }
 
 .dpad button {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--vp-c-default-soft);
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--demo-border);
+  border-radius: 10px;
+  background: var(--demo-surface);
   cursor: pointer;
 }
 
 .dpad button:hover {
-  background: var(--vp-c-brand-soft);
+  background: var(--demo-primary-soft);
 }
-
 .dpad .up {
   grid-area: up;
 }
@@ -358,63 +462,60 @@ const confirm = (): void => {
   grid-area: ok;
   font-size: 12px;
   font-weight: 600;
-  color: #fff;
-  background: var(--vp-c-brand-1);
+  color: var(--demo-on-primary);
+  background: var(--demo-primary);
+}
+.dpad .ok:hover {
+  background: var(--demo-primary);
 }
 
 @media (max-width: 640px) {
   .stage {
     aspect-ratio: auto;
     grid-template-rows: auto auto;
-    padding: 12px;
-    gap: 12px;
+    padding: 16px;
+    gap: 14px;
   }
-
   .tabs {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 4px;
+    gap: 8px;
+    padding-bottom: 12px;
   }
-
   .tab {
-    padding: 8px 2px;
+    padding: 6px 2px;
     font-size: 12px;
   }
-
   .body {
     grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
+    gap: 16px;
   }
-
   .menu {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    gap: 10px;
   }
-
   .menu-item {
-    padding: 8px;
+    padding: 10px;
     font-size: 12px;
   }
-
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 14px;
   }
-
   .card {
-    min-height: 72px;
+    min-height: 95px;
+    padding: 12px;
+  }
+  .card strong {
     font-size: 12px;
   }
-
   .overlay {
     padding: 12px;
   }
-
   .panel {
     grid-template-columns: 1fr;
     grid-template-areas: "status" "dpad" "log";
   }
-
   .dpad {
     justify-content: center;
   }

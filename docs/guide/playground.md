@@ -1,4 +1,8 @@
-# 在线演示
+---
+description: 用键盘或虚拟遥控器体验 vuEPG 空间导航、跨组入口和焦点事件，查看完整演示代码。
+---
+
+# 导航演示
 
 下面是一个模拟 TV 首页的演示，运行的就是本仓库的源码。
 
@@ -38,3 +42,5 @@
 - 从内容区第一行按 **↑** 会离开 `内容` 组、进入 `顶栏` 组，日志中能看到 `epg-leave` 与 `epg-enter`；
 - 虚拟遥控器调用 `epg.navigate(direction)`，与实体方向键触发相同的方向事件和边界拦截；
 - 文档站平时调用了 `epg.pause()`，只有演示激活时才 `resume()`，所以不会影响你正常浏览文档。完整源码见 [EpgPlayground.vue](https://github.com/UzkiS/vuEPG/blob/main/docs/.vitepress/theme/components/EpgPlayground.vue)。
+
+需要页面切换、滚动和弹窗的完整应用，可打开[独立示例](./business-example)。

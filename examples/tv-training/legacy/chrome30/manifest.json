@@ -1,0 +1,27 @@
+{
+  "platform": "linux/amd64",
+  "browserVersion": "30.0.1584.0",
+  "driverVersion": "2.8.240825",
+  "baseImage": "ubuntu:20.04@sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214",
+  "artifacts": [
+    {
+      "name": "chromium",
+      "url": "https://storage.googleapis.com/chromium-browser-snapshots/Linux_x64/215004/chrome-linux.zip",
+      "sha256": "2db05f55c2a757e85ac838adb9dbce24ff05e3d8c39faa62f63f7dc9d6f877ba",
+      "size": 70396337,
+      "filename": "chromium.zip"
+    },
+    {
+      "name": "chromedriver",
+      "filename": "chromedriver.zip",
+      "url": "https://chromedriver.storage.googleapis.com/2.8/chromedriver_linux64.zip",
+      "sha256": "1d9882341827753b12651069bc99a544dc1408b957ec4474f5e5a85314ae7f7d"
+    },
+    {
+      "name": "libgcrypt11",
+      "filename": "libgcrypt11.deb",
+      "url": "https://archive.debian.org/debian/pool/main/libg/libgcrypt11/libgcrypt11_1.5.0-5+deb7u4_amd64.deb",
+      "sha256": "67cabf2672cb6a95afe05eaa773abcb10dc941c56326a789fa8a90d3d58a48d8"
+    }
+  ]
+}

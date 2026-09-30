@@ -116,6 +116,23 @@ export interface NearestAnalysis<T> {
   readonly ranked: readonly RankedCandidate<T>[];
 }
 
+/** 打分与比较只定义一次，调试排序和普通导航使用同一规则。 */
+const score = <T>(
+  rule: DirectionRule,
+  from: Box,
+  candidate: Candidate<T>,
+  anchor?: Box,
+): RankedCandidate<T> => ({
+  value: candidate.value,
+  box: candidate.box,
+  distance: rule.distance(from, candidate.box),
+  gap: anchor === undefined ? 0 : rule.gap(anchor, candidate.box),
+  offset: rule.offset(from, candidate.box),
+});
+
+const compare = <T>(a: RankedCandidate<T>, b: RankedCandidate<T>): number =>
+  a.distance - b.distance || a.gap - b.gap || a.offset - b.offset;
+
 /**
  * 在同一层级的候选中，分析指定方向上的目标：
  *
@@ -139,18 +156,8 @@ export const analyzeNearest = <T>(
     overlapping.length > 0 ? overlapping : ahead.filter((c) => rule.isBeyond(from, c.box));
   // 原始顺序作为最后的排序键：老旧浏览器的 Array.prototype.sort 不保证稳定
   const ranked = pool
-    .map((c, index) => ({
-      value: c.value,
-      box: c.box,
-      distance: rule.distance(from, c.box),
-      gap: anchor === undefined ? 0 : rule.gap(anchor, c.box),
-      offset: rule.offset(from, c.box),
-      index,
-    }))
-    .sort(
-      (a, b) =>
-        a.distance - b.distance || a.gap - b.gap || a.offset - b.offset || a.index - b.index,
-    )
+    .map((c, index) => Object.assign(score(rule, from, c, anchor), { index }))
+    .sort((a, b) => compare(a, b) || a.index - b.index)
     .map(({ value, box, distance, gap, offset }) => ({ value, box, distance, gap, offset }));
   return { ahead, overlapping, pool, ranked };
 };
@@ -162,6 +169,26 @@ export const pickNearest = <T>(
   candidates: readonly Candidate<T>[],
   anchor?: Box,
 ): T | null => {
-  const [best] = analyzeNearest(direction, from, candidates, anchor).ranked;
-  return best === undefined ? null : best.value;
+  const rule = RULES[direction];
+  let best: RankedCandidate<T> | null = null;
+  let foundOverlap = false;
+  for (const candidate of candidates) {
+    if (!rule.isAhead(from, candidate.box)) {
+      continue;
+    }
+    const overlapping = rule.overlaps(from, candidate.box);
+    if (!overlapping && (foundOverlap || !rule.isBeyond(from, candidate.box))) {
+      continue;
+    }
+    if (overlapping && !foundOverlap) {
+      foundOverlap = true;
+      best = null;
+    }
+    const ranked = score(rule, from, candidate, anchor);
+    // 分数相同时保留先出现者，不依赖旧浏览器的排序稳定性。
+    if (best === null || compare(ranked, best) < 0) {
+      best = ranked;
+    }
+  }
+  return best === null ? null : best.value;
 };

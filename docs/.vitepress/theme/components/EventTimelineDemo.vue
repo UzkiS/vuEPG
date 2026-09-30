@@ -1,13 +1,22 @@
 <script setup lang="ts">
+import { useDocsText } from "../composables/use-docs-text";
 import { computed, ref } from "vue";
 import { useVuEPG } from "vuepg";
 
+const { text } = useDocsText();
 const epg = useVuEPG();
 const source = ref<HTMLElement | null>(null);
 const target = ref<HTMLElement | null>(null);
 const events = ref<string[]>([]);
 const shown = ref(0);
-const expected = ["当前项方向", "原组方向", "旧项失焦", "离开原组", "进入目标组", "新项聚焦"];
+const expected = computed(() => [
+  text("当前项方向", "Current item direction"),
+  text("原组方向", "Source group direction"),
+  text("旧项失焦", "Old item blur"),
+  text("离开原组", "Leave source group"),
+  text("进入目标组", "Enter target group"),
+  text("新项聚焦", "New item focus"),
+]);
 const visibleEvents = computed(() => events.value.slice(0, shown.value));
 
 const record = (name: string): void => {
@@ -33,13 +42,20 @@ const step = (): void => {
 </script>
 
 <template>
-  <figure class="timeline-demo">
+  <figure class="timeline-demo vuepg-demo">
     <svg
       viewBox="0 0 440 268"
       role="img"
-      :aria-label="`方向操作和焦点变化事件顺序，已显示${shown}步`"
+      :aria-label="
+        text(
+          `方向操作和焦点变化事件顺序，已显示${shown}步`,
+          `Direction and focus event order, ${shown} steps shown`,
+        )
+      "
     >
-      <text x="15" y="21" class="title">按 ↓ 从原组进入目标组</text>
+      <text x="15" y="21" class="title">
+        {{ text("按 ↓ 从原组进入目标组", "Press ↓ to enter the target group") }}
+      </text>
       <line x1="37" y1="43" x2="37" y2="237" class="spine" />
       <g
         v-for="(label, index) in expected"
@@ -48,60 +64,91 @@ const step = (): void => {
         :class="{ shown: index < shown }"
         role="button"
         tabindex="0"
-        :aria-label="`查看第${index + 1}步：${label}`"
+        :aria-label="text(`查看第${index + 1}步：${label}`, `View step ${index + 1}: ${label}`)"
         @click="shown = Math.min(index + 1, events.length)"
         @keydown.enter="shown = Math.min(index + 1, events.length)"
+        @keydown.space.prevent="shown = Math.min(index + 1, events.length)"
       >
         <circle cx="37" :cy="49 + index * 37" r="12" />
         <text x="37" :y="53 + index * 37" class="number">{{ index + 1 }}</text>
         <rect x="61" :y="32 + index * 37" width="360" height="32" rx="5" />
         <text x="76" :y="53 + index * 37" class="event-label">
-          {{ index < shown ? visibleEvents[index] : "等待事件" }}
+          {{ index < shown ? visibleEvents[index] : text("等待事件", "Waiting for event") }}
         </text>
       </g>
     </svg>
     <div class="controls">
-      <button type="button" @click="run">运行一次 ↓</button>
+      <button type="button" @click="run">{{ text("运行一次 ↓", "Run ↓") }}</button>
       <button type="button" @click="step">
-        {{ events.length > 0 && shown >= events.length ? "从第一步重看" : "查看下一步" }}
+        {{
+          events.length > 0 && shown >= events.length
+            ? text("从第一步重看", "Restart from step 1")
+            : text("查看下一步", "Next step")
+        }}
       </button>
     </div>
     <div class="real" aria-hidden="true">
       <div
         v-epg-group
         class="real-group"
-        @epg-enter="record('进入原组')"
-        @epg-down="record('原组方向')"
-        @epg-leave="record('离开原组')"
+        @epg-enter="record(text('进入原组', 'Enter source group'))"
+        @epg-down="record(text('原组方向', 'Source group direction'))"
+        @epg-leave="record(text('离开原组', 'Leave source group'))"
       >
         <button
           ref="source"
           v-epg-item
           type="button"
-          @epg-focus="record('原项聚焦')"
-          @epg-down="record('当前项方向')"
-          @epg-blur="record('旧项失焦')"
+          tabindex="-1"
+          @epg-focus="record(text('原项聚焦', 'Source item focus'))"
+          @epg-down="record(text('当前项方向', 'Current item direction'))"
+          @epg-blur="record(text('旧项失焦', 'Old item blur'))"
         >
-          原组项目
+          {{ text("原组项目", "Source group item") }}
         </button>
       </div>
-      <div v-epg-group class="real-group" @epg-enter="record('进入目标组')">
-        <button ref="target" v-epg-item type="button" @epg-focus="record('新项聚焦')">
-          目标组项目
+      <div
+        v-epg-group
+        class="real-group"
+        @epg-enter="record(text('进入目标组', 'Enter target group'))"
+      >
+        <button
+          ref="target"
+          v-epg-item
+          type="button"
+          tabindex="-1"
+          @epg-focus="record(text('新项聚焦', 'New item focus'))"
+        >
+          {{ text("目标组项目", "Target group item") }}
         </button>
       </div>
     </div>
-    <figcaption>图中记录的是实际派发的事件；前两步可取消方向移动。</figcaption>
+    <figcaption>
+      {{
+        text(
+          "图中记录的是实际派发的事件；前两步可取消方向移动。",
+          "These are actual dispatched events. The first two can cancel directional movement.",
+        )
+      }}
+    </figcaption>
   </figure>
 </template>
 
 <style scoped>
+[role="button"]:focus {
+  outline: none;
+}
+[role="button"]:focus-visible rect {
+  stroke: var(--demo-primary);
+  stroke-width: 3;
+}
+
 .timeline-demo {
   margin: 20px 0;
   padding: 14px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 12px;
-  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--demo-border);
+  border-radius: 18px;
+  background: var(--demo-canvas);
 }
 svg {
   display: block;
@@ -110,11 +157,11 @@ svg {
   margin: auto;
 }
 .title {
-  fill: var(--vp-c-text-1);
+  fill: var(--demo-text);
   font: 600 14px sans-serif;
 }
 .spine {
-  stroke: var(--vp-c-divider);
+  stroke: var(--demo-border);
   stroke-width: 3;
 }
 .step {
@@ -125,33 +172,33 @@ svg {
   opacity: 1;
 }
 .step circle {
-  fill: var(--vp-c-default-soft);
-  stroke: var(--vp-c-default-1);
+  fill: var(--demo-muted);
+  stroke: var(--demo-border);
   stroke-width: 2;
 }
 .step.shown circle {
-  fill: var(--vp-c-brand-1);
-  stroke: var(--vp-c-brand-1);
+  fill: var(--demo-primary);
+  stroke: var(--demo-primary);
 }
 .step rect {
-  fill: var(--vp-c-bg);
-  stroke: var(--vp-c-divider);
+  fill: var(--demo-surface);
+  stroke: var(--demo-border);
 }
 .step.shown rect {
-  fill: var(--vp-c-brand-soft);
-  stroke: var(--vp-c-brand-1);
+  fill: var(--demo-primary-soft);
+  stroke: var(--demo-primary);
 }
 .number {
-  fill: var(--vp-c-text-1);
+  fill: var(--demo-text);
   text-anchor: middle;
   font: 600 12px sans-serif;
   pointer-events: none;
 }
 .step.shown .number {
-  fill: #fff;
+  fill: var(--demo-on-primary);
 }
 .event-label {
-  fill: var(--vp-c-text-1);
+  fill: var(--demo-text);
   font: 13px sans-serif;
   pointer-events: none;
 }
@@ -166,9 +213,9 @@ svg {
 .controls button,
 .real button {
   padding: 6px 10px;
-  border: 1px solid var(--vp-c-divider);
+  border: 1px solid var(--demo-border);
   border-radius: 6px;
-  background: var(--vp-c-bg);
+  background: var(--demo-surface);
   cursor: pointer;
 }
 .real {
@@ -182,17 +229,17 @@ svg {
 }
 .real-group {
   padding: 3px;
-  border: 1px dashed var(--vp-c-text-3);
+  border: 1px dashed var(--demo-text-soft);
   border-radius: 6px;
 }
 .real button.vuepg-focus {
-  color: var(--vp-c-brand-1);
-  border-color: var(--vp-c-brand-1);
+  color: var(--demo-primary);
+  border-color: var(--demo-primary);
 }
 figcaption {
   margin-top: 8px;
   text-align: center;
-  color: var(--vp-c-text-2);
+  color: var(--demo-text-muted);
   font-size: 13px;
 }
 </style>

@@ -25,6 +25,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
+      - run: pnpm build
       - run: pnpm lint
       - run: pnpm format:check
 
@@ -36,6 +37,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
+      - run: pnpm build
       - run: pnpm typecheck
 
   test:
@@ -67,3 +69,40 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup
       - run: pnpm docs:build
+      - run: node scripts/check-site.mjs
+
+  browser:
+    name: Browser example (Vite + webpack)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm example:build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm example:test
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: failure()
+        with:
+          name: browser-results
+          path: |
+            examples/tv-training/test-results
+            examples/tv-training/playwright-report
+
+  chrome30:
+    name: Chromium 30 + Vue 2.7 (Docker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm legacy:install
+      - run: pnpm test:chrome30
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: chrome30-results
+          path: examples/tv-training/legacy-results

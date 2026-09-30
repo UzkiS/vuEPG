@@ -4,3 +4,11 @@ pnpm-lock.yaml
 docs/.vitepress/cache
 docs/.vitepress/dist
 CHANGELOG.md
+
+**/dist-modern
+**/.webpack-dev
+test-results
+playwright-report
+
+**/.cache
+legacy-results

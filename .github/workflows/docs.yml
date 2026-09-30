@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - docs/**
+      - examples/**
+      - scripts/**
+      - README.en.md
+      - pnpm-workspace.yaml
       - src/**
       - CHANGELOG.md
       - package.json

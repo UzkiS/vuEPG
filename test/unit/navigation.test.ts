@@ -173,3 +173,57 @@ describe("analyzeNearest", () => {
     ]);
   });
 });
+
+describe("普通导航与可视分析的一致性", () => {
+  it("重叠候选出现后取代先发现的斜向目标，后续斜向目标不会抢焦点", () => {
+    const list = candidates({
+      before: rect(300, 210, 40, 40),
+      aligned: rect(100, 500, 40, 40),
+      after: rect(300, 201, 40, 40),
+    });
+    expect(pickNearest("down", origin, list)).toBe("aligned");
+  });
+
+  it("各方向、不同候选顺序与跨组锚点都保持可视规则的结果", () => {
+    const list: Candidate<number>[] = [];
+    for (let row = -2; row < 5; row += 1) {
+      for (let column = -2; column < 5; column += 1) {
+        list.push({
+          value: list.length,
+          box: rect(column * 90, row * 80, 30 + (column + 2) * 20, 40 + (row + 2) * 10),
+        });
+      }
+    }
+    for (const direction of ["up", "down", "left", "right"] as const) {
+      for (const anchor of [undefined, rect(170, 140, 20, 20)]) {
+        for (const ordered of [list, list.slice().reverse()]) {
+          expect(pickNearest(direction, origin, ordered, anchor)).toBe(
+            analyzeNearest(direction, origin, ordered, anchor).ranked[0]?.value ?? null,
+          );
+        }
+      }
+    }
+  });
+});
+
+it("分析空候选与完全并列的候选时保持文档顺序", () => {
+  expect(analyzeNearest("down", origin, []).ranked).toEqual([]);
+  const list = candidates({
+    first: rect(100, 250, 50, 50),
+    second: rect(100, 250, 50, 50),
+    third: rect(100, 250, 50, 50),
+  });
+  expect(analyzeNearest("down", origin, list).ranked.map((candidate) => candidate.value)).toEqual([
+    "first",
+    "second",
+    "third",
+  ]);
+  expect(pickNearest("down", origin, list)).toBe("first");
+});
+
+it("可视分析在无重叠时排除未完全越过的斜向元素", () => {
+  const list = candidates({ straddling: rect(300, 150, 50, 100), beyond: rect(300, 220, 50, 50) });
+  const analysis = analyzeNearest("down", origin, list);
+  expect(analysis.overlapping).toEqual([]);
+  expect(analysis.pool.map((candidate) => candidate.value)).toEqual(["beyond"]);
+});

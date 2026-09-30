@@ -1,3 +1,7 @@
+---
+description: 监听 vuEPG 焦点与分组事件，取消默认方向移动，处理业务跳转，并了解 Vue 2.7 和 Vue 3 的监听方式。
+---
+
 # 事件
 
 vuEPG 通过**原生 DOM 事件**通知焦点变化。它们都是标准的 [`CustomEvent`](https://developer.mozilla.org/zh-CN/docs/Web/API/CustomEvent)：不冒泡，数据放在 `event.detail` 中。在 Vue 模板里用 `@事件名` 监听。事件写在原生元素上时，Vue 2.7 与 Vue 3 的写法相同。
@@ -8,13 +12,15 @@ vuEPG 通过**原生 DOM 事件**通知焦点变化。它们都是标准的 [`Cu
 
 ## 事件一览
 
-| 事件                                             | 派发在   | `detail`              | 可取消 |
-| ------------------------------------------------ | -------- | --------------------- | ------ |
-| `epg-focus`                                      | EPGItem  | `{ item }`            | 否     |
-| `epg-blur`                                       | EPGItem  | `{ item }`            | 否     |
-| `epg-enter`                                      | EPGGroup | `{ group }`           | 否     |
-| `epg-leave`                                      | EPGGroup | `{ group }`           | 否     |
-| `epg-up` / `epg-down` / `epg-left` / `epg-right` | 两者皆可 | `{ node, direction }` | 是     |
+| 事件                                             | 派发在   | `detail`              | 取消默认导航 |
+| ------------------------------------------------ | -------- | --------------------- | ------------ |
+| `epg-focus`                                      | EPGItem  | `{ item }`            | 否           |
+| `epg-blur`                                       | EPGItem  | `{ item }`            | 否           |
+| `epg-enter`                                      | EPGGroup | `{ group }`           | 否           |
+| `epg-leave`                                      | EPGGroup | `{ group }`           | 否           |
+| `epg-up` / `epg-down` / `epg-left` / `epg-right` | 两者皆可 | `{ node, direction }` | 是           |
+
+所有 `epg-*` 事件均以 `cancelable: true` 派发；方向事件的取消会阻止默认导航。焦点和分组通知发生在状态变化后，取消这些通知不会撤销已经完成的变化。
 
 确定键会直接调用当前焦点元素的 `click()`，所以用普通的 `@click` 即可。
 

@@ -1,0 +1,4 @@
+# 独立安装时使用本项目的构建脚本策略。
+allowBuilds:
+  esbuild: true
+  core-js: false
