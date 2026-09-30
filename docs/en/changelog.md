@@ -6,6 +6,14 @@ description: "vuEPG release history, features, fixes, compatibility changes and 
 
 Review features, fixes and compatibility changes. For existing projects, see the [migration guide](./migration/v1).
 
+## 2.2.1
+
+### Patch Changes
+
+- Directional navigation now selects targets in a single pass, reducing candidate sorting and intermediate arrays. Debugging and documentation diagrams retain the full analysis, sharing the same scoring rules to preserve cross-group anchors and tie order.
+  
+  Includes an independently copyable Vue 2.7 example with Vite for modern development, webpack for legacy-device development, and ES5 builds. Adds real Chromium 30 regression tests for production, development and hot updates. Improves Chinese and English integration and migration guides, practical TypeScript examples, the project homepage and SEO, and unifies demos and the complete example around a white and pink visual style.
+
 ## 2.2.0
 
 ### Minor Changes
