@@ -19,6 +19,11 @@ const translations = pending.map((file) => {
 });
 
 execFileSync("pnpm", ["changeset", "version"], { cwd: root, stdio: "inherit" });
+// 版本更新会改变 workspace 内依赖范围；先同步锁文件，再运行后续工具。
+execFileSync("pnpm", ["install", "--lockfile-only", "--no-frozen-lockfile", "--ignore-scripts"], {
+  cwd: root,
+  stdio: "inherit",
+});
 
 if (translations.length > 0) {
   const changelog = readFileSync(resolve(root, "CHANGELOG.md"), "utf8");

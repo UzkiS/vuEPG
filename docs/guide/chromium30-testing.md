@@ -92,7 +92,7 @@ pnpm legacy:clean
 | 宿主环境                                    | 状态                              |
 | ------------------------------------------- | --------------------------------- |
 | WSL2 / Ubuntu 24.04 + Docker Desktop，amd64 | 已通过回归                        |
-| Linux Docker Engine，amd64                  | CI 已配置                         |
+| Linux Docker Engine，amd64                  | 已通过 GitHub Actions 回归        |
 | Windows / macOS + Docker Desktop            | 共用 Linux 镜像，宿主运行尚未验证 |
 | Apple Silicon                               | 使用 `linux/amd64` 模拟，尚未验证 |
 
