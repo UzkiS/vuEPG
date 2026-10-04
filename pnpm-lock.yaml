@@ -257,8 +257,8 @@ importers:
         specifier: 3.50.0
         version: 3.50.0
       vue:
-        specifier: 2.7.16
-        version: 2.7.16
+        specifier: 3.5.43
+        version: 3.5.43(typescript@6.0.3)
       vuepg:
         specifier: ^2.2.1
         version: link:../..
@@ -283,7 +283,7 @@ importers:
         version: 22.20.4
       '@vitejs/plugin-vue2':
         specifier: 2.3.4
-        version: 2.3.4(vite@7.3.6(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.33.0)(terser@5.51.2)(yaml@2.9.1))(vue@2.7.16)
+        version: 2.3.4(vite@7.3.6(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.33.0)(terser@5.51.2)(yaml@2.9.1))(vue@3.5.43(typescript@6.0.3))
       acorn:
         specifier: 8.18.0
         version: 8.18.0
@@ -7045,10 +7045,10 @@ snapshots:
 
   '@ungap/structured-clone@1.4.0': {}
 
-  '@vitejs/plugin-vue2@2.3.4(vite@7.3.6(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.33.0)(terser@5.51.2)(yaml@2.9.1))(vue@2.7.16)':
+  '@vitejs/plugin-vue2@2.3.4(vite@7.3.6(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.33.0)(terser@5.51.2)(yaml@2.9.1))(vue@3.5.43(typescript@6.0.3))':
     dependencies:
       vite: 7.3.6(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.33.0)(terser@5.51.2)(yaml@2.9.1)
-      vue: 2.7.16
+      vue: 3.5.43(typescript@6.0.3)
 
   '@vitejs/plugin-vue@5.2.4(vite@5.4.21(@types/node@26.6.3)(lightningcss@1.33.0)(terser@5.51.2))(vue@3.5.43(typescript@6.0.3))':
     dependencies:

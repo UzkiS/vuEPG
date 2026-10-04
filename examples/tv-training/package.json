@@ -18,7 +18,7 @@
     "check": "vue-tsc --noEmit -p tsconfig.json && webpack --config webpack.config.cjs --mode production && node scripts/check-build.mjs && vite build"
   },
   "dependencies": {
-    "vue": "2.7.16",
+    "vue": "3.5.43",
     "vuepg": "^2.2.1",
     "core-js": "3.50.0",
     "whatwg-fetch": "3.6.20"
