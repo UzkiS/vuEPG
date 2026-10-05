@@ -9,11 +9,28 @@ updates:
         patterns: ["*"]
         update-types: [minor, patch]
     ignore:
-      # typescript-eslint 目前只支持 TypeScript < 6.1
+      # npm 更新覆盖整个 pnpm workspace；精确版本号不阻止 Dependabot 改写清单。
+      # typescript-eslint 的 peer 范围要求 TypeScript < 6.1，保留 6.0 的修复更新。
       - dependency-name: typescript
-        update-types: [version-update:semver-major, version-update:semver-minor]
+        versions: [">=6.1.0"]
+      # 示例保留 Vue 2.7；根工程的 Vue 3 仍接收同主版本更新。
+      - dependency-name: vue
+        update-types: [version-update:semver-major]
       # 用于测试 Vue 2.7 的别名依赖，固定在 2.x
       - dependency-name: vue2
+        update-types: [version-update:semver-major]
+      # Vue 2 模板编译器须与运行时配套。
+      - dependency-name: vue-template-compiler
+        update-types: [version-update:semver-major]
+      # vue-loader 15 用于 Vue 2，后续主版本使用 Vue 3 编译链。
+      - dependency-name: vue-loader
+        update-types: [version-update:semver-major]
+      # @vitejs/plugin-vue2 2.3.4 的 peer 范围最高为 Vite 7。
+      # 按升级类型限制，保留示例 Vite 7 与根工程 Vite 8 各自的 minor / patch。
+      - dependency-name: vite
+        update-types: [version-update:semver-major]
+      # 示例声明可在 Node 22 上运行，类型不能自动换到更高 Node 主版本。
+      - dependency-name: "@types/node"
         update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions

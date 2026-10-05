@@ -153,6 +153,13 @@ scripts/             发布、兼容检查与浏览器回归脚本（CI 调用�
 - 固定下载地址与校验值维护于 `examples/tv-training/legacy/chrome30/manifest.json`。浏览器实际版本必须核验，不以修改 UA 代替真实旧浏览器。
 - 下载缓存、镜像产物、截图及日志结果不提交；公开兼容范围对应实际平台和测试结果，设备宿主桥与性能另行记录。
 
+## 依赖更新
+
+- 自动升级限制统一维护在 [.github/dependabot.yml](./.github/dependabot.yml)，每项限制注明配套依赖或运行环境依据。精确版本与锁文件保证安装可复现，不能代替 Dependabot 的升级限制。
+- Dependabot 的 npm 更新覆盖整个 pnpm workspace；同名依赖在库工程与示例中可以使用不同主版本。设置忽略范围时保留各自兼容分支内的更新，不能用示例的版本上限全局屏蔽根工程已支持的版本。
+- 调整兼容分支、配套插件或宿主 Node 要求时，同时复核自动升级限制。解除限制前核对上游声明和实际构建结果；影响示例转译、运行时或开发客户端的更新须通过现代浏览器与真实 Chromium 30 回归。
+- 常规依赖与 GitHub Actions 更新继续接收并检查 CI；安全告警单独评估修复方案，不直接将不兼容的主版本升级当作修复。
+
 ## 提交与发布
 
 - 提交信息遵循 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/)：`feat:`、`fix:`、`docs:`、`test:`、`refactor:`、`chore:` 等。
