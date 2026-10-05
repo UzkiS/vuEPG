@@ -20,7 +20,7 @@ pnpm install
 1. 从 `main` 创建分支；
 2. 修改代码并补充测试：`pnpm test:watch`；
 3. 本地预览文档：`pnpm docs:dev`，打开 <http://localhost:5173/vuEPG/>；
-4. 面向用户的改动运行 `pnpm changeset` 添加变更说明，并提供同名英文发布说明（规则见 AGENTS.md）；
+4. 按 [AGENTS.md 的发布范围规则](./AGENTS.md#提交与发布)判断是否需要 `pnpm changeset`，需要时提供同名英文发布说明；
 5. 运行 `pnpm check`，全部通过后提交 Pull Request。
 
 ## 发布

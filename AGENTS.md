@@ -23,7 +23,7 @@ vuEPG 是 Vue 2.7 / Vue 3 通用的大屏（TV / IPTV / 机顶盒）焦点管理
 | `pnpm build`     | 构建产物，并用 publint 与 attw 校验包结构                   |
 | `pnpm docs:dev`  | 本地文档，<http://localhost:5173/vuEPG/>                    |
 | `pnpm check`     | **提交前必跑**：以上全部检查 + 文档构建                     |
-| `pnpm changeset` | 为面向用户的改动添加 changeset                              |
+| `pnpm changeset` | 为 npm 包的用户可见改动添加 changeset                       |
 
 ## 目录结构与分层
 
@@ -163,7 +163,8 @@ scripts/             发布、兼容检查与浏览器回归脚本（CI 调用�
 ## 提交与发布
 
 - 提交信息遵循 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/)：`feat:`、`fix:`、`docs:`、`test:`、`refactor:`、`chore:` 等。
-- 面向用户的改动（功能、修复、破坏性变更）必须附带 changeset：`pnpm changeset`。纯文档、测试、工程配置的改动不需要。
+- 影响 npm 包 `vuepg` 的功能、公开 API／类型、运行行为、兼容性、导出或安装要求的改动，必须附带 changeset：`pnpm changeset`。仅修改独立示例、文档、测试或 CI，且没有改变库的行为与产物契约时，不添加库的 changeset；示例和文档随站点部署更新。
+- 合并发布 PR 前核对与上一 npm 版本的实际变化，不能仅因为自动生成了发布 PR 就合并。若 changeset 仅对应上述不需要 npm 发版的内容，移除该 changeset 及其英文说明；没有待发布的库变更时关闭发布 PR。版本号自身的变化不算库的有效改动。
 - Agent 同时在 `.changeset/translations/` 添加同名英文说明；发布流程通过 `scripts/prepare-release.ts` 调用 Changesets 生成版本和中文记录，并同步英文更新记录。
 - 发布全自动，**不要手动修改 `package.json` 的 `version` 或 `CHANGELOG.md`**：
   1. 带 changeset 的改动合并到 `main` 后，Release 工作流创建或更新「chore: release」PR；
@@ -175,4 +176,4 @@ scripts/             发布、兼容检查与浏览器回归脚本（CI 调用�
 - [ ] `pnpm check` 全部通过
 - [ ] 行为改动有对应测试，Vue 2.7 与 Vue 3 均通过
 - [ ] 公开 API 改动已同步 `docs/api/index.md` 与类型测试
-- [ ] 面向用户的改动已添加 changeset
+- [ ] npm 包的用户可见改动已添加 changeset

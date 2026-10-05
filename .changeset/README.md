@@ -1,6 +1,6 @@
 # Changesets
 
-每个会影响使用者的改动都需要一个 changeset，用来决定下一个版本号并生成 CHANGELOG。
+changeset 用于决定 npm 包的下一个版本号并生成 CHANGELOG。是否需要添加，以 [AGENTS.md 的发布范围规则](../AGENTS.md#提交与发布)为准。
 
 ```sh
 pnpm changeset
