@@ -1,5 +1,11 @@
 # vuepg
 
+## 2.2.2
+
+### Patch Changes
+
+- [`9ce58ec`](https://github.com/UzkiS/vuEPG/commit/9ce58ec3d86dcad411cb5c273e1b9dce74dc15d2) Thanks [@UzkiS](https://github.com/UzkiS)! - 修复完整示例末张卡片的焦点框被滚动容器裁剪的问题，将首尾留白计入实际内容轨道，并补充不同缩放与真实 Chromium 30 的边缘可见性回归。示例顶部新增文档与 GitHub 入口，中英文 README 预览图改为打开完整示例。
+
 ## 2.2.1
 
 ### Patch Changes

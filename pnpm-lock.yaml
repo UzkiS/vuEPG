@@ -260,7 +260,7 @@ importers:
         specifier: 2.7.16
         version: 2.7.16
       vuepg:
-        specifier: ^2.2.1
+        specifier: ^2.2.2
         version: link:../..
       whatwg-fetch:
         specifier: 3.6.20

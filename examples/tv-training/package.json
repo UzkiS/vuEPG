@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "vue": "2.7.16",
-    "vuepg": "^2.2.1",
+    "vuepg": "^2.2.2",
     "core-js": "3.50.0",
     "whatwg-fetch": "3.6.20"
   },
