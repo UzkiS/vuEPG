@@ -1,6 +1,6 @@
 {
   "name": "vuepg",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Vue 2.7 / Vue 3 焦点管理与空间导航，支持键盘与遥控器，适用于现代浏览器、TV、IPTV、机顶盒，兼顾 Android 4.x 等运营商存量盒子 | Vue focus & spatial navigation",
   "keywords": [
     "vue",

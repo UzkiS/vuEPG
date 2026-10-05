@@ -6,6 +6,12 @@ description: "vuEPG release history, features, fixes, compatibility changes and 
 
 Review features, fixes and compatibility changes. For existing projects, see the [migration guide](./migration/v1).
 
+## 2.2.2
+
+### Patch Changes
+
+- Fix the complete example's last-card focus outline being clipped by its scroll container. Include end spacing in the content track and add edge-visibility regression checks at different scales and in real Chromium 30. Add documentation and GitHub links to the example header, and make the Chinese and English README previews open the complete example.
+
 ## 2.2.1
 
 ### Patch Changes
