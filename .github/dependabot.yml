@@ -13,6 +13,10 @@ updates:
       # typescript-eslint 的 peer 范围要求 TypeScript < 6.1，保留 6.0 的修复更新。
       - dependency-name: typescript
         versions: [">=6.1.0"]
+      # 8.71.0 的 no-unsafe-enum-assignment 在示例 polyfills.ts 检查时栈溢出。
+      # 仅跳过已失败版本，后续修复版仍可提交并通过 CI 验证。
+      - dependency-name: typescript-eslint
+        versions: ["8.71.0"]
       # 示例保留 Vue 2.7；根工程的 Vue 3 仍接收同主版本更新。
       - dependency-name: vue
         update-types: [version-update:semver-major]
