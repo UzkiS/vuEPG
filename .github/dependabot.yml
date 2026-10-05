@@ -17,9 +17,10 @@ updates:
       # 仅跳过已失败版本，后续修复版仍可提交并通过 CI 验证。
       - dependency-name: typescript-eslint
         versions: ["8.71.0"]
-      # 示例保留 Vue 2.7；根工程的 Vue 3 仍接收同主版本更新。
+      # 同名 workspace 依赖会被统一改写到一个候选版本，minor / patch 也可能
+      # 将另一个工程降级。Vue、Vite、Node 类型交由 Agent 按工程分别升级。
+      # 示例使用 Vue 2.7，根工程使用 Vue 3，停用此依赖的自动更新。
       - dependency-name: vue
-        update-types: [version-update:semver-major]
       # 用于测试 Vue 2.7 的别名依赖，固定在 2.x
       - dependency-name: vue2
         update-types: [version-update:semver-major]
@@ -30,12 +31,11 @@ updates:
       - dependency-name: vue-loader
         update-types: [version-update:semver-major]
       # @vitejs/plugin-vue2 2.3.4 的 peer 范围最高为 Vite 7。
-      # 按升级类型限制，保留示例 Vite 7 与根工程 Vite 8 各自的 minor / patch。
+      # 示例 Vite 7 与根工程 Vite 8 分别维护，停用此依赖的自动更新。
       - dependency-name: vite
-        update-types: [version-update:semver-major]
       # 示例声明可在 Node 22 上运行，类型不能自动换到更高 Node 主版本。
+      # 与根工程的 Node 类型分别维护，停用此依赖的自动更新。
       - dependency-name: "@types/node"
-        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directories: [/, /.github/actions/setup]
