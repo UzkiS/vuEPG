@@ -42,7 +42,7 @@
     "webpack-dev-server": "6.0.0",
     "acorn": "8.18.0",
     "@playwright/test": "1.63.0",
-    "@types/node": "22.20.4"
+    "@types/node": "22.20.5"
   },
   "packageManager": "pnpm@12.8.1",
   "engines": {
