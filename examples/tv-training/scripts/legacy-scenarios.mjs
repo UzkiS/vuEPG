@@ -141,21 +141,22 @@ export const runScenarios = async ({
       'return document.querySelector("[data-testid=lesson-2]") === null;',
       true,
     );
-    await key("\uE014");
-    await check(`${label}：Vue 卸载后在原组恢复`, focus, "lesson-1");
+    // restoreFocus：无需按键即在原组恢复
+    await check(`${label}：Vue 卸载后自动在原组恢复`, focus, "lesson-1");
     await click("[data-testid=filter-completed]");
     await key("\uE014");
     await check(`${label}：重新显示项目可导航`, focus, "lesson-2");
     await click("[data-testid=native-right]");
     await check(`${label}：原生桥方向`, focus, "lesson-3");
     await execute('document.querySelector(".vuepg-focus").style.display = "none";');
+    // restoreFocus：恢复时优先回到组内最近获得过焦点的元素
     await key("\uE014");
-    await check(`${label}：隐藏焦点恢复`, focus, "lesson-1");
+    await check(`${label}：隐藏焦点恢复`, focus, "lesson-2");
     await execute(
       'var el = document.querySelector(".vuepg-focus"); el.parentNode.removeChild(el);',
     );
     await key("\uE014");
-    await check(`${label}：焦点离开文档后恢复`, focus, "lesson-2");
+    await check(`${label}：焦点离开文档后恢复`, focus, "lesson-1");
     await click("[data-testid=native-back]");
     await check(`${label}：原生桥返回`, focus, "start");
     await key("\uE00C");

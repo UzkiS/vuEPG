@@ -228,6 +228,58 @@ describe("scroll", () => {
     }
   });
 
+  it("leaves containers that do not hold the focused item alone", () => {
+    mount({
+      template: `<div>
+        <div id="list" v-epg-scroll style="${box(0, 0, 100, 100)}">
+          <div style="${box(0, 0, 50, 1000)}"></div>
+        </div>
+        <div id="outside" v-epg-item style="${box(200, 500, 50, 50)}"></div>
+      </div>`,
+    });
+    const style = vi.spyOn(window, "getComputedStyle");
+    epg.move(byId("outside"));
+    expect(byId("list").scrollTop).toBe(0);
+    expect(style).not.toHaveBeenCalled();
+  });
+
+  it("keeps a fixed overlay from scrolling the container it is written in", () => {
+    mount({
+      template: `<div>
+        <div id="list" v-epg-scroll style="${box(0, 0, 100, 100)}">
+          <div id="first" v-epg-item style="${box(0, 0, 50, 50)}"></div>
+          <div style="${box(0, 0, 50, 1000)}"></div>
+          <div style="position:fixed">
+            <div id="ok" v-epg-item style="${box(0, 500, 50, 50)}"></div>
+          </div>
+          <div id="toast" v-epg-item style="position:fixed;${box(0, 600, 50, 50)}"></div>
+        </div>
+      </div>`,
+    });
+    epg.move(byId("ok"));
+    expect(byId("list").scrollTop).toBe(0);
+    epg.move(byId("toast"));
+    expect(byId("list").scrollTop).toBe(0);
+  });
+
+  it("scrolls a container inside a fixed overlay but nothing outside it", () => {
+    mount({
+      template: `<div>
+        <div id="page" v-epg-scroll style="${box(0, 0, 100, 100)}">
+          <div style="${box(0, 0, 50, 1000)}"></div>
+          <div style="position:fixed">
+            <div id="panel" v-epg-scroll style="${box(0, 0, 100, 100)}">
+              <div id="far" v-epg-item style="${box(0, 300, 50, 50)}"></div>
+            </div>
+          </div>
+        </div>
+      </div>`,
+    });
+    epg.move(byId("far"));
+    expect(byId("panel").scrollTop).toBe(250);
+    expect(byId("page").scrollTop).toBe(0);
+  });
+
   it("converts scaled visual distance to layout distance", () => {
     mount({ template: row("v-epg-scroll") });
     const group = byId("row");

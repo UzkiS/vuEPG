@@ -7,7 +7,6 @@ const emit = defineEmits<(event: "close" | "confirm") => void>();
 const epg = useVuEPG();
 const cancel = ref<HTMLElement>();
 const dialogElement = ref<HTMLElement>();
-const previous = epg.getCurrentItem()?.el;
 
 epg.onBack(() => {
   emit("close");
@@ -45,17 +44,9 @@ onMounted(() => {
     epg.move(cancel.value);
   });
 });
+// 关闭后的焦点由插件的 restoreFocus 恢复：回到打开前的元素；页面切换时保留业务设置的焦点。
 onUnmounted(() => {
   document.removeEventListener("keydown", handleTab, true);
-  void nextTick().then(() => {
-    // 页面切换已经设置新焦点时，保留业务选择。
-    if (epg.getCurrentItem() !== null) {
-      return;
-    }
-    if (!epg.move(previous)) {
-      epg.navigate("down");
-    }
-  });
 });
 </script>
 

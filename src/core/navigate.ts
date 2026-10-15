@@ -1,11 +1,11 @@
 import { isHidden } from "./dom";
 import { getConfig } from "./config";
 import { emit } from "./events";
-import { getCurrentItem, getFocusPath, moveToItem, moveToNode } from "./focus";
+import { getCurrentItem, getFocusHistory, getFocusPath, moveToItem, moveToNode } from "./focus";
 import { debug } from "./logger";
 import { analyzeNearest, pickNearest, type Direction } from "./navigation";
 import type { EPGGroup, EPGItem, EPGNode } from "./nodes";
-import { entryOf, getChildren, getParentGroup, resolveEntry } from "./tree";
+import { entryOf, getChildren, getParentGroup, isFocusable, resolveEntry } from "./tree";
 
 /**
  * 在 `parent` 这一层中，从 `origin` 出发按方向挑选目标。
@@ -74,21 +74,60 @@ export const moveInDirection = (direction: Direction): boolean => {
   return target !== null && moveToNode(target);
 };
 
+/** `scope` 内（为 `null` 时为整个页面）最近获得过焦点、现在仍可获得焦点的元素 */
+const recentIn = (scope: EPGGroup | null): EPGItem | null => {
+  for (const item of getFocusHistory().slice().reverse()) {
+    if ((scope === null || scope.el.contains(item.el)) && isFocusable(item)) {
+      return item;
+    }
+  }
+  return null;
+};
+
 /**
  * 当前焦点已失效（被卸载、隐藏）时恢复焦点：
  * 进入焦点路径中最内层仍可进入的分组；都不可用时进入页面入口。
+ * 开启 `restoreFocus` 时，优先回到该范围内最近获得过焦点的元素。
  */
 const recover = (): boolean => {
+  const preferRecent = getConfig().restoreFocus;
   for (const group of getFocusPath()) {
     const entry = entryOf(group);
     if (entry !== null) {
-      debug("当前焦点不可用，在原来的分组内恢复", group);
-      return moveToItem(entry);
+      const target = (preferRecent ? recentIn(group) : null) ?? entry;
+      debug("当前焦点不可用，在原来的分组内恢复", group, target);
+      return moveToItem(target);
     }
   }
-  const entry = resolveEntry();
-  debug("当前焦点不可用，回到页面入口", entry);
-  return entry !== null && moveToItem(entry);
+  const target = (preferRecent ? recentIn(null) : null) ?? resolveEntry();
+  debug("当前焦点不可用，在页面内恢复", target);
+  return target !== null && moveToItem(target);
+};
+
+let restoreTimer: number | null = null;
+
+/**
+ * 当前焦点被注销后，开启 `restoreFocus` 时恢复焦点。
+ * 推迟到宏任务：框架在微任务中完成渲染，业务在 `nextTick` 中设置的焦点优先。
+ */
+export const scheduleRestore = (): void => {
+  if (!getConfig().restoreFocus || restoreTimer !== null) {
+    return;
+  }
+  restoreTimer = window.setTimeout(() => {
+    restoreTimer = null;
+    if (getCurrentItem() === null) {
+      recover();
+    }
+  }, 0);
+};
+
+/** @internal 仅供测试：取消尚未执行的恢复 */
+export const resetRestore = (): void => {
+  if (restoreTimer !== null) {
+    window.clearTimeout(restoreTimer);
+    restoreTimer = null;
+  }
 };
 
 /**

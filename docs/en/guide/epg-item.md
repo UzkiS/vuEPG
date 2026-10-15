@@ -36,7 +36,7 @@ Bindings are reactive. Updating defaults or disabled state does not proactively 
 | Binding or component update | Update options; restore the focus class if Vue overwrote it              |
 | Unmount                     | Unregister; clear current focus if necessary without emitting `epg-blur` |
 
-Hidden items (`v-show`, ancestor `display: none`, KeepAlive storage) remain registered but cannot be selected. If current focus is hidden or unmounted, the next direction operation recovers inside the original group first, falling back to the page entry if no group is accessible. An already selected item that becomes disabled can still be a navigation origin, but cannot be selected again.
+Hidden items (`v-show`, ancestor `display: none`, KeepAlive storage) remain registered but cannot be selected. If current focus is hidden or unmounted, the next direction operation recovers inside the original group first, falling back to the page entry if no group is accessible. With [`restoreFocus`](./configuration#restorefocus) enabled, unmounting restores focus automatically without waiting for direction input. An already selected item that becomes disabled can still be a navigation origin, but cannot be selected again.
 
 ## Events
 

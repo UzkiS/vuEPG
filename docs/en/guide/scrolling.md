@@ -100,6 +100,6 @@ app.use(VuEPG, { scrollViewport: true });
 // Or: epg.setConfig({ scrollViewport: "center" });
 ```
 
-`scrollViewport` defaults to false. It accepts true / nearest / start / center and runs last. Fixed dialogs do not move the page behind them. Ordinary ancestors are not automatically guessed as scroll containers.
+`scrollViewport` defaults to false. It accepts true / nearest / start / center and runs last. Fixed-position (`position: fixed`) elements do not move their outer scroll containers or the document viewport, even when a dialog is written inside a page scroll container; scroll containers inside the dialog still scroll. Ordinary ancestors are not automatically guessed as scroll containers.
 
 Bounding rectangles are converted from visual pixels to layout pixels, supporting common CSS scale transforms. Scrolling happens before `epg-focus`. Repeating `move()` on the same item recalculates scrolling. For complex animation, virtual-page changes or custom positions, handle scrolling in `epg-focus`.

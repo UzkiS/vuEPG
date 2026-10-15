@@ -26,7 +26,7 @@ Cross-group movement selects a group, then enters its default. Create groups for
 
 ## What happens when focus hides or unmounts?
 
-The next direction input recovers inside the original group, then at the page entry. To restore a specific page position, move focus after DOM updates. See [Focus items](./epg-item).
+The next direction input recovers inside the original group, then at the page entry. With [`restoreFocus`](./configuration#restorefocus) enabled, unmounted focus is restored automatically; for example, closing a dialog returns focus to the item focused before it opened. To restore a specific page position, move focus after DOM updates. See [Focus items](./epg-item).
 
 ## How do native keys connect?
 

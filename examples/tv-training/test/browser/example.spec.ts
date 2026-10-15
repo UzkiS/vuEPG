@@ -194,7 +194,7 @@ test("完成练习后恢复业务位置与原生桥", async ({ page }) => {
   await expect(page.getByTestId("lesson-2")).toHaveClass(/vuepg-focus/);
   await page.getByTestId("filter-completed").click();
   await expect(page.getByTestId("lesson-2")).toHaveCount(0);
-  await page.keyboard.press("ArrowRight");
+  // restoreFocus：焦点卡片被筛掉后，无需按键即在列表内恢复
   await expect(page.getByTestId("lesson-1")).toHaveClass(/vuepg-focus/);
   await page.getByTestId("native-back").click();
   await expect(page.getByTestId("start")).toHaveClass(/vuepg-focus/);

@@ -101,7 +101,7 @@ Try the first available item in this order:
 
 The first direction input without current focus selects the **page entry**, using the same group-entry rules for the root.
 
-After focus is hidden or unmounted (including KeepAlive page changes), the next direction input tries the innermost accessible group on the original focus path, then the page entry. An already selected item becoming disabled affects future eligibility but can remain a navigation origin.
+After focus is hidden or unmounted (including KeepAlive page changes), the next direction input tries the innermost accessible group on the original focus path, then the page entry. With [`restoreFocus`](./configuration#restorefocus) enabled, unmounted focus is restored automatically after rendering, preferring the most recently focused item in the original group. An already selected item becoming disabled affects future eligibility but can remain a navigation origin.
 
 ## Source
 

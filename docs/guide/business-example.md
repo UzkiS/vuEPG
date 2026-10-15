@@ -24,7 +24,7 @@ vuEPG 附带「遥控学习中心」完整示例工程，可独立安装、运�
 | 页面位置恢复 | 进入练习后返回，回到刚才的卡片   | 保存业务 ID，挂载后设置焦点     |
 | 动态列表     | 筛选已完成内容，失效焦点恢复     | Vue 更新内容与分组入口          |
 | 弹窗         | 打开退出弹窗，方向键保持在弹窗内 | 分组边界与组件返回处理          |
-| 关闭复焦     | 返回关闭弹窗，回到可用位置       | 保存原目标并检查其可用性        |
+| 关闭复焦     | 返回关闭弹窗，回到打开前的元素   | 开启 `restoreFocus`             |
 | 原生按键     | 使用 Android 方向、返回按钮      | [原生按键接入](./native-bridge) |
 
 ## 复制为自己的工程
@@ -48,7 +48,7 @@ Vite 入口用于现代浏览器；webpack 入口用于旧机顶盒开发与生�
 | 文件                                                                                                     | 内容                                       |
 | -------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
 | [`app.vue`](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/app.vue)                   | 页面切换、业务位置记忆、循环导航和内容筛选 |
-| [`focus-dialog.vue`](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/focus-dialog.vue) | 弹窗入口、返回关闭、原目标失效时的回退     |
+| [`focus-dialog.vue`](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/focus-dialog.vue) | 弹窗入口、返回关闭与 Tab 循环              |
 | [`bridge.ts`](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/bridge.ts)               | Android 按键映射与监听释放                 |
 | [`polyfills.ts`](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/polyfills.ts)         | 旧设备需要的语言和 DOM / Web API 补齐      |
 

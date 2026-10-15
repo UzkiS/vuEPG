@@ -30,7 +30,7 @@ The repository includes a **complete, independently copyable example project** w
 - Add directives to your existing DOM and keep your UI components and visual design.
 - Navigate by live screen geometry, searching within groups first, then outward; enter groups at their designated default item.
 - Use the same API on Vue 2.7 and Vue 3, with a full test suite on both versions.
-- Skip hidden, unmounted and disabled targets; recover unavailable focus within the original group.
+- Skip hidden, unmounted and disabled targets; recover unavailable focus within the original group, or enable `restoreFocus` to restore focus automatically after unmounting.
 - Native `epg-*` DOM events support focus, group entry/exit and cancellable directions through `.prevent`.
 - Customize key mappings, including numeric `keyCode` fallback on legacy devices.
 - Keep focused items visible with independent scroll-container directives.

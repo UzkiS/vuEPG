@@ -96,6 +96,21 @@ describe("keyboard navigation", () => {
     press("Enter");
     expect(onClick).toHaveBeenCalledOnce();
   });
+
+  it("dispatches a click event where the element has no click() method", () => {
+    const onClick = vi.fn();
+    mount({
+      template: `<div id="a" v-epg-item style="${box(0, 0, 50, 50)}" @click="onClick"></div>`,
+      setup: () => ({ onClick }),
+    });
+    const el = byId("a");
+    // 模拟部分旧 WebKit 内核：非表单元素没有 click()
+    Object.defineProperty(el, "click", { value: undefined });
+    epg.move(el);
+    press("Enter");
+    expect(onClick).toHaveBeenCalledOnce();
+    expect(onClick.mock.calls[0]?.[0]).toBeInstanceOf(MouseEvent);
+  });
 });
 
 describe("invalidation", () => {

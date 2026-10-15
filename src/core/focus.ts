@@ -1,4 +1,5 @@
 import { getConfig } from "./config";
+import { blurEditableOutside, clickElement } from "./dom";
 import { emit } from "./events";
 import { debug } from "./logger";
 import { EPGItem, type EPGGroup, type EPGNode } from "./nodes";
@@ -16,6 +17,9 @@ let focusedItem: EPGItem | null = null;
  * 焦点元素被卸载后仍然保留，用于保证进入 / 离开成对派发，并在原来的分组内恢复焦点。
  */
 let focusPath: EPGGroup[] = [];
+
+/** 获得过焦点、仍然注册的元素，最近的在最后；用于恢复焦点 */
+let focusHistory: EPGItem[] = [];
 
 interface AppliedClass {
   readonly el: HTMLElement;
@@ -37,6 +41,9 @@ export const getCurrentGroup = (): EPGGroup | null =>
 
 /** 焦点路径（由内向外），焦点元素被卸载后仍保留 */
 export const getFocusPath = (): readonly EPGGroup[] => focusPath;
+
+/** 获得过焦点、仍然注册的元素，最近的在最后 */
+export const getFocusHistory = (): readonly EPGItem[] => focusHistory;
 
 /** 当前焦点应使用的 class */
 export const getFocusClass = (): string => currentItem?.focusClass ?? getConfig().focusClass;
@@ -76,6 +83,7 @@ export const moveToItem = (item: EPGItem): boolean => {
   debug("焦点移动", currentItem, "→", item);
   currentItem = item;
   syncFocusClass();
+  blurEditableOutside(item.el);
 
   const stillCurrent = (): boolean => currentItem === item;
   const targetGroups = getAncestorGroups(item);
@@ -104,6 +112,7 @@ export const moveToItem = (item: EPGItem): boolean => {
   }
   scrollIntoView(item);
   focusedItem = item;
+  focusHistory = focusHistory.filter((entry) => entry !== item).concat(item);
   emit(item.el, "epg-focus", { item });
   return true;
 };
@@ -128,7 +137,7 @@ export const moveToNode = (node: EPGNode): boolean =>
 /** 模拟点击当前焦点 */
 export const activate = (): void => {
   if (currentItem !== null && isFocusable(currentItem)) {
-    currentItem.el.click();
+    clickElement(currentItem.el);
   }
 };
 
@@ -145,6 +154,7 @@ export const releaseFocus = (node: EPGNode): void => {
     syncFocusClass();
   }
   focusPath = focusPath.filter((group) => group !== node);
+  focusHistory = focusHistory.filter((item) => item !== node);
 };
 
 /** @internal 仅供测试：清除焦点状态 */
@@ -152,5 +162,6 @@ export const resetFocus = (): void => {
   currentItem = null;
   focusedItem = null;
   focusPath = [];
+  focusHistory = [];
   syncFocusClass();
 };

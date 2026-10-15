@@ -23,7 +23,7 @@ The six built-in actions cannot be removed. Their codes, `preventDefault` and ca
 
 Read `event.code`, then `event.which`, then `event.keyCode`. A missing, empty or `"Unidentified"` code falls back to numeric values. Modern browsers normally match code strings; legacy set-top boxes may provide only numbers. Add both string and numeric codes for a portable mapping.
 
-For text input, textarea, select and editable content, vuEPG leaves text, Backspace and left/right keys to the browser. Up/down, Escape and remote Back still use vuEPG. Listen on the input element for other custom keys.
+For text input, textarea, select and editable content, vuEPG still handles keys of `UP`, `DOWN` and `BACK` that do not type text: up/down, Escape, remote Back and any other non-text keys added to these actions. Text, Backspace, left/right and other actions go to the browser. Keys pressed during an input method composition all go to the input method. Once focus moves outside the input element, it loses input focus and later keys navigate normally. Listen on the input element for other custom keys.
 
 Inspect codes on your device:
 

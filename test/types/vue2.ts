@@ -8,6 +8,7 @@ import VuEPG, { useVuEPG, type EPGGroupOptions, type ScrollBinding } from "../..
 Vue.use(VuEPG);
 Vue.use(VuEPG, { focusClass: "focused" });
 Vue.use(VuEPG, { scrollViewport: true });
+Vue.use(VuEPG, { restoreFocus: true });
 
 // Vue 2.7 中 `$epg` 的类型通过 defineComponent 获得
 defineComponent({

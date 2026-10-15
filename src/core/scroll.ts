@@ -1,4 +1,5 @@
 import { getConfig } from "./config";
+import { getScrollingElement, isFixed } from "./dom";
 import type { EPGItem } from "./nodes";
 
 // #region scroll-options
@@ -84,11 +85,9 @@ const scrollElement = (item: EPGItem, el: HTMLElement, mode: ScrollMode): void =
   }
 };
 
-/** 文档视口仅在配置启用时滚动；旧内核没有 scrollingElement 时按文档模式回退 */
+/** 文档视口仅在配置启用时滚动 */
 const scrollDocument = (item: EPGItem, mode: ScrollMode): void => {
-  const el =
-    document.scrollingElement ??
-    (document.compatMode === "BackCompat" ? document.body : document.documentElement);
+  const el = getScrollingElement();
   const rect = item.getRect();
   const dx = scrollDelta(mode, rect.left, rect.width, 0, window.innerWidth);
   const dy = scrollDelta(mode, rect.top, rect.height, 0, window.innerHeight);
@@ -100,24 +99,45 @@ const scrollDocument = (item: EPGItem, mode: ScrollMode): void => {
   }
 };
 
-/** 由内向外处理标记的容器，最后按需处理文档视口 */
+/**
+ * 由内向外处理标记的容器，最后按需处理文档视口。
+ * 遇到 `position: fixed` 的元素即停止：它不随外层容器和文档滚动，例如写在页面容器内的弹窗。
+ */
 export const scrollIntoView = (item: EPGItem): void => {
   const viewport = getConfig().scrollViewport;
   if (containers.size === 0 && viewport === false) {
     return;
   }
-  let fixed = viewport !== false && window.getComputedStyle(item.el).position === "fixed";
+  const ancestors: HTMLElement[] = [];
   for (let el = item.el.parentElement; el !== null; el = el.parentElement) {
+    ancestors.push(el);
+  }
+  // 视口不滚动时，只需处理到最外层的滚动容器
+  let end = ancestors.length;
+  if (viewport === false) {
+    end = 0;
+    ancestors.forEach((el, index) => {
+      if (containers.has(el)) {
+        end = index + 1;
+      }
+    });
+    if (end === 0) {
+      return;
+    }
+  }
+  if (isFixed(item.el)) {
+    return;
+  }
+  for (const el of ancestors.slice(0, end)) {
     const mode = containers.get(el);
     if (mode !== undefined) {
       scrollElement(item, el, mode);
     }
-    if (viewport !== false && window.getComputedStyle(el).position === "fixed") {
-      fixed = true;
-      break;
+    if (isFixed(el)) {
+      return;
     }
   }
-  if (viewport !== false && !fixed) {
+  if (viewport !== false) {
     scrollDocument(item, viewport === true ? "nearest" : viewport);
   }
 };
