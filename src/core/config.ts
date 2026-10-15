@@ -27,6 +27,12 @@ export interface EPGConfig {
    * @defaultValue `false`
    */
   scrollViewport: boolean | ScrollMode;
+  /**
+   * 当前焦点元素被卸载后，是否在 DOM 更新完成后自动恢复焦点；
+   * 开启后，恢复焦点时优先回到原分组内最近获得过焦点的元素
+   * @defaultValue `false`
+   */
+  restoreFocus: boolean;
 }
 // #endregion config
 
@@ -35,6 +41,7 @@ const DEFAULT_CONFIG: Readonly<EPGConfig> = {
   backHandler: null,
   debug: false,
   scrollViewport: false,
+  restoreFocus: false,
 };
 
 let config: Readonly<EPGConfig> = DEFAULT_CONFIG;
@@ -46,6 +53,7 @@ export const getConfig = (): Readonly<EPGConfig> => {
 
 /**
  * 合并配置。仅负责存储与校验，焦点 class 的同步由上层完成。
+ * 值为 `undefined` 的字段视为未传入，不覆盖当前配置。
  * @throws 当 `focusClass` 为空字符串或包含空白字符时
  */
 export const mergeConfig = (patch: Partial<EPGConfig>): void => {
@@ -64,7 +72,13 @@ export const mergeConfig = (patch: Partial<EPGConfig>): void => {
   ) {
     throw new TypeError(`[vuEPG] scrollViewport 必须是布尔值或有效滚动方式`);
   }
-  config = Object.assign({}, config, patch);
+  config = {
+    focusClass: patch.focusClass ?? config.focusClass,
+    backHandler: patch.backHandler === undefined ? config.backHandler : patch.backHandler,
+    debug: patch.debug ?? config.debug,
+    scrollViewport: patch.scrollViewport ?? config.scrollViewport,
+    restoreFocus: patch.restoreFocus ?? config.restoreFocus,
+  };
 };
 
 /** @internal 仅供测试：恢复默认配置 */

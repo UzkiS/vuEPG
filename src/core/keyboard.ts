@@ -1,4 +1,5 @@
 import { back } from "./back";
+import { isEditable } from "./dom";
 import { activate } from "./focus";
 import { debug } from "./logger";
 import { navigate } from "./navigate";
@@ -223,49 +224,38 @@ const findActionName = (code: KeyCode): string | null => {
   return found;
 };
 
-/** 不能输入文字的 `<input>` 类型 */
-const NON_TEXT_INPUT_TYPES = [
-  "button",
-  "checkbox",
-  "color",
-  "file",
-  "hidden",
-  "image",
-  "radio",
-  "range",
-  "reset",
-  "submit",
-];
+/** 在可编辑元素中仍由 vuEPG 处理的按键事件：上下移动与返回 */
+const EDITABLE_ACTIONS: readonly string[] = ["UP", "DOWN", "BACK"];
 
-/** 按键目标是否为可编辑元素（拥有真实 DOM 焦点的输入框、下拉框等） */
-const isEditable = (target: EventTarget | null): boolean => {
-  if (target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) {
-    return true;
+/** 输入或删除文字的 `event.code` */
+const TEXT_CODE = /^(?:Key[A-Z]|Digit\d|Numpad\d|Space|Backspace|Delete)$/;
+
+/**
+ * 是否为输入或删除文字的按键：即使属于上述事件，在可编辑元素中也交给浏览器。
+ * 数字键值：8 退格 · 32 空格 · 46 删除 · 48–111 数字、字母与小键盘 · 186–222 标点 · 47 Android S 键
+ */
+const isTextKey = (code: KeyCode): boolean => {
+  if (typeof code === "string") {
+    return TEXT_CODE.test(code);
   }
-  if (target instanceof HTMLInputElement) {
-    return NON_TEXT_INPUT_TYPES.indexOf(target.type) === -1;
-  }
-  return target instanceof HTMLElement && target.isContentEditable;
+  return (
+    code === 8 ||
+    code === 32 ||
+    code === 46 ||
+    code === 47 ||
+    (code >= 48 && code <= 111) ||
+    (code >= 186 && code <= 222)
+  );
 };
 
-/** 在可编辑元素中仍由 vuEPG 处理的按键：上下方向键与返回键（Esc、遥控器返回键） */
-const EDITABLE_KEYS: readonly KeyCode[] = [
-  "ArrowUp",
-  "ArrowDown",
-  "Escape",
-  38,
-  40,
-  19,
-  20,
-  27,
-  4,
-  10009,
-  461,
-];
+/** 输入法正在组字：此时的按键（包括方向键与 Esc）属于输入法 */
+const isComposing = (event: KeyboardEvent): boolean =>
+  // eslint-disable-next-line @typescript-eslint/no-deprecated -- 不支持 isComposing 的内核以 keyCode 229 标记输入法按键
+  event.isComposing || event.keyCode === 229;
 
 /** keydown 处理函数 */
 export const handleKeydown = (event: KeyboardEvent): void => {
-  if (isPaused()) {
+  if (isPaused() || isComposing(event)) {
     return;
   }
   const code = resolveKeyCode(event);
@@ -274,7 +264,7 @@ export const handleKeydown = (event: KeyboardEvent): void => {
   if (code === null || name === null) {
     return;
   }
-  if (isEditable(event.target) && EDITABLE_KEYS.indexOf(code) === -1) {
+  if (isEditable(event.target) && (EDITABLE_ACTIONS.indexOf(name) === -1 || isTextKey(code))) {
     debug("按键目标是可编辑元素，交给浏览器处理");
     return;
   }

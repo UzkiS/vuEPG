@@ -7,7 +7,12 @@ import { resetBack } from "./back";
 import { getCurrentItem, moveToNode, releaseFocus, resetFocus, syncFocusClass } from "./focus";
 import { resetKeyboard } from "./keyboard";
 import { debug, warn } from "./logger";
-import { moveInDirection, navigate as navigateInDirection } from "./navigate";
+import {
+  moveInDirection,
+  navigate as navigateInDirection,
+  resetRestore,
+  scheduleRestore,
+} from "./navigate";
 import { isDirection, type Direction } from "./navigation";
 import {
   EPGGroup,
@@ -165,18 +170,23 @@ export const updateGroup = (el: HTMLElement, options: EPGGroupOptions): void => 
   }
 };
 
-/** 注销节点；若它是当前焦点，焦点被清除 */
+/** 注销节点；若它是当前焦点，焦点被清除，开启 `restoreFocus` 时稍后恢复 */
 export const unregister = (el: HTMLElement): void => {
   const node = removeNode(el);
   if (node !== null) {
+    const wasCurrent = node === getCurrentItem();
     node.el.removeAttribute(node instanceof EPGItem ? "data-epg-item-id" : "data-epg-group-id");
     releaseFocus(node);
     debug("注销", node);
+    if (wasCurrent) {
+      scheduleRestore();
+    }
   }
 };
 
 /** @internal 仅供测试：恢复全部初始状态 */
 export const resetCore = (): void => {
+  resetRestore();
   resetFocus();
   resetRegistry();
   resetScroll();

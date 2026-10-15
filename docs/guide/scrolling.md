@@ -100,6 +100,6 @@ app.use(VuEPG, { scrollViewport: true });
 // 或：epg.setConfig({ scrollViewport: "center" });
 ```
 
-`scrollViewport` 默认是 `false`。它使用 `true` / `"nearest"` / `"start"` / `"center"`，最后处理文档视口；固定定位的弹窗不会带动背后的页面。普通祖先元素不会被自动猜测为滚动容器，需要在实际容器上使用 `v-epg-scroll`。
+`scrollViewport` 默认是 `false`。它使用 `true` / `"nearest"` / `"start"` / `"center"`，最后处理文档视口。固定定位（`position: fixed`）的元素不会带动它外层的滚动容器和文档视口，即使弹窗写在页面的滚动容器内；弹窗内部的滚动容器照常滚动。普通祖先元素不会被自动猜测为滚动容器，需要在实际容器上使用 `v-epg-scroll`。
 
 `v-epg-scroll` 使用元素的 `getBoundingClientRect()` 和布局尺寸换算滚动距离，支持常见的 CSS `scale()` 缩放。滚动在 `epg-focus` 事件之前执行；对同一焦点项再次调用 `epg.move()` 会重新计算。复杂动画、虚拟列表换页或业务指定滚动位置时，可以在 `epg-focus` 中自行处理。

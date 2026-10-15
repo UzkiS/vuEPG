@@ -2,6 +2,7 @@ import { mount } from "#mount";
 import { describe, expect, it } from "vitest";
 import { nextTick, ref } from "vue";
 import { useVuEPG } from "../../src";
+import { resetCore } from "../../src/core";
 import { byId, focusedId } from "../helpers/dom";
 import { press } from "../helpers/keyboard";
 import { box } from "../helpers/layout";
@@ -231,5 +232,136 @@ describe("disabled focused item", () => {
     await nextTick();
     expect(epg.move("down")).toBe(true);
     expect(focusedId()).toBe("below");
+  });
+});
+
+describe("restoreFocus", () => {
+  /** 等待已排定的焦点恢复执行 */
+  const settle = (): Promise<void> =>
+    new Promise((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+  const PAGE_WITH_DIALOG = `<div>
+    <div v-epg-group>
+      <div id="p1" v-epg-item style="${box(0, 0, 50, 50)}"></div>
+      <div id="p2" v-epg-item style="${box(60, 0, 50, 50)}"></div>
+    </div>
+    <div v-if="open" v-epg-group>
+      <div id="ok" v-epg-item style="${box(300, 300, 50, 50)}"></div>
+    </div>
+  </div>`;
+
+  const openAndClose = async (open: { value: boolean }): Promise<void> => {
+    epg.move(byId("p2"));
+    open.value = true;
+    await nextTick();
+    epg.move(byId("ok"));
+    open.value = false;
+    await nextTick();
+    expect(epg.getCurrentItem()).toBeNull();
+  };
+
+  it("is off by default", async () => {
+    const open = ref(false);
+    mount({ template: PAGE_WITH_DIALOG, setup: () => ({ open }) });
+    await openAndClose(open);
+    await settle();
+    expect(epg.getCurrentItem()).toBeNull();
+  });
+
+  it("returns to the item focused before a dialog was opened", async () => {
+    const open = ref(false);
+    mount({ template: PAGE_WITH_DIALOG, setup: () => ({ open }) }, { restoreFocus: true });
+    await openAndClose(open);
+    await settle();
+    expect(focusedId()).toBe("p2");
+  });
+
+  it("lets the page set the focus itself after the update", async () => {
+    const open = ref(false);
+    mount({ template: PAGE_WITH_DIALOG, setup: () => ({ open }) }, { restoreFocus: true });
+    await openAndClose(open);
+    await nextTick();
+    epg.move(byId("p1"));
+    await settle();
+    expect(focusedId()).toBe("p1");
+  });
+
+  it("stays in the original group when the focused item is replaced", async () => {
+    const items = ref([1, 2, 3]);
+    mount(
+      {
+        template: `<div>
+          <div v-epg-group><div id="nav" v-epg-item style="${box(0, 0, 50, 50)}"></div></div>
+          <div v-epg-group>
+            <div v-for="n in items" :key="n" :id="'item' + n" v-epg-item :style="'left:' + (100 + n * 60) + 'px;top:0;width:50px;height:50px'"></div>
+          </div>
+        </div>`,
+        setup: () => ({ items }),
+      },
+      { restoreFocus: true },
+    );
+    epg.move(byId("nav"));
+    epg.move(byId("item2"));
+    items.value = [4, 5, 6];
+    await nextTick();
+    await settle();
+    expect(focusedId()).toBe("item4");
+  });
+
+  it("prefers the most recent item of the group when a direction key recovers the focus", async () => {
+    const show = ref(true);
+    mount(
+      {
+        template: `<div v-epg-group>
+          <div id="a" v-epg-item style="${box(0, 0, 50, 50)}"></div>
+          <div id="b" v-epg-item style="${box(60, 0, 50, 50)}"></div>
+          <div id="c" v-show="show" v-epg-item style="${box(120, 0, 50, 50)}"></div>
+        </div>`,
+        setup: () => ({ show }),
+      },
+      { restoreFocus: true },
+    );
+    epg.move(byId("b"));
+    epg.move(byId("c"));
+    show.value = false;
+    await nextTick();
+    press("ArrowLeft");
+    expect(focusedId()).toBe("b");
+  });
+
+  it("restores once for several removals before the update settles", async () => {
+    const shown = ref(["x", "y"]);
+    mount(
+      {
+        template: `<div>
+          <div id="top" v-epg-item style="${box(0, 0, 50, 50)}"></div>
+          <div v-for="id in shown" :key="id" :id="id" v-epg-item style="${box(0, 100, 50, 50)}"></div>
+        </div>`,
+        setup: () => ({ shown }),
+      },
+      { restoreFocus: true },
+    );
+    const log: string[] = [];
+    byId("top").addEventListener("epg-focus", () => log.push("top"));
+    epg.move(byId("x"));
+    shown.value = ["y"];
+    await nextTick();
+    epg.move(byId("y"));
+    shown.value = [];
+    await nextTick();
+    await settle();
+    expect(focusedId()).toBe("top");
+    expect(log).toEqual(["top"]);
+  });
+
+  it("cancels a pending restore when the core is reset", async () => {
+    const open = ref(false);
+    mount({ template: PAGE_WITH_DIALOG, setup: () => ({ open }) }, { restoreFocus: true });
+    await openAndClose(open);
+    resetCore();
+    await settle();
+    expect(epg.getCurrentItem()).toBeNull();
   });
 });

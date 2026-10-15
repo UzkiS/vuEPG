@@ -15,6 +15,9 @@ const app = createApp({});
 app.use(VuEPG);
 app.use(VuEPG, { focusClass: "focused", debug: true, backHandler: () => undefined });
 app.use(VuEPG, { scrollViewport: true });
+app.use(VuEPG, { restoreFocus: true });
+// @ts-expect-error restoreFocus 只接受布尔值
+app.use(VuEPG, { restoreFocus: "auto" });
 // @ts-expect-error 插件选项只接受 EPGConfig 中的字段
 app.use(VuEPG, { unknown: true });
 

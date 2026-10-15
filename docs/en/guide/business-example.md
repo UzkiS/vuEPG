@@ -16,15 +16,15 @@ The example header links to the documentation and GitHub in a new window. The ca
 
 The learning theme is just page content. Use the interactions for your own menus, cards or channel lists.
 
-| Interaction         | Try it                                        | Implementation                        |
-| ------------------- | --------------------------------------------- | ------------------------------------- |
-| Circular navigation | Left/right loop at list ends                  | Direction events and move()           |
-| Scrolling           | Focus a card outside the viewport             | v-epg-scroll on the real container    |
-| Page restoration    | Enter an exercise and return to the same card | Saved ID and focus after mount        |
-| Dynamic lists       | Filter completed content                      | Vue updates and group entry           |
-| Dialog              | Open exit; directions stay inside             | Boundaries and component Back         |
-| Focus restoration   | Close and return to an available target       | Save and validate the original target |
-| Native keys         | Android direction/Back controls               | [Native input](./native-bridge)       |
+| Interaction         | Try it                                        | Implementation                     |
+| ------------------- | --------------------------------------------- | ---------------------------------- |
+| Circular navigation | Left/right loop at list ends                  | Direction events and move()        |
+| Scrolling           | Focus a card outside the viewport             | v-epg-scroll on the real container |
+| Page restoration    | Enter an exercise and return to the same card | Saved ID and focus after mount     |
+| Dynamic lists       | Filter completed content                      | Vue updates and group entry        |
+| Dialog              | Open exit; directions stay inside             | Boundaries and component Back      |
+| Focus restoration   | Close and return to the previous item         | `restoreFocus`                     |
+| Native keys         | Android direction/Back controls               | [Native input](./native-bridge)    |
 
 ## Copy into your project
 
@@ -44,12 +44,12 @@ Vite serves modern-browser development. webpack handles legacy-device developmen
 
 ## Read the source
 
-| File                                                                                                   | Contents                                       |
-| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
-| [app.vue](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/app.vue)                   | Pages, saved position, loops and filtering     |
-| [focus-dialog.vue](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/focus-dialog.vue) | Dialog entry, Back and invalid-target fallback |
-| [bridge.ts](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/bridge.ts)               | Android mapping and listener cleanup           |
-| [polyfills.ts](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/polyfills.ts)         | Language, DOM and Web API compatibility        |
+| File                                                                                                   | Contents                                   |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------ |
+| [app.vue](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/app.vue)                   | Pages, saved position, loops and filtering |
+| [focus-dialog.vue](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/focus-dialog.vue) | Dialog entry, Back and Tab cycling         |
+| [bridge.ts](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/bridge.ts)               | Android mapping and listener cleanup       |
+| [polyfills.ts](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/polyfills.ts)         | Language, DOM and Web API compatibility    |
 
 The example also loads `whatwg-fetch` so its webpack 5 hot updates can download the update manifest. This serves the example's development toolchain; vuEPG itself does not use fetch.
 

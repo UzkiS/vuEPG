@@ -1,5 +1,5 @@
 ---
-description: "Configure focus styling, Back fallback, debug logs and viewport scrolling, with source-defined defaults and reactive updates."
+description: "Configure focus styling, Back fallback, debug logs, viewport scrolling and automatic focus restoration, with source-defined defaults and reactive updates."
 ---
 
 # Configuration
@@ -18,7 +18,7 @@ Or call `setConfig` at any time with the fields you want to change:
 useVuEPG().setConfig({ debug: true });
 ```
 
-`getConfig()` reads the current readonly configuration.
+Fields whose value is `undefined` count as omitted and keep the current setting. `getConfig()` reads the current readonly configuration.
 
 ## Configuration options
 
@@ -41,3 +41,19 @@ Logs movement, keys, registration and unregistration. Direction lookup also logs
 ### scrollViewport
 
 Document viewport scrolling, disabled by default. `true` means `"nearest"`; `"start"` and `"center"` are also available. Independent from element `v-epg-scroll`; see [Scrolling](./scrolling).
+
+### restoreFocus
+
+Disabled by default. When enabled and the focused element unmounts (for example, a dialog closes, list data is replaced or tab content switches), vuEPG restores focus once the current render finishes, without waiting for the next direction input:
+
+1. If the page has already set focus after the update (for example, by calling `move()` in `nextTick`), its choice is kept.
+2. Otherwise, inside the innermost accessible group on the original focus path, focus returns to the most recently focused item; if the group has none, focus enters the group's entry.
+3. If no group on the original path is accessible, focus returns to the most recently focused item anywhere on the page, falling back to the page entry.
+
+As a result, closing a dialog returns focus to the item focused before it opened, and replacing list data keeps focus in the list. With this option, direction input that recovers unavailable focus (for example, a hidden focused item) also prefers the most recently focused item.
+
+```ts
+app.use(VuEPG, { restoreFocus: true });
+```
+
+If the page decides focus only after an asynchronous request, restoration runs first; call `move()` again when the request completes.

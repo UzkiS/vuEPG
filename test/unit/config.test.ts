@@ -10,7 +10,23 @@ describe("config", () => {
       backHandler: null,
       debug: false,
       scrollViewport: false,
+      restoreFocus: false,
     });
+  });
+
+  it("ignores fields whose value is undefined", () => {
+    const handler = (): void => undefined;
+    epg.setConfig({ focusClass: "focused", backHandler: handler, scrollViewport: "start" });
+    // JavaScript 调用方，或未开启 exactOptionalPropertyTypes 的 TypeScript 工程
+    const patch = { focusClass: undefined, backHandler: undefined, scrollViewport: undefined };
+    epg.setConfig(patch as unknown as Parameters<typeof epg.setConfig>[0]);
+    expect(epg.getConfig()).toMatchObject({
+      focusClass: "focused",
+      backHandler: handler,
+      scrollViewport: "start",
+    });
+    epg.setConfig({ backHandler: null });
+    expect(epg.getConfig().backHandler).toBeNull();
   });
 
   it("merges partial updates", () => {
