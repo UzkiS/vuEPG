@@ -65,7 +65,7 @@ Equivalent to `epg.move("right")`.
 moveToItem(item: EPGItem): boolean
 ```
 
-Focuses the specified EPGItem.
+Focuses the specified EPGItem and returns whether focus landed on it. Returns `false` when the item is disabled or not rendered.
 
 ### epg.moveToGroup
 
@@ -73,7 +73,7 @@ Focuses the specified EPGItem.
 moveToGroup(group: EPGGroup): boolean
 ```
 
-Enters the EPGGroup, selecting its `default` entry or first available item.
+Enters the EPGGroup, selecting its `default` entry or first available item. Returns `false` when the group has no focusable item.
 
 ### epg.findTarget
 
@@ -125,6 +125,8 @@ Immediately resumes key input and clears all outstanding pauses. To release only
 isPaused(): boolean
 ```
 
+Whether input is paused: returns `true` while any `pause()` has not been released.
+
 ## Configuration
 
 ### epg.setConfig
@@ -133,13 +135,15 @@ isPaused(): boolean
 setConfig(patch: Partial<EPGConfig>): void
 ```
 
-Merges configuration; see [Configuration](../guide/configuration). An invalid `focusClass` throws `TypeError`.
+Merges configuration, changing only the given fields; fields set to `undefined` count as omitted. See [Configuration](../guide/configuration). An invalid `focusClass` or `scrollViewport` throws `TypeError`.
 
 ### epg.getConfig
 
 ```ts
 getConfig(): Readonly<EPGConfig>
 ```
+
+Returns the current configuration (read-only).
 
 ## Queries
 
@@ -221,11 +225,15 @@ Returns all EPGItems at any depth within the group, in document order.
 isEPGItem(value: unknown): value is EPGItem
 ```
 
+Checks whether a value is an EPGItem, narrowing its type.
+
 ### epg.isEPGGroup
 
 ```ts
 isEPGGroup(value: unknown): value is EPGGroup
 ```
+
+Checks whether a value is an EPGGroup, narrowing its type.
 
 ## Keys
 

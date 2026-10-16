@@ -42,7 +42,7 @@ const epg = useVuEPG();
 epg.setKeyAction("MENU", {
   codes: ["KeyM", 82],
   preventDefault: true,
-  callback: (code, event) => openMenu(),
+  callback: () => openMenu(),
 });
 
 // Update selected fields
@@ -51,8 +51,8 @@ epg.updateKeyAction("NUMBER", {
   callback: (code) => jumpToChannel(code),
 });
 
-// Append / remove keys for an action
-epg.addKeyCodes("ENTER", ["Space", 32]);
+// Append / remove keys: also treat the remote's browser Back key (166) as Back
+epg.addKeyCodes("BACK", ["BrowserBack", 166]);
 epg.removeKeyCodes("UP", [87]);
 
 // Remove a custom action
@@ -62,7 +62,7 @@ epg.removeKeyAction("MENU");
 console.log(epg.getKeyActions());
 ```
 
-Updating nonexistent actions or removing a built-in action throws an error.
+When the same key belongs to several actions, only the first defined action fires; to reassign a key, remove it from its original action first. Updating nonexistent actions or removing a built-in action throws an error.
 
 ## Pause input
 

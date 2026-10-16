@@ -38,7 +38,7 @@ features:
     details: Organize menus, content and dialogs into navigation regions, searching within groups first with default entries and cancellable boundaries.
   - icon: 📜
     title: Scrolling and focus recovery
-    details: Keeps focus visible in scroll containers. The next navigation recovers within an available group when a target is hidden or unmounted.
+    details: Scrolls when focus leaves the visible area of a scroll container. Hidden or unmounted focus recovers inside its original group, and can be restored automatically after unmounting.
 ---
 
 ## Included complete example project
@@ -47,7 +47,7 @@ The repository includes an independent Vue 2.7 project with Vite / webpack devel
 
 <BusinessExample />
 
-The example demonstrates circular navigation, scrolling, page position restoration, dialogs and Android native input. Copy the project and retain your own UI and business logic. Its application interface is in Chinese. See the [navigation demo](./guide/playground) for interaction rules and [Android 4.x integration](./guide/legacy-webview) for legacy configuration.
+The example demonstrates circular navigation, scrolling, page position restoration, dialogs and Android native input. Its interface is in Chinese. Try the navigation rules in the [navigation demo](./guide/playground); legacy configuration is in [Android 4.x integration](./guide/legacy-webview).
 
 ## Support the project {#support}
 

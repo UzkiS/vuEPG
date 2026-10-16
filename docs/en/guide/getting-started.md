@@ -11,7 +11,7 @@ description: "Install vuEPG in Vue 2.7 or Vue 3, register directives, set initia
 - The library ships ES2015 syntax. If a target only supports ES5, transpile `node_modules/vuepg` in the application build.
 - Supply the `CustomEvent` constructor, `Symbol`, `Map`, `Set`, `Object.assign` and `Array.from`. Missing runtime APIs need polyfills in addition to syntax transforms.
 
-To start from a complete project, copy the included [example](./business-example) and replace its pages and data. It supplies Vue 2.7, both development entries, ES5 builds and required polyfills for getting started with legacy Android 4.x operator set-top boxes. See [Legacy integration](./legacy-webview) for compatibility steps.
+To start from a complete project, copy the included [example](./business-example) and replace its pages and data. It is already set up with Vue 2.7, both development entries, ES5 builds and the required polyfills, making it a good starting point for legacy Android 4.x operator set-top boxes. See [Legacy integration](./legacy-webview) for compatibility steps.
 
 ## Installation
 
@@ -129,14 +129,14 @@ const epg = useVuEPG(); // Anywhere
 ```vue
 <template>
   <!-- In a template -->
-  <div v-epg-item @epg-up="$epg.move('left')">...</div>
+  <button v-epg-item @click="$epg.back()">Back</button>
 </template>
 ```
 
 ```ts
 export default {
   mounted() {
-    this.$epg.move("down"); // Options API
+    this.$epg.move(this.$refs.first); // Options API: move to the template ref "first"
   },
 };
 ```

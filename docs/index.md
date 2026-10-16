@@ -6,7 +6,7 @@ titleTemplate: false
 hero:
   name: vuEPG
   text: 焦点管理与空间导航
-  tagline: Vue 2.7 / Vue 3 通用，适用于现代浏览器与 TV、IPTV、机顶盒网页，兼顾 Android 4.x 等运营商存量盒子。已在各大运营商盒子项目中实际落地。
+  tagline: Vue 2.7 / Vue 3 通用，适用于现代浏览器与 TV、IPTV、机顶盒网页，兼顾 Android 4.x 等运营商存量盒子。已在各大运营商机顶盒项目中实际落地。
   image:
     src: /logo.svg
     alt: vuEPG
@@ -38,16 +38,16 @@ features:
     details: 按菜单、内容区和弹窗组织导航区域，组内优先，支持默认入口与方向边界拦截。
   - icon: 📜
     title: 自动滚动与焦点恢复
-    details: 焦点超出滚动容器时保持可见；目标隐藏或卸载后，下一次导航在可用分组恢复。
+    details: 焦点移出滚动容器的可视区域时自动滚动；焦点元素隐藏或卸载后在原分组恢复，也可开启卸载后自动复焦。
 ---
 
 ## 附带完整示例工程
 
-仓库附带一个可独立安装、运行和复制的 Vue 2.7 工程，包含 Vite / webpack 双开发入口、ES5 构建、必要 polyfill 和真实 Chromium 30 自动回归。复制后替换页面与数据，即可开始自己的 TV / IPTV 应用开发，省去从零搭建低版本机顶盒工程的配置工作。
+仓库附带一个可独立安装、运行和复制的 Vue 2.7 工程，包含 Vite / webpack 双开发入口、ES5 构建、必要 polyfill 和真实 Chromium 30 自动回归。复制后替换页面与数据，即可开始自己的 TV / IPTV 应用开发，省去从零搭建旧机顶盒工程的配置工作。
 
 <BusinessExample />
 
-完整示例展示循环导航、滚动、页面位置恢复、弹窗和 Android 原生按键接入。可以直接复制示例工程，保留自己的界面和业务；交互规则见[导航演示](./guide/playground)，旧设备配置见 [Android 4.x 接入](./guide/legacy-webview)。
+示例展示循环导航、滚动、页面位置恢复、弹窗和 Android 原生按键接入。导航规则可在[导航演示](./guide/playground)中体验，旧设备配置见 [Android 4.x 接入](./guide/legacy-webview)。
 
 ## 支持项目 {#support}
 

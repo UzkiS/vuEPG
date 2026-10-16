@@ -4,9 +4,7 @@ description: "Keep focus visible with v-epg-scroll, configure horizontal and ver
 
 # Scrolling
 
-vuEPG uses logical focus without calling native `focus()`. Only marked containers scroll when focus changes. Scroll configuration is independent from navigation groups and disabled by default.
-
-Scrolling uses the element's border rectangle, which excludes outlines and shadows. Reserve extra space for these outward effects to avoid overflow clipping. Include horizontal end spacing in the content track's actual width; padding on the clipping container alone may still leave the last item at the clipping edge. See the `lesson-track` layout in the [complete example](./business-example).
+vuEPG uses logical focus without calling native `focus()`, so the browser does not scroll on its own. Only marked containers scroll when focus changes. Scroll configuration is independent from navigation groups and disabled by default.
 
 ## Horizontal and vertical lists
 
@@ -55,6 +53,10 @@ A vertical list uses the same directive with a fixed height and vertical overflo
 
 Scroll and group directives can share an element or be independent. Adding a navigation group only for scrolling changes entry and boundary rules, so keep their roles distinct.
 
+::: tip Clipped focus outlines
+Scrolling uses the element's border rectangle, which excludes outlines and shadows. Reserve space for these outward effects so `overflow` does not clip them. Include the start and end spacing of a horizontal list in the content track's width; padding on the clipping container alone may still leave the last item against the clipping edge. See the `lesson-track` layout in the [complete example](./business-example).
+:::
+
 ## Alignment
 
 The binding type is defined in the source:
@@ -68,7 +70,7 @@ The binding type is defined in the source:
 | `"center"`         | Center in the visible area                                     |
 | `false`            | Disable reactively                                             |
 
-For oversized items, nearest aligns the beginning. Positions are clamped by the scroll range. The directive does not set overflow or use smooth-scroll APIs; it writes `scrollLeft` / `scrollTop` directly.
+For oversized items, nearest aligns the beginning. Positions are clamped by the scroll range. The directive does not set CSS `overflow`; it writes `scrollLeft` / `scrollTop` directly without smooth scrolling, which also works on legacy devices.
 
 ## Groups and nested containers
 

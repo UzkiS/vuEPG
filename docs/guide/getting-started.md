@@ -11,7 +11,7 @@ description: 安装 vuEPG，在 Vue 2.7 或 Vue 3 注册插件、标记焦点项
 - 产物语法为 ES2015；目标设备若只支持 ES5，请让构建工具转译 `node_modules/vuepg`
 - 浏览器需提供 `CustomEvent` 构造函数、`Symbol`、`Map`、`Set`、`Object.assign` 与 `Array.from`；旧设备缺失时需要相应 polyfill。仅转译语法不会补齐这些运行时 API
 
-希望直接从完整工程开始，可以复制仓库附带的[完整示例](./business-example)，替换页面与数据后开始开发。它配好 Vue 2.7、双开发入口、ES5 构建与必要 polyfill，适合快速上手 Android 4.x 等运营商存量盒子；兼容步骤见[旧设备接入](./legacy-webview)。
+希望直接从完整工程开始，可以复制仓库附带的[完整示例](./business-example)，替换页面与数据后开始开发。它已配好 Vue 2.7、双开发入口、ES5 构建与必要 polyfill，适合作为 Android 4.x 等运营商存量盒子工程的起点；兼容步骤见[旧设备接入](./legacy-webview)。
 
 ## 安装
 
@@ -133,14 +133,14 @@ const epg = useVuEPG(); // 任意位置
 ```vue
 <template>
   <!-- 模板中 -->
-  <div v-epg-item @epg-up="$epg.move('left')">...</div>
+  <button v-epg-item @click="$epg.back()">返回</button>
 </template>
 ```
 
 ```ts
 export default {
   mounted() {
-    this.$epg.move("down"); // Options API
+    this.$epg.move(this.$refs.first); // Options API：移动到模板 ref "first"
   },
 };
 ```

@@ -5,7 +5,7 @@ description: 在 Vue 2.7 和 Vue 3 中使用 vuEPG 的 TypeScript 类型，配�
 
 # TypeScript 接入
 
-本页用于解决接入时的具体类型问题：如何检查 `.vue` 文件、怎样声明模板 ref、如何读取事件里的焦点元素，以及 Options API 中怎样获得 `this.$epg` 提示。vuepg 自带类型声明，无需额外安装 `@types/vuepg`。
+本页说明接入时常见的类型问题：如何检查 `.vue` 文件、怎样声明模板 ref、如何读取事件里的焦点元素，以及 Options API 中怎样获得 `this.$epg` 提示。vuepg 自带类型声明，无需额外安装 `@types/vuepg`。
 
 插件安装与页面用法见[快速开始](./getting-started)；方法签名见 [API](../api/)。
 
@@ -28,7 +28,7 @@ pnpm exec vue-tsc --noEmit -p tsconfig.json
 }
 ```
 
-这是接在已有 tsconfig 中的配置片段；完整可运行配置见[独立示例的 tsconfig.json](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/tsconfig.json)。Vue 3 工程使用与所装 Vue 版本一致的模板目标，不填写 `2.7`。
+完整配置可参考[示例的 tsconfig.json](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/tsconfig.json)。Vue 3 工程不需要这一项。
 
 类型检查与浏览器兼容构建是两个步骤。TypeScript 通过检查，不代表产物已经是 ES5；旧设备还需应用转译与 polyfill，见[旧设备接入](./legacy-webview)。
 
@@ -77,7 +77,6 @@ Vue 3 的模板指令绑定也有类型增强。Vue 2.7 工程可以先把绑定
 ```vue
 <script lang="ts">
 import { defineComponent } from "vue";
-import { useVuEPG } from "vuepg";
 
 export default defineComponent({
   methods: {
@@ -89,7 +88,7 @@ export default defineComponent({
     },
   },
   created() {
-    useVuEPG().onBack(() => {
+    this.$epg.onBack(() => {
       this.closeDialog();
     });
   },
