@@ -134,11 +134,17 @@ export const moveToGroup = (group: EPGGroup): boolean => {
 export const moveToNode = (node: EPGNode): boolean =>
   node instanceof EPGItem ? moveToItem(node) : moveToGroup(node);
 
-/** 模拟点击当前焦点 */
-export const activate = (): void => {
-  if (currentItem !== null && isFocusable(currentItem)) {
-    clickElement(currentItem.el);
+/**
+ * 与按下确定键相同：当前焦点存在、未禁用且已渲染时，在其元素上触发 `click`
+ * @returns 是否触发了点击
+ */
+export const activate = (): boolean => {
+  if (currentItem === null || !isFocusable(currentItem)) {
+    debug("当前没有可确定的焦点");
+    return false;
   }
+  clickElement(currentItem.el);
+  return true;
 };
 
 /**

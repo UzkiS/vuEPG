@@ -8,7 +8,7 @@ import VuEPG, { useVuEPG, type EPGGroupOptions, type ScrollBinding } from "../..
 Vue.use(VuEPG);
 Vue.use(VuEPG, { focusClass: "focused" });
 Vue.use(VuEPG, { scrollViewport: true });
-Vue.use(VuEPG, { restoreFocus: true });
+Vue.use(VuEPG, { restoreFocus: true, keyRepeatInterval: 150 });
 
 // Vue 2.7 中 `$epg` 的类型通过 defineComponent 获得
 defineComponent({
@@ -20,6 +20,8 @@ defineComponent({
 
 useVuEPG().onBack(() => undefined);
 export const navigated: boolean = useVuEPG().navigate("down");
+export const activated: boolean = useVuEPG().activate();
+useVuEPG().onBack(() => false);
 const releasePause: () => void = useVuEPG().pause();
 releasePause();
 export const scrollBinding: ScrollBinding = "center";

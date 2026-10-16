@@ -1,6 +1,6 @@
 import { mount } from "#mount";
 import { describe, expect, it, vi } from "vitest";
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
 import { useVuEPG } from "../../src";
 import { byId, focusedId } from "../helpers/dom";
 import { press } from "../helpers/keyboard";
@@ -91,6 +91,25 @@ describe("move", () => {
     expect(epg.findTarget("right")?.el.id).toBe("inner");
     expect(inner && epg.moveToGroup(inner)).toBe(true);
     expect(b && epg.moveToItem(b)).toBe(true);
+  });
+});
+
+describe("activate", () => {
+  it("clicks the focused item like the Enter key", async () => {
+    const onClick = vi.fn();
+    const disabled = ref(false);
+    mount({
+      template: `<div id="a" v-epg-item="{ disabled }" style="${box(0, 0, 50, 50)}" @click="onClick"></div>`,
+      setup: () => ({ onClick, disabled }),
+    });
+    expect(epg.activate()).toBe(false);
+    epg.move(byId("a"));
+    expect(epg.activate()).toBe(true);
+    expect(onClick).toHaveBeenCalledOnce();
+    disabled.value = true;
+    await nextTick();
+    expect(epg.activate()).toBe(false);
+    expect(onClick).toHaveBeenCalledOnce();
   });
 });
 

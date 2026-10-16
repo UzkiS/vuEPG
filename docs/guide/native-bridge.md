@@ -40,16 +40,21 @@ const onNativeKey = (keyCode: number): void => {
     case 22:
       epg.navigate("right");
       break;
+    case 23:
+      epg.activate();
+      break;
     case 4:
-      epg.back();
+      if (!epg.back()) {
+        exitApp(); // 页面都不处理返回键时，由宿主退出应用
+      }
       break;
   }
 };
 ```
 
-调用 `navigate()` 与用户按下方向键一致，会派发可取消的方向事件。`move("right")` 用于编程式移动，不会经过这条方向事件链路。
+调用 `navigate()` 与用户按下方向键一致，会派发可取消的方向事件。`back()` 返回是否有处理函数处理了返回键，都不处理时由宿主执行自己的默认行为。`move("right")` 用于编程式移动，不会经过这条方向事件链路。
 
-确定键可以调用当前可用项的 `el.click()`。应先检查当前项存在、未禁用、仍然渲染，完整守卫见示例 [`bridge.ts`](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/bridge.ts)。
+确定键调用 `activate()`，与按下确定键相同：当前项存在、未禁用且已渲染时才触发 `click`。
 
 ## 连接设备的原生容器
 

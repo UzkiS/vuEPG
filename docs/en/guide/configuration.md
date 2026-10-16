@@ -1,5 +1,5 @@
 ---
-description: "Configure focus styling, Back fallback, debug logs, viewport scrolling and automatic focus restoration, with source-defined defaults and reactive updates."
+description: "Configure focus styling, Back fallback, debug logs, viewport scrolling, automatic focus restoration and held-key rate limiting, with source-defined defaults and reactive updates."
 ---
 
 # Configuration
@@ -57,3 +57,13 @@ app.use(VuEPG, { restoreFocus: true });
 ```
 
 If the page decides focus only after an asynchronous request, restoration runs first; call `move()` again when the request completes.
+
+### keyRepeatInterval
+
+Defaults to `0`, no limit. While a direction key is held, the browser repeats it twenty to thirty times per second. On slower devices navigation cannot keep up, keys pile up and focus keeps moving after the key is released. With a number of milliseconds, auto-repeated keys from a held key are handled at most once per interval; repeats inside the interval are ignored (the browser default is still prevented). Separate key presses are not affected.
+
+```ts
+app.use(VuEPG, { keyRepeatInterval: 120 });
+```
+
+Pick the value by holding a direction key on the target device; 100–200 is common. On legacy engines without `event.repeat`, vuEPG treats a key pressed again before it was released as a repeat. A few devices never send `keyup`; there, quickly pressing the same key repeatedly is also limited by this interval.

@@ -10,7 +10,7 @@ No. Directives mark DOM focus items and groups, and your page controls focus sty
 
 ## Which input types are supported?
 
-Keyboard and remote direction, Confirm and Back mappings are built in. Gamepads, virtual controls and native callbacks connect through navigate(), back() and other logical APIs without synthetic keyboard events. See [Native input](./native-bridge).
+Keyboard and remote direction, Confirm and Back mappings are built in. Gamepads, virtual controls and native callbacks connect through navigate(), activate(), back() and other logical APIs without synthetic keyboard events. See [Native input](./native-bridge).
 
 ## How do legacy Android 4.x operator boxes integrate?
 

@@ -1,0 +1,7 @@
+Adds `activate()`, `keyRepeatInterval` and Back pass-through, and validates key mapping arguments.
+
+- New `epg.activate()`: same as pressing Enter; triggers `click` when the current focus exists, is not disabled and is rendered, and returns whether it did. Native key callbacks and virtual remotes no longer need to check focus state and call `click()` themselves.
+- A Back handler that returns `false` passes Back to the next active `onBack` and finally to the global `backHandler`. Temporary state inside a component (edit mode, a search box, a player overlay) no longer blocks the outer page when it has nothing to do. `epg.back()` now returns whether any handler handled Back, so a native host can run its own default, such as exiting the application. Existing handlers are unaffected.
+- New `keyRepeatInterval` option (default `0`, no limit): auto-repeated keys from a held key are handled at most once per given number of milliseconds, so keys no longer pile up on slow devices and keep moving focus after release. On legacy engines without `event.repeat`, a key pressed again before it was released counts as a repeat.
+- `setKeyAction`, `updateKeyAction`, `addKeyCodes` and `removeKeyCodes` validate their arguments and throw a `[vuEPG]` `TypeError` for an invalid name, key list or field. Previously, passing a string as the key list could be silently accepted or remove unrelated keys.
+- When the same key belongs to several key actions, a console warning names the action that actually fires.

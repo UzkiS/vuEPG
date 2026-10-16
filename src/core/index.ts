@@ -28,7 +28,14 @@ export { back, registerBackHandler, type BackEntry } from "./back";
 export { getConfig, type BackHandler, type EPGConfig } from "./config";
 export { isValidClassName } from "./dom";
 export type { DirectionEventDetail, EPGEvent, EPGEventDetailMap, EPGEventName } from "./events";
-export { getCurrentGroup, getCurrentItem, getFocusClass, moveToGroup, moveToItem } from "./focus";
+export {
+  activate,
+  getCurrentGroup,
+  getCurrentItem,
+  getFocusClass,
+  moveToGroup,
+  moveToItem,
+} from "./focus";
 export {
   addKeyCodes,
   getKeyActions,
@@ -65,7 +72,7 @@ export type FocusTarget = EPGNode | Element | { readonly $el: unknown };
 
 /**
  * 合并配置
- * @throws 当 `focusClass` 为空字符串或包含空白字符时
+ * @throws 当 `focusClass`、`scrollViewport` 或 `keyRepeatInterval` 无效时
  */
 export const setConfig = (patch: Partial<EPGConfig>): void => {
   mergeConfig(patch);

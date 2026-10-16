@@ -1,9 +1,10 @@
 import { isValidClassName } from "./dom";
 import type { ScrollMode } from "./scroll";
 
+/* eslint-disable @typescript-eslint/no-invalid-void-type -- 保持既有的 () => void 处理函数可直接传入 */
 // #region config
-/** 返回处理函数 */
-export type BackHandler = () => void;
+/** 返回处理函数：返回 `false` 表示不处理，交给下一个处理函数 */
+export type BackHandler = () => boolean | void;
 
 /** 全局配置 */
 export interface EPGConfig {
@@ -13,7 +14,7 @@ export interface EPGConfig {
    */
   focusClass: string;
   /**
-   * 全局返回处理函数：按下返回键且没有生效中的 `onBack` 时调用
+   * 全局返回处理函数：按下返回键，且生效中的 `onBack` 都没有处理时调用
    * @defaultValue `null`
    */
   backHandler: BackHandler | null;
@@ -33,8 +34,14 @@ export interface EPGConfig {
    * @defaultValue `false`
    */
   restoreFocus: boolean;
+  /**
+   * 按住按键时，自动重复的按键至少间隔多少毫秒才处理一次；`0` 表示不限制
+   * @defaultValue `0`
+   */
+  keyRepeatInterval: number;
 }
 // #endregion config
+/* eslint-enable @typescript-eslint/no-invalid-void-type */
 
 const DEFAULT_CONFIG: Readonly<EPGConfig> = {
   focusClass: "vuepg-focus",
@@ -42,6 +49,7 @@ const DEFAULT_CONFIG: Readonly<EPGConfig> = {
   debug: false,
   scrollViewport: false,
   restoreFocus: false,
+  keyRepeatInterval: 0,
 };
 
 let config: Readonly<EPGConfig> = DEFAULT_CONFIG;
@@ -54,7 +62,7 @@ export const getConfig = (): Readonly<EPGConfig> => {
 /**
  * 合并配置。仅负责存储与校验，焦点 class 的同步由上层完成。
  * 值为 `undefined` 的字段视为未传入，不覆盖当前配置。
- * @throws 当 `focusClass` 为空字符串或包含空白字符时
+ * @throws 当 `focusClass`、`scrollViewport` 或 `keyRepeatInterval` 无效时
  */
 export const mergeConfig = (patch: Partial<EPGConfig>): void => {
   if (patch.focusClass !== undefined && !isValidClassName(patch.focusClass)) {
@@ -72,12 +80,20 @@ export const mergeConfig = (patch: Partial<EPGConfig>): void => {
   ) {
     throw new TypeError(`[vuEPG] scrollViewport 必须是布尔值或有效滚动方式`);
   }
+  const interval: unknown = patch.keyRepeatInterval;
+  if (
+    interval !== undefined &&
+    (typeof interval !== "number" || !Number.isFinite(interval) || interval < 0)
+  ) {
+    throw new TypeError(`[vuEPG] keyRepeatInterval 必须是不小于 0 的毫秒数`);
+  }
   config = {
     focusClass: patch.focusClass ?? config.focusClass,
     backHandler: patch.backHandler === undefined ? config.backHandler : patch.backHandler,
     debug: patch.debug ?? config.debug,
     scrollViewport: patch.scrollViewport ?? config.scrollViewport,
     restoreFocus: patch.restoreFocus ?? config.restoreFocus,
+    keyRepeatInterval: patch.keyRepeatInterval ?? config.keyRepeatInterval,
   };
 };
 

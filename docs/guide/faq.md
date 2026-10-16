@@ -13,7 +13,7 @@ description: vuEPG 接入常见问题：已有组件、Vue 2.7/3、Android 4.x�
 
 ## 支持哪些输入方式
 
-内置键盘和遥控器方向、确定、返回映射。手柄、虚拟控制器和原生回调可通过 `navigate()`、`back()` 等逻辑 API 接入；API 接入不需要合成键盘事件。见[原生按键接入](./native-bridge)。
+内置键盘和遥控器方向、确定、返回映射。手柄、虚拟控制器和原生回调可通过 `navigate()`、`activate()`、`back()` 等逻辑 API 接入；API 接入不需要合成键盘事件。见[原生按键接入](./native-bridge)。
 
 ## Android 4.x 等运营商存量盒子怎么接入
 

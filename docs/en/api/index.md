@@ -83,23 +83,31 @@ findTarget(direction: Direction): EPGNode | null
 
 Calculates the next target in a direction from current focus, **without moving focus**.
 
-## Back
+## Confirm and Back
+
+### epg.activate
+
+```ts
+activate(): boolean
+```
+
+Same as pressing Enter: when the current focus exists, is not disabled and is rendered, triggers `click` on its element. Returns whether a click was triggered. Intended for native key callbacks, virtual remotes and other inputs; see [Native input](../guide/native-bridge).
 
 ### epg.back
 
 ```ts
-back(): void
+back(): boolean
 ```
 
-Invokes the active component handler, or the global `backHandler` when none is active. See [Back handling](../guide/back).
+Runs Back handling: starting with the last registered active component handler, a handler returning `false` passes Back to the next one, ending with the global `backHandler`. Returns whether any handler handled it. See [Back handling](../guide/back).
 
 ### epg.onBack
 
 ```ts
-onBack(handler: () => void): void
+onBack(handler: () => boolean | void): void
 ```
 
-Registers a component-scoped handler inside `setup()` or `created()`.
+Registers a component-scoped handler inside `setup()` or `created()`. Returning `false` passes Back to the next handler.
 
 ## Pause
 
@@ -135,7 +143,7 @@ Whether input is paused: returns `true` while any `pause()` has not been release
 setConfig(patch: Partial<EPGConfig>): void
 ```
 
-Merges configuration, changing only the given fields; fields set to `undefined` count as omitted. See [Configuration](../guide/configuration). An invalid `focusClass` or `scrollViewport` throws `TypeError`.
+Merges configuration, changing only the given fields; fields set to `undefined` count as omitted. See [Configuration](../guide/configuration). An invalid `focusClass`, `scrollViewport` or `keyRepeatInterval` throws `TypeError`.
 
 ### epg.getConfig
 
@@ -259,7 +267,7 @@ interface KeyActionOptions {
 }
 ```
 
-Adds or replaces a key action.
+Adds or replaces a key action. Throws `TypeError` for an invalid name, key list or field; logs a warning when a key already belongs to another action.
 
 ### epg.updateKeyAction
 

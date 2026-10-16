@@ -153,3 +153,106 @@ describe("handleKeydown", () => {
     expect(isPaused()).toBe(false);
   });
 });
+
+describe("key action validation", () => {
+  /** 模拟不受类型检查约束的 JavaScript 调用方 */
+  const loose = (value: unknown): never => value as never;
+
+  it("rejects invalid names, codes and fields with a [vuEPG] TypeError", () => {
+    const invalid: [string, () => void][] = [
+      [
+        "empty name",
+        () => {
+          setKeyAction("", { codes: ["KeyM"] });
+        },
+      ],
+      [
+        "string codes",
+        () => {
+          setKeyAction("MENU", { codes: loose("KeyM") });
+        },
+      ],
+      [
+        "missing codes",
+        () => {
+          setKeyAction("MENU", loose({}));
+        },
+      ],
+      [
+        "empty code",
+        () => {
+          setKeyAction("MENU", { codes: [""] });
+        },
+      ],
+      [
+        "NaN code",
+        () => {
+          setKeyAction("MENU", { codes: [Number.NaN] });
+        },
+      ],
+      [
+        "preventDefault",
+        () => {
+          setKeyAction("MENU", { codes: [1], preventDefault: loose("yes") });
+        },
+      ],
+      [
+        "callback",
+        () => {
+          setKeyAction("MENU", { codes: [1], callback: loose(1) });
+        },
+      ],
+      [
+        "update codes",
+        () => {
+          updateKeyAction("ENTER", { codes: loose("Space") });
+        },
+      ],
+      [
+        "add codes",
+        () => {
+          addKeyCodes("ENTER", loose("Space"));
+        },
+      ],
+      [
+        "remove codes",
+        () => {
+          removeKeyCodes("UP", loose("Up"));
+        },
+      ],
+    ];
+    for (const [label, call] of invalid) {
+      expect(call, label).toThrow(TypeError);
+      expect(call, label).toThrow(/^\[vuEPG\]/);
+    }
+    expect(getKeyActions()["MENU"]).toBeUndefined();
+    expect(getKeyActions()["UP"]?.codes).toContain("ArrowUp");
+  });
+
+  it("accepts null to clear a callback", () => {
+    updateKeyAction("PAGE", { callback: () => undefined });
+    updateKeyAction("PAGE", { callback: null });
+    expect(getKeyActions()["PAGE"]?.callback).toBeNull();
+  });
+});
+
+describe("shared key codes", () => {
+  it("warns which action wins when a code belongs to several actions", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    setKeyAction("MENU", { codes: ["KeyM", 32] });
+    expect(warn).toHaveBeenCalledOnce();
+    expect(String(warn.mock.calls[0]?.[0])).toContain(
+      '按键 32 同时属于按键事件 "RIGHT" 与 "MENU"，只会触发 "RIGHT"',
+    );
+    warn.mockClear();
+    addKeyCodes("UP", ["KeyM"]);
+    expect(String(warn.mock.calls[0]?.[0])).toContain('只会触发 "UP"');
+  });
+
+  it("stays quiet when codes are unique", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    setKeyAction("MENU", { codes: ["KeyM", 77] });
+    addKeyCodes("BACK", ["BrowserBack", 166]);
+    expect(warn).not.toHaveBeenCalled();
+  });
+});

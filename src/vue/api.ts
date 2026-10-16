@@ -14,7 +14,8 @@ export {
   moveToItem,
   moveToGroup,
   findTarget,
-  // 返回
+  // 确定与返回
+  activate,
   back,
   // 暂停
   pause,
