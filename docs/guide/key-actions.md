@@ -42,7 +42,7 @@ const epg = useVuEPG();
 epg.setKeyAction("MENU", {
   codes: ["KeyM", 82],
   preventDefault: true,
-  callback: (code, event) => openMenu(),
+  callback: () => openMenu(),
 });
 
 // 修改部分字段
@@ -51,8 +51,8 @@ epg.updateKeyAction("NUMBER", {
   callback: (code) => jumpToChannel(code),
 });
 
-// 为已有事件追加 / 移除按键
-epg.addKeyCodes("ENTER", ["Space", 32]);
+// 为已有事件追加 / 移除按键：遥控器的浏览器返回键（键值 166）也作为返回
+epg.addKeyCodes("BACK", ["BrowserBack", 166]);
 epg.removeKeyCodes("UP", [87]);
 
 // 删除自定义事件
@@ -62,7 +62,7 @@ epg.removeKeyAction("MENU");
 console.log(epg.getKeyActions());
 ```
 
-修改不存在的事件、删除内置事件时会抛出错误。
+同一个按键出现在多个事件中时，只触发先定义的那个事件；需要改用某个按键时，先从原来的事件中移除它。修改不存在的事件、删除内置事件时会抛出错误。
 
 ## 暂停
 

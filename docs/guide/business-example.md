@@ -11,18 +11,16 @@ vuEPG 附带「遥控学习中心」完整示例工程，可独立安装、运�
 
 [查看源码](https://github.com/UzkiS/vuEPG/tree/main/examples/tv-training)
 
-示例顶部提供文档和 GitHub 入口，点击后在新窗口打开，方便查看用法与源码。卡片轨道在首尾保留焦点框的绘制空间，循环导航到末项时也能完整显示。
-
 ## 可以复用哪些交互
 
-示例的学习主题只是界面内容。以下交互也适用于菜单、内容卡片、频道列表等页面；使用者可以按自己的业务选择需要的部分。
+示例以学习中心为题材，以下交互可以直接用于菜单、内容卡片、频道列表等页面。
 
 | 交互         | 在示例中体验                     | 实现入口                        |
 | ------------ | -------------------------------- | ------------------------------- |
 | 循环导航     | 列表左右首尾循环                 | 项上的方向事件和 `move()`       |
 | 自动滚动     | 切换卡片，焦点保持在视口中       | 实际容器上的 `v-epg-scroll`     |
 | 页面位置恢复 | 进入练习后返回，回到刚才的卡片   | 保存业务 ID，挂载后设置焦点     |
-| 动态列表     | 筛选已完成内容，失效焦点恢复     | Vue 更新内容与分组入口          |
+| 动态列表     | 筛掉当前卡片后，焦点留在列表中   | `restoreFocus` 与分组入口       |
 | 弹窗         | 打开退出弹窗，方向键保持在弹窗内 | 分组边界与组件返回处理          |
 | 关闭复焦     | 返回关闭弹窗，回到打开前的元素   | 开启 `restoreFocus`             |
 | 原生按键     | 使用 Android 方向、返回按钮      | [原生按键接入](./native-bridge) |
@@ -39,7 +37,7 @@ pnpm build     # ES5 兼容构建
 pnpm preview   # 生产产物：http://localhost:4174/
 ```
 
-工程包含自己的依赖、类型配置、开发与构建脚本、自动检查和 AGENTS.md；从 npm 安装 vuepg，不需要父目录文件。替换页面与数据即可开始自己的业务开发。
+工程自带依赖、类型配置、开发与构建脚本和自动检查，从 npm 安装 vuepg，复制出来即可独立运行。替换页面与数据即可开始自己的业务开发。
 
 Vite 入口用于现代浏览器；webpack 入口用于旧机顶盒开发与生产构建。Android 4.x 的配置、polyfill 和排错步骤见[旧设备接入指南](./legacy-webview)。
 
@@ -52,6 +50,6 @@ Vite 入口用于现代浏览器；webpack 入口用于旧机顶盒开发与生�
 | [`bridge.ts`](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/bridge.ts)               | Android 按键映射与监听释放                 |
 | [`polyfills.ts`](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/polyfills.ts)         | 旧设备需要的语言和 DOM / Web API 补齐      |
 
-示例兼容入口还包含 `whatwg-fetch`，供本工程的 webpack 5 热更新下载更新清单使用；这是本示例开发链路的需求，vuEPG 本身不使用 fetch。
+示例额外加载的 `whatwg-fetch` 只供 webpack 热更新使用，vuEPG 本身不需要。
 
 在 vuEPG 仓库中开发库或文档时，可以从根目录运行 `pnpm example:dev`、`pnpm example:dev:tv` 和 `pnpm example:build`，使用本地构建的包。浏览器检查与 Docker 环境说明见 [Chromium 30 自动回归](./chromium30-testing)。

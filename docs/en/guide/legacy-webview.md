@@ -4,7 +4,7 @@ description: "Integrate vuEPG with legacy Android 4.x operator boxes and older W
 
 # Legacy operator box integration, including Android 4.x
 
-Maintaining applications for existing operator boxes often requires Android 4.x and older WebView compatibility. These projects need compatible syntax, runtime APIs and key handling. vuEPG supplies a Vue 2.7 path and a copyable dual-toolchain project and has been deployed in projects for major telecom operators.
+Existing operator set-top boxes often run Android 4.x with an older WebView, so integration has to handle legacy syntax, missing runtime APIs and remote input together. This page explains how to integrate vuEPG with Vue 2.7, an ES5 build and polyfills; the included complete example is configured this way and can be copied directly.
 
 ## Choose Vue and build targets
 
@@ -28,19 +28,19 @@ pnpm preview   # http://COMPUTER-LAN-IP:4174/
 
 The computer and device must be able to reach each other and these ports. Use pnpm dev for fast Vite development in modern browsers and dev:tv for device development.
 
-## Why retain webpack development
+## Why webpack development is needed
 
-Vite serves native ESM. In real Chromium 30, HTML loads but module entry scripts do not run and Vue does not mount, leaving a blank page.
+Vite serves native ESM. In Chromium 30, the HTML loads but module entry scripts do not run and Vue does not mount, leaving a blank page.
 
-webpack transpiles application, library and development-client code. The example's interactions and CSS updates pass in the same Chromium 30 environment.
+The webpack development entry transpiles application code, library dependencies and the development client, so it runs and hot-updates in Chromium 30.
 
-The Vite legacy plugin only transforms production builds, not its development server. A legacy production build requires checking scripts, polyfills, HTML loading and styles. This project defaults to webpack compatibility builds.
+`@vitejs/plugin-legacy` only applies to Vite production builds; the development server still cannot run in legacy browsers. The example's production build also uses webpack.
 
 ## Transpile dependencies in webpack
 
 Transpilation converts unsupported syntax such as arrows and optional chaining into compatible syntax. Babel must process both application code and bundled dependencies; processing only src misses vuepg.
 
-These installation commands and settings apply to webpack projects using the tool combination in the [complete example](./business-example). Existing projects should retain compatible webpack, Babel and loader versions. For Vue CLI, use the [project configuration below](#when-using-vue-cli).
+These commands and settings match the tools used by the [complete example](./business-example); existing projects can keep their own webpack and Babel versions. For Vue CLI, see [below](#when-using-vue-cli).
 
 ```sh
 pnpm add core-js
@@ -80,7 +80,7 @@ module.exports = {
 };
 ```
 
-The webpack target controls generated runtime syntax. The Babel 8 rule handles application and dependency syntax; the compatibility entry in the next section supplies runtime APIs. TypeScript/SFC projects also need .ts and Vue processing; see the [complete webpack configuration](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/webpack.config.cjs).
+The webpack target controls generated runtime syntax. The Babel rule handles application and dependency syntax; the compatibility entry in the next section supplies runtime APIs. TypeScript/SFC projects also need .ts and Vue processing; see the [complete webpack configuration](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/webpack.config.cjs).
 
 ## Load runtime polyfills
 
@@ -100,7 +100,7 @@ import "core-js/stable";
 
 core-js does not provide the DOM CustomEvent constructor. When it is missing, document.createEvent("CustomEvent") can create compatible events. See the [CustomEvent implementation in the example polyfills.ts](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/polyfills.ts).
 
-Babel downlevels the whole bundle's syntax. Supply any additional runtime APIs required by your application dependencies and development client according to their actual usage.
+Babel only transforms syntax. Other runtime APIs used by your dependencies and the development client also need polyfills as they are used; for example, the example loads `whatwg-fetch` for webpack hot updates.
 
 ## Required capabilities
 
@@ -115,29 +115,23 @@ Load polyfills before their users. Recheck final output after changing dependenc
 
 ## When using Vue CLI
 
-First inspect the CLI service and Babel plugin versions actually installed in the project:
-
-```sh
-pnpm list @vue/cli-service @vue/cli-plugin-babel --depth 0
-```
-
-Retain the project's tool versions and add the required engine to its existing browser targets. For example, when Chromium 30 is the minimum target:
+Vue CLI projects keep their tool versions; only the browser targets and dependency transpilation change. Add the required engine to the browser targets, for example when Chromium 30 is the minimum target:
 
 ```text
 # .browserslistrc
 chrome >= 30
 ```
 
-Add vuepg to dependency transpilation in the Vue configuration file already used by the project:
+Add vuepg to dependency transpilation in the Vue configuration file:
 
 ```js
-// Merge into the existing vue.config.js or another config file supported by the project.
+// vue.config.js
 module.exports = {
   transpileDependencies: ["vuepg"],
 };
 ```
 
-Append "vuepg" to an existing transpileDependencies list and retain other entries. Add other libraries that need transpilation according to actual usage. Enable the Babel plugin and preset that match the CLI so browser targets control syntax transforms.
+If the project already has a `transpileDependencies` list, append `"vuepg"` to it. Syntax transforms come from `@vue/cli-plugin-babel`, so make sure the project uses it.
 
 Supply runtime APIs as described in [the previous section](#load-runtime-polyfills). Check the final application scripts, dependencies and development client, then verify startup, input and updates in the target browser. Checking only src is insufficient.
 

@@ -65,7 +65,7 @@ navigate(direction: Direction): boolean
 moveToItem(item: EPGItem): boolean
 ```
 
-让指定 EPGItem 获得焦点。
+让指定 EPGItem 获得焦点，返回焦点是否落在该元素上。元素已禁用或未渲染时返回 `false`。
 
 ### epg.moveToGroup
 
@@ -73,7 +73,7 @@ moveToItem(item: EPGItem): boolean
 moveToGroup(group: EPGGroup): boolean
 ```
 
-进入指定 EPGGroup，焦点落在组内 `default` 元素或第一个可获得焦点的元素上。
+进入指定 EPGGroup，焦点落在组内 `default` 元素或第一个可获得焦点的元素上。组内没有可获得焦点的元素时返回 `false`。
 
 ### epg.findTarget
 
@@ -125,6 +125,8 @@ resume(): void
 isPaused(): boolean
 ```
 
+是否处于暂停状态：还有未释放的 `pause()` 时返回 `true`。
+
 ## 配置
 
 ### epg.setConfig
@@ -133,13 +135,15 @@ isPaused(): boolean
 setConfig(patch: Partial<EPGConfig>): void
 ```
 
-合并配置，见 [配置](../guide/configuration)。`focusClass` 非法时抛出 `TypeError`。
+合并配置，只修改传入的字段，值为 `undefined` 的字段视为未传入；见 [配置](../guide/configuration)。`focusClass` 或 `scrollViewport` 的值无效时抛出 `TypeError`。
 
 ### epg.getConfig
 
 ```ts
 getConfig(): Readonly<EPGConfig>
 ```
+
+获取当前配置（只读）。
 
 ## 查询
 
@@ -221,11 +225,15 @@ getItemsInGroup(group: EPGGroup): EPGItem[]
 isEPGItem(value: unknown): value is EPGItem
 ```
 
+判断值是否为 EPGItem，同时作为类型守卫收窄类型。
+
 ### epg.isEPGGroup
 
 ```ts
 isEPGGroup(value: unknown): value is EPGGroup
 ```
+
+判断值是否为 EPGGroup，同时作为类型守卫收窄类型。
 
 ## 按键
 

@@ -22,7 +22,7 @@ The `epg-` prefix avoids collisions with native events. A mouse click on a butto
 
 All `epg-*` events are dispatched with `cancelable: true`. Cancelling a direction event blocks default navigation. Focus/group notifications happen after state changes; cancellation does not undo those changes.
 
-Confirm calls the current element's `click()`, so ordinary `@click` handlers work.
+Confirm triggers `click` on the current element, so ordinary `@click` handlers work.
 
 ## Focus event order
 

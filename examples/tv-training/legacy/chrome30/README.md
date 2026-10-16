@@ -15,6 +15,6 @@ pnpm legacy:clean
 
 清理仅针对项目标记的容器、vuepg/chrome30 镜像、本地下载缓存与测试结果。Docker 自身共享的基础镜像和构建缓存由 Docker 管理，不在该命令中全局清理。
 
-WSL2 / Ubuntu 24.04 + Docker Desktop amd64 已实际验证。其他宿主使用相同平台镜像，Windows / macOS 及 Apple Silicon 的实际结果另行记录；Apple Silicon 需要 amd64 模拟支持。桌面 Chromium 回归不等同于运营商设备桥协议与性能验证。
+已在 WSL2 / Ubuntu 24.04 + Docker Desktop（amd64）和 GitHub Actions 的 Linux Docker Engine 上验证。其他宿主使用相同的平台镜像，Windows / macOS 及 Apple Silicon 尚未验证；Apple Silicon 需要 amd64 模拟支持。桌面 Chromium 回归不等同于运营商设备桥协议与性能验证。
 
 安装、输出和故障排查见 [Chromium 30 回归测试](https://uzkis.github.io/vuEPG/guide/chromium30-testing)。

@@ -5,7 +5,7 @@ description: "Configure vue-tsc and use vuEPG types in Vue 2.7 and Vue 3, includ
 
 # TypeScript integration
 
-This page addresses concrete integration questions: checking Vue files, typing template refs, reading focus events and getting this.$epg completion in Options API. vuepg includes declarations; no @types/vuepg package is needed.
+This page covers common typing questions: checking Vue files, typing template refs, reading focus events and getting this.$epg completion in Options API. vuepg includes declarations; no @types/vuepg package is needed.
 
 See [Getting started](./getting-started) for installation and page behavior, and [API](../api/) for method signatures.
 
@@ -28,7 +28,7 @@ Use Vue - Official in the editor. Vue 2.7 projects also specify the template tar
 }
 ```
 
-Merge this fragment into the existing config. See the [independent example tsconfig.json](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/tsconfig.json) for a runnable project configuration. Vue 3 projects use a template target matching their Vue version, rather than 2.7.
+See the [example tsconfig.json](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/tsconfig.json) for a complete configuration. Vue 3 projects do not need this option.
 
 Type checking and browser-compatible builds are separate. Passing TypeScript checks does not make output ES5; legacy devices still need application transpilation and polyfills. See [Legacy integration](./legacy-webview).
 
@@ -77,7 +77,6 @@ Use defineComponent for the component instance type. This example works with Vue
 ```vue
 <script lang="ts">
 import { defineComponent } from "vue";
-import { useVuEPG } from "vuepg";
 
 export default defineComponent({
   methods: {
@@ -89,7 +88,7 @@ export default defineComponent({
     },
   },
   created() {
-    useVuEPG().onBack(() => {
+    this.$epg.onBack(() => {
       this.closeDialog();
     });
   },

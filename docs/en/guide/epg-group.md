@@ -97,4 +97,4 @@ const lastId = ref<string | null>(null);
 <div v-epg-group @epg-up.prevent @epg-down.prevent @epg-left.prevent @epg-right.prevent>...</div>
 ```
 
-See [Events](./events) for the full event contract.
+See [Events](./events) for full details.

@@ -13,14 +13,14 @@ Keep your UI, business components and `@click` handlers. Review directive bindin
 
 This table follows the public vue-tv-focusable 2.x documentation and examples. Both integrate with existing pages; the choice depends on which built-in behaviors you need.
 
-| Area                        | vue-tv-focusable                                            | vuEPG                                                                                   | Tradeoff                                                                     |
-| --------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Directives and framework    | Vue 2 / 3 wrapper with v-focusable and $tv                  | Vue 2.7 / 3, separate item, group and scroll directives                                 | Upgrade Vue 2.6 and replace boolean bindings with options                    |
-| Direction events            | In 2.x, a listener must call next() to continue movement    | Observing listeners continue; .prevent explicitly cancels                               | Simpler observation; remove old continuation calls                           |
-| Scrolling                   | Smooth animation, edge distance and scroll-speed settings   | Explicit containers, nested scrolling and alignment, direct position updates            | Predictable containers; migrate animations and throttling in the application |
-| Dialogs and restoration     | limitingEl restricts the region and must be reset           | Group boundaries, component Back handlers, restoration and Tab isolation in the example | Clearer lifecycle handling; not a direct limitingEl rename                   |
-| Long press, forms and XPath | Built-in long press, automatic form editing and XPath tools | Native click, focus and event APIs without those tools                                  | The old library has broader built-ins; dependent pages need extra work       |
-| Legacy device setup         | Integration docs and examples                               | Independent dual-toolchain example and real Chromium 30 regression                      | Copyable verification path; still check actual device input and performance  |
+| Area                        | vue-tv-focusable                                            | vuEPG                                                                        | Tradeoff                                                                     |
+| --------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Directives and framework    | Vue 2 / 3 wrapper with v-focusable and $tv                  | Vue 2.7 / 3, separate item, group and scroll directives                      | Upgrade Vue 2.6 and replace boolean bindings with options                    |
+| Direction events            | In 2.x, a listener must call next() to continue movement    | Observing listeners continue; .prevent explicitly cancels                    | Listening needs no extra code; remove old `next()` calls                     |
+| Scrolling                   | Smooth animation, edge distance and scroll-speed settings   | Explicit containers, nested scrolling and alignment, direct position updates | Predictable containers; migrate animations and throttling in the application |
+| Dialogs and restoration     | limitingEl restricts the region and must be reset           | Group boundaries, component Back handlers, `restoreFocus` after closing      | Clearer lifecycle handling; not a direct limitingEl rename                   |
+| Long press, forms and XPath | Built-in long press, automatic form editing and XPath tools | Native click, focus and event APIs without those tools                       | The old library has broader built-ins; dependent pages need extra work       |
+| Legacy device setup         | Integration docs and examples                               | Independent dual-toolchain example and real Chromium 30 regression           | Copyable verification path; still check actual device input and performance  |
 
 ## Replace installation and initialization
 
@@ -223,7 +223,7 @@ Replace limitingEl with a dialog group that cancels movement at all four boundar
 </section>
 ```
 
-Direction boundaries constrain user navigation; direct move() calls can still select other targets. Save epg.getCurrentItem()?.el before opening, then wait for nextTick() before focusing a newly shown dialog. On close, try epg.move(previous), and use an application entry if it fails. Copy the [example dialog](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/focus-dialog.vue) for complete lifecycle, Back and Tab isolation handling.
+Direction boundaries constrain user navigation; direct move() calls can still select other targets. Wait for nextTick() before focusing a newly shown dialog. With [`restoreFocus`](../guide/configuration#restorefocus) enabled, closing the dialog returns focus to the item focused before it opened. Copy the [example dialog](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/focus-dialog.vue) for complete lifecycle, Back and Tab isolation handling.
 
 For page returns and KeepAlive, prefer storing stable business IDs, then locating the element after rendering and calling move(). XPath indices may select different content after filtering or sorting. Remove workarounds that manually clear [focused]; vuEPG manages focus classes and invalidation recovery. See the [complete example](../guide/business-example) for page position memory.
 

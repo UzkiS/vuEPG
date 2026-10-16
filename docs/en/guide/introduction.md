@@ -4,11 +4,9 @@ description: "Vue 2.7 / Vue 3 focus management and spatial navigation for keyboa
 
 # Introduction
 
-vuEPG aims to make focus management and spatial navigation easier to add to Vue pages, reducing adaptation and debugging work for modern browsers and existing operator set-top boxes.
+vuEPG provides **focus management and spatial navigation** for Vue web applications in modern browsers, TV, IPTV and set-top boxes. Keyboard and remote mappings are built in, and logical APIs connect gamepads, virtual remotes and native key callbacks. Your pages keep their components, styling and business logic.
 
-vuEPG provides **focus management and spatial navigation** for Vue web applications in modern browsers, TV, IPTV and set-top boxes. Keyboard and remote mappings are built in. Logical APIs connect gamepads, virtual controls and native callbacks while preserving your components, styling and business logic.
-
-It supports Vue 2.7 and Vue 3 and has been deployed in projects for major telecom operators. Maintaining applications for existing operator boxes often requires Android 4.x and older WebView compatibility. These projects use Vue 2.7, ES5 application builds and required polyfills. See [Android 4.x integration](./legacy-webview).
+vuEPG supports Vue 2.7 and Vue 3 and has been deployed in set-top box projects for major telecom operators. Legacy devices such as Android 4.x use Vue 2.7 with an ES5 application build and the required polyfills; see [Android 4.x integration](./legacy-webview).
 
 ## How focus moves
 
@@ -19,7 +17,7 @@ It supports Vue 2.7 and Vue 3 and has been deployed in projects for major teleco
 
 <FocusConceptDemo />
 
-vuEPG uses logical focus: a focus class marks the selected item. Your page controls its appearance without adopting a fixed TV component library.
+vuEPG uses logical focus: instead of calling the browser's `focus()`, it adds a focus class to the selected item. Your page controls its appearance without adopting a fixed TV component library.
 
 ## Where input comes from
 
@@ -27,12 +25,11 @@ A normal browser receives keyboard events directly. A remote may send the same e
 
 ## Common capabilities
 
-- **Dynamic content:** navigation skips hidden, unmounted and disabled targets and recovers unavailable focus inside an accessible group.
+- **Dynamic content:** navigation skips hidden, unmounted and disabled targets; unavailable focus recovers inside its original group, and can be restored automatically after unmounting.
 - **Default entries:** entering a group selects its designated item, which may change with application state.
 - **Direction overrides:** DOM events handle custom jumps and boundaries, including loops and dialogs.
 - **Scrolling:** marked scroll containers keep the selected item visible.
 - **Back handling:** components register their own handlers; closing a dialog restores the page handler.
-- **Input integration:** keyboard mappings, native callbacks and virtual controls share navigation logic.
 
 ## Where to start
 

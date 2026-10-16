@@ -43,7 +43,9 @@ pnpm install
 
 ## 示例与浏览器检查
 
-先执行 `pnpm example:build` 构建独立应用，再运行 `pnpm example:test`。现代浏览器首次使用需要 `pnpm exec playwright install chromium`；CI 安装对应的系统依赖。
+运行 `pnpm example:test`，它会先构建库和示例，再执行现代浏览器场景。首次使用需要 `pnpm exec playwright install chromium`；CI 会安装对应的系统依赖。
+
+示例相关命令请在仓库根目录运行（`pnpm example:*`、`pnpm test:chrome30` 或 `pnpm --filter @vuepg/tv-training …`）。示例目录有自己的 `pnpm-workspace.yaml`，在该目录内运行 pnpm 命令会把它当作独立工程重新安装，改用 npm 上已发布的 vuepg，测试的就不是当前源码了。出现这种情况时，删除示例目录中生成的 `pnpm-lock.yaml`，再在根目录执行 `pnpm install`。
 
 旧设备兼容改动执行 `pnpm legacy:install` 与 `pnpm test:chrome30`，宿主需有可用 Docker。配置、结果及跨平台范围见 [legacy/chrome30](./legacy/chrome30/README.md)。示例开发规范见 [examples/tv-training/AGENTS.md](./examples/tv-training/AGENTS.md)。
 

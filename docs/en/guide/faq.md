@@ -18,7 +18,7 @@ Use Vue 2.7, transpile application and dependencies to ES5 and supply language/D
 
 ## Why is Vite development blank on the device?
 
-Legacy WebViews cannot execute the native ESM entry. The example retains webpack device development and Vite for modern browsers. See [Development entries](./legacy-webview#why-retain-webpack-development).
+Legacy WebViews cannot execute the native ESM entry. The example uses webpack for device development and Vite for modern browsers. See [Development entries](./legacy-webview#why-webpack-development-is-needed).
 
 ## Why does entering a group not pick the nearest item?
 

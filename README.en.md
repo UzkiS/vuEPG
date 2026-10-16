@@ -1,7 +1,13 @@
-<p align="center"><a href="https://uzkis.github.io/vuEPG/en/"><img src="https://raw.githubusercontent.com/UzkiS/vuEPG/main/docs/public/logo.svg" width="100" height="100" alt="vuEPG"></a></p>
+<p align="center">
+  <a href="https://uzkis.github.io/vuEPG/en/">
+    <img src="https://raw.githubusercontent.com/UzkiS/vuEPG/main/docs/public/logo.svg" width="120" height="120" alt="vuEPG">
+  </a>
+</p>
 
-# vuEPG
+<h1 align="center">vuEPG</h1>
 
+<p align="center">Focus management and spatial navigation for Vue 2.7 / Vue 3, for modern browsers, TV, IPTV and set-top boxes, including legacy Android 4.x operator set-top boxes</p>
+<p align="center">Deployed in set-top box projects for major telecom operators</p>
 <p align="center"><a href="./README.md">简体中文</a> · <b>English</b></p>
 
 <p align="center">
@@ -15,26 +21,31 @@
   <a href="./LICENSE"><img src="https://img.shields.io/npm/l/vuepg" alt="license"></a>
 </p>
 
-Focus management and spatial navigation for **Vue 2.7 / Vue 3**, for modern browsers, TV, IPTV and set-top boxes, including legacy Android 4.x operator set-top boxes. Keyboard and remote input are built in; logical APIs let you connect gamepads, virtual controls and native callbacks.
+<p align="center">
+  <a href="https://uzkis.github.io/vuEPG/en/">Documentation</a> ·
+  <a href="https://uzkis.github.io/vuEPG/en/guide/business-example">Complete example</a> ·
+  <a href="https://uzkis.github.io/vuEPG/en/guide/legacy-webview">Android 4.x integration</a> ·
+  <a href="https://uzkis.github.io/vuEPG/en/migration/">Migration guides</a> ·
+  <a href="https://uzkis.github.io/vuEPG/en/changelog">Changelog</a>
+</p>
 
-[简体中文](./README.md) · [Documentation](https://uzkis.github.io/vuEPG/en/) · [Complete example](https://uzkis.github.io/vuEPG/en/guide/business-example) · [Android 4.x integration](https://uzkis.github.io/vuEPG/en/guide/legacy-webview)
+---
 
-vuEPG aims to make focus management and spatial navigation easier to add to Vue pages, reducing adaptation and debugging work for modern browsers and existing operator set-top boxes.
+vuEPG adds focus management and spatial navigation to Vue pages: add directives to existing elements, and the arrow keys of a keyboard or remote move focus between them. Gamepads, virtual remotes and native key callbacks connect through the API. Your pages keep their own components and styles.
 
-vuEPG has been deployed in set-top box projects for major telecom operators. Add directives to your existing UI and keep your components and visual design. Maintaining applications for existing operator boxes often requires Android 4.x and older WebView compatibility. These projects use Vue 2.7, ES5 application builds and required polyfills.
-
-The repository includes a **complete, independently copyable example project** with Vue 2.7, Vite / webpack development entries, ES5 builds, required polyfills and real Chromium 30 regression tests. Copy it, replace the pages and data, and start your own TV / IPTV application, including development for legacy Android 4.x operator set-top boxes. See the [complete example](https://uzkis.github.io/vuEPG/en/guide/business-example).
+For legacy Android 4.x operator set-top boxes, use **Vue 2.7 + an ES5 application build + the required polyfills**; see the [legacy device guide](https://uzkis.github.io/vuEPG/en/guide/legacy-webview). The included [complete example project](#included-complete-example-project) is already set up this way: copy it, replace the pages and data, and start building.
 
 ## Features
 
-- Add directives to your existing DOM and keep your UI components and visual design.
-- Navigate by live screen geometry, searching within groups first, then outward; enter groups at their designated default item.
-- Use the same API on Vue 2.7 and Vue 3, with a full test suite on both versions.
-- Skip hidden, unmounted and disabled targets; recover unavailable focus within the original group, or enable `restoreFocus` to restore focus automatically after unmounting.
-- Native `epg-*` DOM events support focus, group entry/exit and cancellable directions through `.prevent`.
-- Customize key mappings, including numeric `keyCode` fallback on legacy devices.
-- Keep focused items visible with independent scroll-container directives.
-- Zero runtime dependencies; Vue is a peer dependency. ES2015 ESM/CommonJS output compatible with webpack 4, with TypeScript declarations.
+- 🎮 **Multiple inputs**: built-in keyboard and remote mappings; connect gamepads, virtual controls or native key callbacks through the logical API
+- 🧭 **Spatial navigation**: the next focus is chosen from the elements' real positions, with no hand-written jump tables
+- 🗂️ **Groups and default focus**: search inside the group first, then outward; entering a group lands on its designated default item
+- 🛡️ **Reliable recovery**: navigation skips unmounted, hidden (`v-show`, KeepAlive) and disabled targets; unavailable focus recovers inside its original group, and `restoreFocus` can restore focus automatically after unmounting
+- 📜 **Optional scrolling**: mark the real scroll containers with `v-epg-scroll` to keep the focused item visible
+- 🧩 **Native DOM events**: `epg-focus`, `epg-blur`, `epg-enter`, `epg-leave` and direction events; cancel the default move with `.prevent`
+- 🎛️ **Customizable keys**: built-in direction, Enter and Back mappings, including legacy boxes that only report `keyCode`
+- 🔌 **Vue 2.7 / Vue 3**: one API, with the full test suite run on both versions in CI
+- 🪶 **Zero dependencies**: no runtime dependencies, ES2015 output compatible with webpack 4, complete TypeScript types
 
 ## Installation
 
@@ -45,9 +56,11 @@ pnpm add vuepg
 ## Usage
 
 ```ts
+// main.ts
 import { createApp } from "vue";
 import VuEPG from "vuepg";
 import App from "./App.vue";
+
 createApp(App)
   .use(VuEPG, { backHandler: () => history.back() })
   .mount("#app");
@@ -59,6 +72,7 @@ createApp(App)
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useVuEPG } from "vuepg";
+
 const epg = useVuEPG();
 const first = ref<HTMLElement>();
 onMounted(() => {
@@ -68,12 +82,14 @@ const open = (id: number): void => {
   alert(`Selected content ${id}`);
 };
 </script>
+
 <template>
   <main v-epg-group>
     <button ref="first" v-epg-item="{ default: true }" @click="open(1)">Content 1</button>
     <button v-epg-item @click="open(2)">Content 2</button>
   </main>
 </template>
+
 <style>
 .vuepg-focus {
   outline: 3px solid #d81b60;
@@ -81,52 +97,51 @@ const open = (id: number): void => {
 </style>
 ```
 
-Direction keys move focus by position, Confirm invokes the current element's `click`, and Back calls the component's `onBack` or global `backHandler`. See the [documentation](https://uzkis.github.io/vuEPG/en/) and [navigation demo](https://uzkis.github.io/vuEPG/en/guide/playground).
+- Direction keys move focus by position; when a group has no target, focus moves to the adjacent group
+- Enter triggers the current element's `click`
+- Back calls the page's `onBack`, or the global `backHandler` when there is none
 
-For existing focus-library applications, follow the [migration guides](https://uzkis.github.io/vuEPG/en/migration/): [vuEPG 1.x](https://uzkis.github.io/vuEPG/en/migration/v1), [vue-epg](https://uzkis.github.io/vuEPG/en/migration/vue-epg) or [vue-tv-focusable / tv-focusable](https://uzkis.github.io/vuEPG/en/migration/tv-focusable).
+See the **[documentation](https://uzkis.github.io/vuEPG/en/)** for complete usage, or try the **[navigation demo](https://uzkis.github.io/vuEPG/en/guide/playground)** first.
+
+Projects using another focus library can follow the [migration guides](https://uzkis.github.io/vuEPG/en/migration/): [vuEPG 1.x](https://uzkis.github.io/vuEPG/en/migration/v1), [vue-epg](https://uzkis.github.io/vuEPG/en/migration/vue-epg) or [vue-tv-focusable / tv-focusable](https://uzkis.github.io/vuEPG/en/migration/tv-focusable).
 
 ## Included complete example project
 
-The [TV learning center](./examples/tv-training) provides a starting point for a new project, including development, build and compatibility test configuration. It demonstrates circular navigation, scrolling, saved page position, dialogs, focus restoration and a mock Android key bridge. The learning theme is demonstration content; reuse these interactions in your own menus, lists and cards.
+The [remote learning center](https://uzkis.github.io/vuEPG/en/guide/business-example) can serve as the starting point of a new project, with development, build and compatibility testing already configured. It demonstrates circular navigation, scrolling, page position restoration, dynamic lists, dialog focus restoration and native key input. The learning theme is just the subject of the demo; the interactions apply directly to your own menus, lists and cards. Its interface is in Chinese.
 
-<a href="https://uzkis.github.io/vuEPG/example/tv-training/"><img src="https://raw.githubusercontent.com/UzkiS/vuEPG/main/docs/public/example-preview.png" alt="Open the vuEPG complete interaction example" width="960"></a>
+<a href="https://uzkis.github.io/vuEPG/example/tv-training/"><img src="https://raw.githubusercontent.com/UzkiS/vuEPG/main/docs/public/example-preview.png" alt="Open the vuEPG complete remote-control example" width="960"></a>
 
-Copy the example directory and run its commands independently:
+Copy the [examples/tv-training](./examples/tv-training) directory and run in it:
 
 ```sh
 pnpm install
-pnpm dev
-pnpm dev:tv
-pnpm build
-pnpm preview
+pnpm dev       # Vite, fast development in modern browsers
+pnpm dev:tv    # webpack + Babel, development on legacy set-top boxes
+pnpm build     # ES5-compatible application
+pnpm preview   # serve the production build
 ```
 
-When developing vuEPG itself, use the root commands:
-
-| Command at repository root | Purpose                                           |
-| -------------------------- | ------------------------------------------------- |
-| `pnpm example:dev`         | Fast Vite development in modern browsers          |
-| `pnpm example:dev:tv`      | webpack + Babel development on legacy TV WebViews |
-| `pnpm example:build`       | ES5 application build targeting Chrome 30         |
-| `pnpm example:preview`     | Serve the production application                  |
-
-Vite's development server requires native ESM. A production legacy build does not make that server usable on WebView 30. Both development paths are intentionally retained.
-
-## Development and compatibility tests
+When developing the vuEPG repository, you can also run from the root:
 
 ```sh
-pnpm legacy:install
-pnpm test:chrome30
-pnpm legacy:clean
+pnpm install
+pnpm example:dev       # modern browsers, Vite
+pnpm example:dev:tv    # legacy device development, webpack + Babel
+pnpm example:build     # ES5 application build
+pnpm example:preview   # serve the static build
 ```
 
-The project manages a pinned amd64 Docker environment with real Chromium 30.0.1584.0, ChromeDriver 2.8 and Xvfb. It checks binary/session versions and saves assertions, logs, screenshots and bundle hashes. See the [regression guide](https://uzkis.github.io/vuEPG/en/guide/chromium30-testing) for host-platform verification limits.
+See [examples/tv-training](./examples/tv-training) for details.
 
-## Compatibility
+## Development and compatibility testing
 
-The library ships ES2015 syntax. Legacy devices, including Android 4.x set-top boxes, need application-level transpilation and missing JavaScript / DOM APIs. WebView 30 needs **Vue 2.7**, ES5 application output and polyfills including CustomEvent where necessary. Vue 3 requires Proxy.
+```sh
+pnpm legacy:install   # install and verify the real browser and driver in Docker
+pnpm test:chrome30    # build the package and test the production and webpack dev entries
+pnpm legacy:clean     # remove legacy browser caches, images and results
+```
 
-See the [compatibility guide](https://uzkis.github.io/vuEPG/en/guide/legacy-webview) for the complete build and verification path. Browser automation and syntax checks do not replace tests on the actual device.
+The real Chromium 30 regression covers the production build, webpack development and hot updates, and checks navigation, scrolling, dialogs and focus restoration. Installation, logs and screenshots are described in the [regression guide](https://uzkis.github.io/vuEPG/en/guide/chromium30-testing).
 
 ## Contributing
 
@@ -155,7 +170,7 @@ A star, a suggestion or sharing the project with a friend helps too.
 
 ## Acknowledgements
 
-- [vue-epg](https://www.npmjs.com/package/vue-epg): the starting point for this project.
+- [vue-epg](https://www.npmjs.com/package/vue-epg): the starting point of this project
 
 ## License
 

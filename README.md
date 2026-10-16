@@ -31,11 +31,9 @@
 
 ---
 
-vuEPG 致力于让 Vue 页面更容易接入焦点管理与空间导航，减少现代浏览器和运营商存量盒子开发中的适配与调试工作。
+vuEPG 为 Vue 页面提供焦点管理与空间导航：在现有元素上添加指令，就能用键盘或遥控器的方向键在元素之间移动焦点；手柄、虚拟遥控器和原生按键回调可以通过 API 接入。页面继续使用自己的组件和样式。
 
-在现有页面元素上添加指令即可管理焦点和方向导航，支持键盘、遥控器输入，也可通过 API 接入手柄、虚拟遥控器和原生回调。页面保留自己的业务组件和设计。运营商存量盒子的应用维护，常需要兼顾 Android 4.x 设备与旧 WebView。对应工程使用 **Vue 2.7 + ES5 应用构建 + 必要 polyfill**，接入步骤见[旧设备指南](https://uzkis.github.io/vuEPG/guide/legacy-webview)。
-
-仓库附带一个**可独立复制的完整示例工程**，配好 Vue 2.7、Vite / webpack 双开发入口、ES5 构建、必要 polyfill 和真实 Chromium 30 回归测试。复制后替换页面与数据，就能开始自己的 TV / IPTV 应用开发，也能更快上手 Android 4.x 等运营商存量盒子开发。详见[完整示例](https://uzkis.github.io/vuEPG/guide/business-example)。
+需要兼容 Android 4.x 等运营商存量盒子时，使用 **Vue 2.7 + ES5 应用构建 + 必要 polyfill**，步骤见[旧设备接入指南](https://uzkis.github.io/vuEPG/guide/legacy-webview)。仓库附带的[完整示例工程](#附带完整示例工程)已经配好这些设置，复制后替换页面与数据即可开始开发。
 
 ## 特性
 
@@ -109,7 +107,7 @@ const open = (id: number): void => {
 
 ## 附带完整示例工程
 
-[遥控学习中心](https://uzkis.github.io/vuEPG/guide/business-example)可直接作为新工程的起点，开发、构建与兼容验证配置都已包含。它展示循环导航、滚动、页面位置恢复、动态列表、弹窗复焦和原生按键接入。学习主题只是演示内容，交互代码可以用于自己的菜单、列表和卡片。
+[遥控学习中心](https://uzkis.github.io/vuEPG/guide/business-example)可直接作为新工程的起点，开发、构建与兼容验证配置都已包含。它展示循环导航、滚动、页面位置恢复、动态列表、弹窗复焦和原生按键接入。示例以学习中心为题材，其中的交互可以直接用于菜单、列表和卡片。
 
 <a href="https://uzkis.github.io/vuEPG/example/tv-training/"><img src="https://raw.githubusercontent.com/UzkiS/vuEPG/main/docs/public/example-preview.png" alt="打开 vuEPG 完整遥控交互示例" width="960"></a>
 
@@ -129,8 +127,8 @@ pnpm preview   # 查看生产产物
 pnpm install
 pnpm example:dev       # 现代浏览器，Vite
 pnpm example:dev:tv    # 旧盒子真机开发，webpack + Babel
-pnpm example:build    # ES5 应用产物
-pnpm example:preview  # 静态产物预览
+pnpm example:build     # ES5 应用产物
+pnpm example:preview   # 静态产物预览
 ```
 
 完整说明见 [examples/tv-training](./examples/tv-training)。
@@ -138,9 +136,9 @@ pnpm example:preview  # 静态产物预览
 ## 开发与兼容验证
 
 ```sh
-pnpm legacy:install  # Docker 安装并核验真实浏览器与驱动
-pnpm test:chrome30  # 构建当前包，测试生产与 webpack 开发入口
-pnpm legacy:clean   # 清理项目旧浏览器缓存、镜像与结果
+pnpm legacy:install   # 在 Docker 中安装并校验真实浏览器与驱动
+pnpm test:chrome30    # 构建当前包，测试生产与 webpack 开发入口
+pnpm legacy:clean     # 清理旧浏览器缓存、镜像与测试结果
 ```
 
 真实 Chromium 30 自动回归覆盖生产、webpack 开发及热更新；同时检查导航、滚动、弹窗和焦点恢复。安装、日志与截图说明见[自动回归指南](https://uzkis.github.io/vuEPG/guide/chromium30-testing)。

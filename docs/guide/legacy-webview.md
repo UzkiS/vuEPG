@@ -5,7 +5,7 @@ description: 在 Android 4.x 等运营商存量盒子和旧 WebView 中接入 vu
 
 # 运营商存量盒子接入（含 Android 4.x）
 
-运营商存量盒子的应用维护，常需要兼顾 Android 4.x 设备与旧 WebView。这类工程需要同时处理旧浏览器的语法、运行时 API 和遥控器输入。vuEPG 提供 Vue 2.7 接入路径，以及可复制的双工具链工程；已在各大运营商机顶盒项目中实际落地。
+运营商存量盒子常运行 Android 4.x 与旧版 WebView，接入时要同时处理旧浏览器的语法、缺失的运行时 API 和遥控器输入。本页说明如何用 Vue 2.7、ES5 构建和 polyfill 接入 vuEPG；仓库附带的完整示例已按本页配置，可直接复制。
 
 ## 选择 Vue 与构建目标
 
@@ -29,19 +29,19 @@ pnpm preview   # http://电脑局域网IP:4174/
 
 电脑与机顶盒需能互相访问相应地址和端口。日常使用现代浏览器快速开发时，运行 `pnpm dev` 打开 Vite 入口；真机开发使用 `dev:tv`。
 
-## 为什么保留 webpack 开发入口
+## 为什么需要 webpack 开发入口
 
-Vite 开发服务器依赖原生 ESM。真实 Chromium 30 加载 Vite 页面后，HTML 存在，但模块入口不执行，Vue 应用没有挂载，表现为空白页面。
+Vite 开发服务器依赖原生 ESM。Chromium 30 加载 Vite 页面后，HTML 存在，但模块入口不执行，Vue 应用没有挂载，表现为空白页面。
 
-webpack 开发入口会转译业务、库依赖和开发客户端。在相同 Chromium 30 环境中，示例的页面操作与 CSS 热更新均通过检查。
+webpack 开发入口会转译业务代码、库依赖和开发客户端，在 Chromium 30 中可以正常运行和热更新。
 
-`@vitejs/plugin-legacy` 处理 Vite 的生产构建，不能使其开发服务器适用于旧浏览器。Vite 生产构建能否用于目标设备，需要核对最终脚本、polyfill、HTML 加载和样式；本工程默认使用 webpack 兼容构建。
+`@vitejs/plugin-legacy` 只作用于 Vite 的生产构建，开发服务器仍然无法在旧浏览器中运行。示例的生产构建也使用 webpack。
 
 ## 在 webpack 中转译依赖
 
 「转译」指构建工具将旧浏览器无法解析的语法转换为兼容语法，例如将箭头函数和可选链转为旧浏览器可执行的代码。webpack 的 Babel loader 必须处理应用代码和打包进来的依赖；只处理 `src` 会遗漏 vuepg。
 
-以下安装命令和配置用于采用本仓库[完整示例](./business-example)工具组合的 webpack 工程。已有工程应沿用自己的 webpack、Babel 和 loader 配套版本；使用 Vue CLI 时，按[下文](#使用-vue-cli-时)的工程配置入口调整。
+以下安装命令和配置与[完整示例](./business-example)使用的工具一致，已有工程沿用自己的 webpack 与 Babel 版本即可。使用 Vue CLI 时见[下文](#使用-vue-cli-时)。
 
 ```sh
 pnpm add core-js
@@ -81,7 +81,7 @@ module.exports = {
 };
 ```
 
-`target` 约束 webpack 自己生成的代码；Babel 8 规则处理应用及依赖的语法，运行时 API 通过下一节的兼容入口补齐。TypeScript 工程还需处理 `.ts` 文件和 Vue 单文件组件，完整配置见[示例 webpack.config.cjs](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/webpack.config.cjs)。
+`target` 约束 webpack 自己生成的代码；Babel 规则处理应用及依赖的语法，运行时 API 通过下一节的兼容入口补齐。TypeScript 工程还需处理 `.ts` 文件和 Vue 单文件组件，完整配置见[示例 webpack.config.cjs](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/webpack.config.cjs)。
 
 ## 加载运行时 polyfill
 
@@ -101,7 +101,7 @@ import "core-js/stable";
 
 core-js 不提供 DOM 的 `CustomEvent` 构造器。缺少该能力时，可用 `document.createEvent("CustomEvent")` 创建兼容事件；具体实现见[示例 polyfills.ts 中的 CustomEvent 补齐](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/polyfills.ts)。
 
-Babel 负责将整个 bundle 的语法降级；应用依赖与开发客户端所需的额外运行时 API，按各自的使用情况补齐。
+Babel 只转换语法。业务依赖和开发客户端用到的其他运行时 API 也要按实际使用补齐，例如示例为 webpack 热更新额外加载了 `whatwg-fetch`。
 
 ## 需要补齐哪些能力
 
@@ -116,29 +116,23 @@ polyfill 必须在 Vue、vuEPG 和其他依赖使用这些 API 前加载。示�
 
 ## 使用 Vue CLI 时
 
-先查看工程实际安装的 CLI 服务与 Babel 插件版本：
-
-```sh
-pnpm list @vue/cli-service @vue/cli-plugin-babel --depth 0
-```
-
-沿用工程原有的工具版本，在现有浏览器目标中加入需要兼容的内核。例如，最低目标为 Chromium 30 时：
+Vue CLI 工程不需要更换工具版本，只需调整浏览器目标和依赖转译。在浏览器目标中加入需要兼容的内核，例如最低目标为 Chromium 30 时：
 
 ```text
 # .browserslistrc
 chrome >= 30
 ```
 
-在工程已使用的 Vue 配置文件中，把 vuepg 加入依赖转译列表：
+在 Vue 配置文件中把 vuepg 加入依赖转译列表：
 
 ```js
-// 合并到现有的 vue.config.js 或工程已支持的配置文件。
+// vue.config.js
 module.exports = {
   transpileDependencies: ["vuepg"],
 };
 ```
 
-已有 `transpileDependencies` 列表时追加 `"vuepg"`，保留其他依赖；仍需转译的库也按实际情况加入列表。工程需启用与 CLI 配套的 Babel 插件和 preset，让浏览器目标参与语法转译。
+已有 `transpileDependencies` 列表时追加 `"vuepg"` 即可。语法转译由 `@vue/cli-plugin-babel` 完成，确认工程已启用它。
 
 运行时 API 按[上一节](#加载运行时-polyfill)补齐。配置完成后检查最终业务脚本、依赖及开发客户端，并在目标浏览器验证启动、输入与更新；不能只检查自己的 `src` 目录。
 

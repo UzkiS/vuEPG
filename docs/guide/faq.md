@@ -21,7 +21,7 @@ description: vuEPG 接入常见问题：已有组件、Vue 2.7/3、Android 4.x�
 
 ## 为什么 Vite 真机开发会白屏
 
-旧 WebView 无法执行 Vite 的原生 ESM 开发入口。示例保留 webpack 真机开发入口；Vite 用于现代浏览器。两者的构建与运行路径见 [Android 4.x 接入](./legacy-webview#为什么保留-webpack-开发入口)。
+旧 WebView 无法执行 Vite 的原生 ESM 开发入口。示例保留 webpack 真机开发入口；Vite 用于现代浏览器。两者的构建与运行路径见 [Android 4.x 接入](./legacy-webview#为什么需要-webpack-开发入口)。
 
 ## 为什么进入另一个分组没有落在最近的元素上
 

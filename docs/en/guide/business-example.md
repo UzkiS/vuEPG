@@ -10,21 +10,19 @@ vuEPG includes the TV learning center as a complete example project that can be 
 
 [Source](https://github.com/UzkiS/vuEPG/tree/main/examples/tv-training)
 
-The example header links to the documentation and GitHub in a new window. The card track reserves space for focus outlines at both ends, keeping the last card fully visible during circular navigation.
-
 ## Reusable interactions
 
-The learning theme is just page content. Use the interactions for your own menus, cards or channel lists.
+The example uses a learning-center theme; the interactions below apply directly to menus, content cards, channel lists and similar pages.
 
-| Interaction         | Try it                                        | Implementation                     |
-| ------------------- | --------------------------------------------- | ---------------------------------- |
-| Circular navigation | Left/right loop at list ends                  | Direction events and move()        |
-| Scrolling           | Focus a card outside the viewport             | v-epg-scroll on the real container |
-| Page restoration    | Enter an exercise and return to the same card | Saved ID and focus after mount     |
-| Dynamic lists       | Filter completed content                      | Vue updates and group entry        |
-| Dialog              | Open exit; directions stay inside             | Boundaries and component Back      |
-| Focus restoration   | Close and return to the previous item         | `restoreFocus`                     |
-| Native keys         | Android direction/Back controls               | [Native input](./native-bridge)    |
+| Interaction         | Try it                                               | Implementation                     |
+| ------------------- | ---------------------------------------------------- | ---------------------------------- |
+| Circular navigation | Left/right loop at list ends                         | Direction events and move()        |
+| Scrolling           | Focus a card outside the viewport                    | v-epg-scroll on the real container |
+| Page restoration    | Enter an exercise and return to the same card        | Saved ID and focus after mount     |
+| Dynamic lists       | Filter out the focused card; focus stays in the list | `restoreFocus` and group entry     |
+| Dialog              | Open exit; directions stay inside                    | Boundaries and component Back      |
+| Focus restoration   | Close and return to the previous item                | `restoreFocus`                     |
+| Native keys         | Android direction/Back controls                      | [Native input](./native-bridge)    |
 
 ## Copy into your project
 
@@ -38,7 +36,7 @@ pnpm build     # ES5 compatibility build
 pnpm preview   # Production preview: http://localhost:4174/
 ```
 
-It includes independent dependencies, type configuration, scripts, checks and AGENTS.md. It installs vuepg from npm and needs no parent files. Replace its pages and data for your application.
+It comes with its own dependencies, type configuration, scripts and checks, and installs vuepg from npm, so it runs on its own once copied. Replace its pages and data for your application.
 
 Vite serves modern-browser development. webpack handles legacy-device development and production. See [Android 4.x integration](./legacy-webview) for polyfills and troubleshooting.
 
@@ -51,6 +49,6 @@ Vite serves modern-browser development. webpack handles legacy-device developmen
 | [bridge.ts](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/bridge.ts)               | Android mapping and listener cleanup       |
 | [polyfills.ts](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/polyfills.ts)         | Language, DOM and Web API compatibility    |
 
-The example also loads `whatwg-fetch` so its webpack 5 hot updates can download the update manifest. This serves the example's development toolchain; vuEPG itself does not use fetch.
+The example's extra `whatwg-fetch` is only used by webpack hot updates; vuEPG itself does not need it.
 
 When developing vuEPG, root `example:dev`, `example:dev:tv` and `example:build` use the local built package. See [Chromium regression](./chromium30-testing) for browser checks and Docker.
