@@ -83,23 +83,31 @@ findTarget(direction: Direction): EPGNode | null
 
 计算从当前焦点出发、指定方向上的下一个目标，**不移动焦点**。
 
-## 返回
+## 确定与返回
+
+### epg.activate
+
+```ts
+activate(): boolean
+```
+
+与按下确定键相同：当前焦点存在、未禁用且已渲染时，在其元素上触发 `click`。返回是否触发了点击。供原生按键回调、虚拟遥控器等输入方式调用，见 [原生按键接入](../guide/native-bridge)。
 
 ### epg.back
 
 ```ts
-back(): void
+back(): boolean
 ```
 
-执行返回处理：调用生效中的页面级处理函数，没有时调用全局 `backHandler`。见 [返回处理](../guide/back)。
+执行返回处理：从最后登记的生效中的页面级处理函数开始调用，处理函数返回 `false` 时交给下一个，最后调用全局 `backHandler`。返回是否有处理函数处理了返回。见 [返回处理](../guide/back)。
 
 ### epg.onBack
 
 ```ts
-onBack(handler: () => void): void
+onBack(handler: () => boolean | void): void
 ```
 
-在组件 `setup()` 或 `created()` 中注册页面级返回处理函数。
+在组件 `setup()` 或 `created()` 中注册页面级返回处理函数。处理函数返回 `false` 时交给下一个处理函数。
 
 ## 暂停
 
@@ -135,7 +143,7 @@ isPaused(): boolean
 setConfig(patch: Partial<EPGConfig>): void
 ```
 
-合并配置，只修改传入的字段，值为 `undefined` 的字段视为未传入；见 [配置](../guide/configuration)。`focusClass` 或 `scrollViewport` 的值无效时抛出 `TypeError`。
+合并配置，只修改传入的字段，值为 `undefined` 的字段视为未传入；见 [配置](../guide/configuration)。`focusClass`、`scrollViewport` 或 `keyRepeatInterval` 的值无效时抛出 `TypeError`。
 
 ### epg.getConfig
 
@@ -259,7 +267,7 @@ interface KeyActionOptions {
 }
 ```
 
-新增或替换按键事件。
+新增或替换按键事件。名称、按键或字段类型无效时抛出 `TypeError`；按键已属于其他事件时在控制台警告。
 
 ### epg.updateKeyAction
 

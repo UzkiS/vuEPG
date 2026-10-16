@@ -18,7 +18,7 @@ Live reads avoid stale layout data after menus, dialogs and lists change. Cost s
 - Group real navigation regions. Do not wrap every row or card just to reduce candidates: groups change entry rules.
 - Mark actual scroll containers. Enable `scrollViewport` only for document scrolling; disabled scrolling avoids its geometry reads.
 - Use debug logs to troubleshoot, and turn them off when measuring.
-- Hold direction keys on the device and measure input-to-class latency, drops and peaks during cross-group moves and scrolling. Include long lists, dialogs and page changes.
+- Hold direction keys on the device and measure input-to-class latency, drops and peaks during cross-group moves and scrolling. Include long lists, dialogs and page changes. If focus keeps moving after the key is released, keys are piling up; limit auto-repeat with [`keyRepeatInterval`](./configuration#keyrepeatinterval).
 
 ## Cost of debug mode
 

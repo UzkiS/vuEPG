@@ -42,21 +42,29 @@ export const registerBackHandler = (handler: BackHandler): BackEntry => {
   };
 };
 
-const findActiveHandler = (): BackHandler | null => {
-  for (let i = registrations.length - 1; i >= 0; i -= 1) {
-    const registration = registrations[i];
-    if (registration?.active === true) {
-      return registration.handler;
+/**
+ * 执行返回：从最后登记的生效中的处理函数开始调用，返回 `false` 时交给下一个，
+ * 最后交给全局 `backHandler`。
+ * @returns 是否有处理函数处理了返回（全局 `backHandler` 返回 `false` 时也视为未处理）
+ */
+export const back = (): boolean => {
+  // 处理函数可能关闭弹窗、注销自己，先取快照
+  const handlers = registrations
+    .filter((registration) => registration.active)
+    .map((registration) => registration.handler)
+    .reverse();
+  const global = getConfig().backHandler;
+  if (global !== null) {
+    handlers.push(global);
+  }
+  for (const handler of handlers) {
+    if (handler() !== false) {
+      debug("返回已处理", handler);
+      return true;
     }
   }
-  return null;
-};
-
-/** 执行返回：调用优先级最高的生效中的处理函数，没有时调用全局 `backHandler` */
-export const back = (): void => {
-  const handler = findActiveHandler() ?? getConfig().backHandler;
-  debug("返回", handler ?? "（未设置处理函数）");
-  handler?.();
+  debug("返回未被处理");
+  return false;
 };
 
 /** @internal 仅供测试：清空登记 */

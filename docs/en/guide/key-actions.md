@@ -10,12 +10,12 @@ vuEPG maps keys to **key actions**. Each action defines codes, whether to preven
 
 <<< ../../../src/core/keyboard.ts#default-key-actions{ts}
 
-| Action                           | Built-in behavior                          |
-| -------------------------------- | ------------------------------------------ |
-| `UP` / `DOWN` / `LEFT` / `RIGHT` | Move focus; see [Navigation](./navigation) |
-| `ENTER`                          | Invoke the current element's `click()`     |
-| `BACK`                           | Invoke [Back handling](./back)             |
-| `PAGE` / `NUMBER`                | None; supply your own callback             |
+| Action                           | Built-in behavior                                             |
+| -------------------------------- | ------------------------------------------------------------- |
+| `UP` / `DOWN` / `LEFT` / `RIGHT` | Move focus; see [Navigation](./navigation)                    |
+| `ENTER`                          | Trigger `click` on the current element, like `epg.activate()` |
+| `BACK`                           | Invoke [Back handling](./back)                                |
+| `PAGE` / `NUMBER`                | None; supply your own callback                                |
 
 The six built-in actions cannot be removed. Their codes, `preventDefault` and callback can change. Callbacks run **after** the built-in behavior.
 
@@ -62,7 +62,9 @@ epg.removeKeyAction("MENU");
 console.log(epg.getKeyActions());
 ```
 
-When the same key belongs to several actions, only the first defined action fires; to reassign a key, remove it from its original action first. Updating nonexistent actions or removing a built-in action throws an error.
+When the same key belongs to several actions, only the first defined action fires and a warning is logged; to reassign a key, remove it from its original action first. Updating nonexistent actions, removing a built-in action or passing invalid arguments throws an error.
+
+Auto-repeat from held keys can be rate-limited with the [`keyRepeatInterval`](./configuration#keyrepeatinterval) option.
 
 ## Pause input
 

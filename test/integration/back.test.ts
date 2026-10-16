@@ -89,6 +89,49 @@ describe("back", () => {
     expect(inner).toHaveBeenCalledOnce();
   });
 
+  it("lets an inner handler pass Back to the page and the global handler", async () => {
+    const calls: string[] = [];
+    const editing = ref(true);
+    mount(
+      {
+        template: `<div><FavoriteList /></div>`,
+        components: {
+          FavoriteList: {
+            template: `<ul></ul>`,
+            setup: () => {
+              epg.onBack(() => {
+                if (!editing.value) {
+                  return false;
+                }
+                calls.push("exit editing");
+                editing.value = false;
+                return undefined;
+              });
+              return {};
+            },
+          },
+        },
+        setup: () => {
+          epg.onBack(() => {
+            calls.push("page");
+            return calls.length < 3 ? undefined : false;
+          });
+          return {};
+        },
+      },
+      {
+        backHandler: () => {
+          calls.push("global");
+        },
+      },
+    );
+    press("Escape");
+    await nextTick();
+    press("Escape");
+    press("Escape");
+    expect(calls).toEqual(["exit editing", "page", "page", "global"]);
+  });
+
   it("follows KeepAlive activation", async () => {
     const first = vi.fn();
     const second = vi.fn();

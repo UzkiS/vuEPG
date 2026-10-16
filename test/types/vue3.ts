@@ -15,7 +15,9 @@ const app = createApp({});
 app.use(VuEPG);
 app.use(VuEPG, { focusClass: "focused", debug: true, backHandler: () => undefined });
 app.use(VuEPG, { scrollViewport: true });
-app.use(VuEPG, { restoreFocus: true });
+app.use(VuEPG, { restoreFocus: true, keyRepeatInterval: 150 });
+// @ts-expect-error keyRepeatInterval 是毫秒数
+app.use(VuEPG, { keyRepeatInterval: "150ms" });
 // @ts-expect-error restoreFocus 只接受布尔值
 app.use(VuEPG, { restoreFocus: "auto" });
 // @ts-expect-error 插件选项只接受 EPGConfig 中的字段
@@ -32,6 +34,12 @@ const epg = useVuEPG();
 epg.move("down");
 epg.move(document.body);
 export const navigated: boolean = epg.navigate("right");
+export const activated: boolean = epg.activate();
+export const handled: boolean = epg.back();
+epg.onBack(() => false);
+epg.onBack((): void => undefined);
+// @ts-expect-error 返回处理函数只能返回布尔值或不返回
+epg.onBack(() => "next");
 const releasePause: () => void = epg.pause();
 releasePause();
 export const scrollBinding: ScrollBinding = "nearest";

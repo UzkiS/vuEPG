@@ -39,16 +39,21 @@ const onNativeKey = (keyCode: number): void => {
     case 22:
       epg.navigate("right");
       break;
+    case 23:
+      epg.activate();
+      break;
     case 4:
-      epg.back();
+      if (!epg.back()) {
+        exitApp(); // No page handled Back: let the host exit the application
+      }
       break;
   }
 };
 ```
 
-`navigate()` dispatches cancellable direction events, matching user direction input. `move("right")` is a programmatic move without that event flow.
+`navigate()` dispatches cancellable direction events, matching user direction input. `move("right")` is a programmatic move without that event flow. `back()` returns whether any handler handled Back; when none did, the host runs its own default.
 
-Confirm can call the available current item's `el.click()`. Check existence, disabled state and rendering first; see the full guard in [bridge.ts](https://github.com/UzkiS/vuEPG/blob/main/examples/tv-training/src/bridge.ts).
+Confirm calls `activate()`, the same as pressing Enter: `click` fires only when the current item exists, is not disabled and is rendered.
 
 ## Connect the device container
 

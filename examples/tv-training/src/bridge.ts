@@ -16,16 +16,9 @@ export const dispatchNativeKey = (keyCode: number): boolean => {
     case 22:
       return epg.navigate("right");
     case 4:
-      epg.back();
-      return true;
-    case 23: {
-      const current = epg.getCurrentItem();
-      if (current === null || current.isDisabled || current.el.getClientRects().length === 0) {
-        return false;
-      }
-      current.el.click();
-      return true;
-    }
+      return epg.back();
+    case 23:
+      return epg.activate();
     default:
       return false;
   }

@@ -208,3 +208,60 @@ describe("invalidation", () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 });
+
+describe("keyRepeatInterval", () => {
+  const ROW = `<div>${["a", "b", "c", "d"]
+    .map((id, index) => `<div id="${id}" v-epg-item style="${box(index * 60, 0, 50, 50)}"></div>`)
+    .join("")}</div>`;
+  const keyup = (code: string): void => {
+    document.dispatchEvent(new KeyboardEvent("keyup", { code, bubbles: true }));
+  };
+
+  it("handles every repeat by default", () => {
+    mount({ template: ROW });
+    epg.move(byId("a"));
+    press("ArrowRight");
+    press("ArrowRight", { repeat: true });
+    press("ArrowRight", { repeat: true });
+    expect(focusedId()).toBe("d");
+  });
+
+  it("ignores repeats of a held key within the interval", () => {
+    const now = vi.spyOn(Date, "now").mockReturnValue(1000);
+    mount({ template: ROW }, { keyRepeatInterval: 100 });
+    epg.move(byId("a"));
+    press("ArrowRight");
+    const ignored = press("ArrowRight", { repeat: true });
+    expect(focusedId()).toBe("b");
+    // 被忽略的重复按键仍阻止浏览器默认滚动
+    expect(ignored.defaultPrevented).toBe(true);
+    now.mockReturnValue(1100);
+    press("ArrowRight", { repeat: true });
+    expect(focusedId()).toBe("c");
+    // 松开后重新按下不受限制
+    keyup("ArrowRight");
+    press("ArrowRight");
+    expect(focusedId()).toBe("d");
+  });
+
+  it("detects repeats without event.repeat until the key is released", () => {
+    vi.spyOn(Date, "now").mockReturnValue(1000);
+    mount({ template: ROW }, { keyRepeatInterval: 100 });
+    epg.move(byId("a"));
+    pressLegacy(39);
+    pressLegacy(39);
+    expect(focusedId()).toBe("b");
+    const release = new KeyboardEvent("keyup", { bubbles: true });
+    Object.defineProperty(release, "code", { value: undefined });
+    Object.defineProperty(release, "keyCode", { value: 39 });
+    Object.defineProperty(release, "which", { value: 39 });
+    document.dispatchEvent(release);
+    pressLegacy(39);
+    expect(focusedId()).toBe("c");
+    // 松开其他按键不影响正在按住的键
+    pressLegacy(39);
+    keyup("ArrowLeft");
+    pressLegacy(39);
+    expect(focusedId()).toBe("c");
+  });
+});

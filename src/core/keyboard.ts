@@ -1,7 +1,8 @@
 import { back } from "./back";
+import { getConfig } from "./config";
 import { isEditable } from "./dom";
 import { activate } from "./focus";
-import { debug } from "./logger";
+import { debug, warn } from "./logger";
 import { navigate } from "./navigate";
 
 /** 按键标识：`event.code`（字符串）或 `event.which` / `event.keyCode`（数字） */
@@ -124,21 +125,82 @@ export const getKeyActions = (): Readonly<Record<string, KeyAction>> => {
   return Object.freeze(snapshot);
 };
 
-/** 新增或替换一个按键事件 */
-export const setKeyAction = (name: string, options: KeyActionOptions): void => {
-  actions.set(name, {
-    codes: Object.freeze(unique(options.codes)),
-    preventDefault: options.preventDefault ?? false,
-    callback: options.callback ?? null,
+/** 按键标识：非空字符串（`event.code`）或有限数字（`which` / `keyCode`） */
+const isKeyCode = (value: unknown): boolean =>
+  (typeof value === "string" && value !== "") ||
+  (typeof value === "number" && Number.isFinite(value));
+
+/**
+ * 校验按键列表（JavaScript 调用方不受类型检查约束）
+ * @throws 不是由按键标识组成的数组时
+ */
+const assertCodes = (name: string, codes: unknown): void => {
+  if (!Array.isArray(codes) || !codes.every(isKeyCode)) {
+    throw new TypeError(`[vuEPG] 按键事件 "${name}" 的 codes 必须是由非空字符串或数字组成的数组`);
+  }
+};
+
+/**
+ * 校验按键事件的可选字段
+ * @throws 字段类型无效时
+ */
+const assertOptions = (name: string, options: Partial<KeyActionOptions>): void => {
+  if (options.codes !== undefined) {
+    assertCodes(name, options.codes);
+  }
+  const preventDefault: unknown = options.preventDefault;
+  if (preventDefault !== undefined && typeof preventDefault !== "boolean") {
+    throw new TypeError(`[vuEPG] 按键事件 "${name}" 的 preventDefault 必须是布尔值`);
+  }
+  const callback: unknown = options.callback;
+  if (callback !== undefined && callback !== null && typeof callback !== "function") {
+    throw new TypeError(`[vuEPG] 按键事件 "${name}" 的 callback 必须是函数或 null`);
+  }
+};
+
+/** 同一按键属于多个事件时，只会触发按插入顺序靠前的事件 */
+const warnSharedCodes = (name: string, codes: readonly KeyCode[]): void => {
+  const order = Array.from(actions.keys());
+  actions.forEach((action, other) => {
+    const shared = codes.filter((code) => other !== name && action.codes.indexOf(code) !== -1);
+    if (shared.length > 0) {
+      const otherFirst = order.indexOf(other) < order.indexOf(name);
+      const winner = otherFirst ? other : name;
+      const loser = otherFirst ? name : other;
+      warn(
+        `按键 ${shared.join("、")} 同时属于按键事件 "${winner}" 与 "${loser}"，只会触发 "${winner}"`,
+      );
+    }
   });
 };
 
 /**
+ * 新增或替换一个按键事件
+ * @throws 名称或字段类型无效时
+ */
+export const setKeyAction = (name: string, options: KeyActionOptions): void => {
+  const value: unknown = name;
+  if (typeof value !== "string" || value === "") {
+    throw new TypeError(`[vuEPG] 按键事件名称必须是非空字符串，收到 ${String(value)}`);
+  }
+  assertCodes(name, options.codes);
+  assertOptions(name, options);
+  const codes = Object.freeze(unique(options.codes));
+  actions.set(name, {
+    codes,
+    preventDefault: options.preventDefault ?? false,
+    callback: options.callback ?? null,
+  });
+  warnSharedCodes(name, codes);
+};
+
+/**
  * 修改已有按键事件的部分字段
- * @throws 事件不存在时
+ * @throws 事件不存在或字段类型无效时
  */
 export const updateKeyAction = (name: string, patch: Partial<KeyActionOptions>): void => {
   const action = requireAction(name);
+  assertOptions(name, patch);
   setKeyAction(name, {
     codes: patch.codes ?? action.codes,
     preventDefault: patch.preventDefault ?? action.preventDefault,
@@ -160,19 +222,23 @@ export const removeKeyAction = (name: string): boolean => {
 
 /**
  * 为按键事件追加按键
- * @throws 事件不存在时
+ * @throws 事件不存在或按键无效时
  */
 export const addKeyCodes = (name: string, codes: readonly KeyCode[]): void => {
-  updateKeyAction(name, { codes: requireAction(name).codes.concat(codes) });
+  const action = requireAction(name);
+  assertCodes(name, codes);
+  updateKeyAction(name, { codes: action.codes.concat(codes) });
 };
 
 /**
  * 从按键事件中移除按键
- * @throws 事件不存在时
+ * @throws 事件不存在或按键无效时
  */
 export const removeKeyCodes = (name: string, codes: readonly KeyCode[]): void => {
+  const action = requireAction(name);
+  assertCodes(name, codes);
   updateKeyAction(name, {
-    codes: requireAction(name).codes.filter((code) => codes.indexOf(code) === -1),
+    codes: action.codes.filter((code) => codes.indexOf(code) === -1),
   });
 };
 
@@ -253,6 +319,18 @@ const isComposing = (event: KeyboardEvent): boolean =>
   // eslint-disable-next-line @typescript-eslint/no-deprecated -- 不支持 isComposing 的内核以 keyCode 229 标记输入法按键
   event.isComposing || event.keyCode === 229;
 
+/** 最近按下且尚未松开的按键：缺少 `event.repeat` 的旧内核据此识别按住时的自动重复 */
+let heldCode: KeyCode | null = null;
+
+/** 最近一次处理按键的时间（毫秒） */
+let lastHandledAt = Number.NEGATIVE_INFINITY;
+
+/** 自动重复的按键是否落在 `keyRepeatInterval` 之内 */
+const isThrottled = (): boolean => {
+  const interval = getConfig().keyRepeatInterval;
+  return interval > 0 && Date.now() - lastHandledAt < interval;
+};
+
 /** keydown 处理函数 */
 export const handleKeydown = (event: KeyboardEvent): void => {
   if (isPaused() || isComposing(event)) {
@@ -264,6 +342,9 @@ export const handleKeydown = (event: KeyboardEvent): void => {
   if (code === null || name === null) {
     return;
   }
+  // 部分设备不派发 keyup，此时连按同一个键也视为自动重复
+  const repeated = event.repeat || heldCode === code;
+  heldCode = code;
   if (isEditable(event.target) && (EDITABLE_ACTIONS.indexOf(name) === -1 || isTextKey(code))) {
     debug("按键目标是可编辑元素，交给浏览器处理");
     return;
@@ -272,10 +353,22 @@ export const handleKeydown = (event: KeyboardEvent): void => {
   if (action.preventDefault) {
     event.preventDefault();
   }
+  if (repeated && isThrottled()) {
+    debug("按住按键的自动重复间隔过短，已忽略");
+    return;
+  }
+  lastHandledAt = Date.now();
   if (isBuiltin(name)) {
     BUILTIN_HANDLERS[name]();
   }
   action.callback?.(code, event);
+};
+
+/** keyup 处理函数：松开按键后，再次按下不再视为自动重复 */
+const handleKeyup = (event: KeyboardEvent): void => {
+  if (resolveKeyCode(event) === heldCode) {
+    heldCode = null;
+  }
 };
 
 let listening = false;
@@ -284,6 +377,7 @@ let listening = false;
 export const listenKeyboard = (target: Document): void => {
   if (!listening) {
     target.addEventListener("keydown", handleKeydown);
+    target.addEventListener("keyup", handleKeyup);
     listening = true;
   }
 };
@@ -292,4 +386,6 @@ export const listenKeyboard = (target: Document): void => {
 export const resetKeyboard = (): void => {
   actions = new Map(DEFAULT_KEY_ACTIONS);
   pauseHolds.clear();
+  heldCode = null;
+  lastHandledAt = Number.NEGATIVE_INFINITY;
 };

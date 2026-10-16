@@ -11,7 +11,19 @@ describe("config", () => {
       debug: false,
       scrollViewport: false,
       restoreFocus: false,
+      keyRepeatInterval: 0,
     });
+  });
+
+  it("accepts key repeat intervals and rejects invalid values", () => {
+    epg.setConfig({ keyRepeatInterval: 150 });
+    expect(epg.getConfig().keyRepeatInterval).toBe(150);
+    for (const value of [-1, Number.NaN, Number.POSITIVE_INFINITY, "100"]) {
+      expect(() => {
+        epg.setConfig({ keyRepeatInterval: value as number });
+      }, String(value)).toThrow(TypeError);
+    }
+    expect(epg.getConfig().keyRepeatInterval).toBe(150);
   });
 
   it("ignores fields whose value is undefined", () => {
