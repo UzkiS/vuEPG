@@ -1,5 +1,17 @@
 # vuepg
 
+## 2.4.0
+
+### Minor Changes
+
+- [#37](https://github.com/UzkiS/vuEPG/pull/37) [`0902306`](https://github.com/UzkiS/vuEPG/commit/09023060193bb78c65448caaaabe5d93865b76a3) Thanks [@UzkiS](https://github.com/UzkiS)! - 新增 `activate()`、`keyRepeatInterval` 与返回处理的放行，并加强按键映射的参数校验。
+  
+  - 新增 `epg.activate()`：与按下确定键相同，当前焦点存在、未禁用且已渲染时触发 `click`，返回是否触发。原生按键回调与虚拟遥控器不再需要自己检查焦点状态和调用 `click()`。
+  - 返回处理函数返回 `false` 时，交给下一个生效中的 `onBack`，最后是全局 `backHandler`。组件内部的临时状态（编辑模式、搜索框、播放器浮层等）不需要处理返回键时，不再拦住外层页面。`epg.back()` 改为返回是否有处理函数处理了返回，原生宿主可据此执行自己的默认行为，例如退出应用。现有处理函数不受影响。
+  - 新增配置 `keyRepeatInterval`（默认 `0`，不限制）：按住按键时，自动重复的按键至少间隔指定毫秒数才处理一次，避免慢设备上按键堆积、松手后焦点继续移动。旧内核没有 `event.repeat` 时，按下后尚未松开又再次按下视为自动重复。
+  - `setKeyAction`、`updateKeyAction`、`addKeyCodes`、`removeKeyCodes` 校验参数，名称、按键列表或字段类型无效时抛出带 `[vuEPG]` 前缀的 `TypeError`；以前传入字符串作为按键列表时可能被静默接受或误删其他按键。
+  - 同一个按键属于多个按键事件时，在控制台警告实际会触发哪一个事件。
+
 ## 2.3.0
 
 ### Minor Changes
