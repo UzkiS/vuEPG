@@ -1,6 +1,7 @@
 const path = require("node:path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
+const { EntryPlugin } = require("webpack");
 const settings = require("./build-settings.cjs");
 
 module.exports = (_env, argv) => ({
@@ -51,6 +52,10 @@ module.exports = (_env, argv) => ({
     ],
   },
   plugins: [
+    // 开发客户端会先于业务入口执行；全局入口确保其使用 Symbol 等 API 前完成补齐。
+    ...(argv.mode === "development"
+      ? [new EntryPlugin(__dirname, "./src/polyfills.ts", { name: undefined })]
+      : []),
     new VueLoaderPlugin(),
     new HtmlWebpackPlugin({
       templateContent: () =>
